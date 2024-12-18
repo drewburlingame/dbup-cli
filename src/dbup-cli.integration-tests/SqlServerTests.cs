@@ -2,18 +2,27 @@ using DbUp.Cli.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using System.Reflection;
 using FluentAssertions;
-using System.Data.SqlClient;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
 
 namespace DbUp.Cli.IntegrationTests
 {
     [TestClass]
     public class SqlServerTests : DockerBasedTest
     {
+        private const string Pwd = "SaPwd1!$";
+        private static readonly string DefaultConnString = BuildConnString("master");
+        private static readonly string DbUpConnString = BuildConnString("dbup");
+
+        private static string BuildConnString(string db)
+        {
+            return $"Database={db};Data Source={HostIp};Persist Security Info=True;User ID=sa;Password={Pwd};Encrypt=Yes;TrustServerCertificate=Yes;";
+        }
+
+        private static readonly string DbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, "SqlServer");
+        
         readonly CaptureLogsLogger Logger;
         readonly IEnvironment Env;
 
@@ -22,42 +31,31 @@ namespace DbUp.Cli.IntegrationTests
             Env = new CliEnvironment();
             Logger = new CaptureLogsLogger();
 
-            Environment.SetEnvironmentVariable("CONNSTR", "Data Source=127.0.0.1;Initial Catalog=DbUp;Persist Security Info=True;User ID=sa;Password=SaPwd2017");
+            Environment.SetEnvironmentVariable("CONNSTR", DbUpConnString);
         }
+        
+        private static string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") =>
+            new DirectoryInfo(Path.Combine(DbScriptsDir, subPath, name)).FullName;
 
-        string GetBasePath(string subPath = "EmptyScript")
-            => Path.Combine(Assembly.GetExecutingAssembly().Location, $@"..\Scripts\SqlServer\{subPath}");
-
-        string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript")
-            => new DirectoryInfo(Path.Combine(GetBasePath(subPath), name)).FullName;
-
-        Func<DbConnection> CreateConnection = ()
-            => new SqlConnection("Data Source=127.0.0.1;Persist Security Info=True;User ID=sa;Password=SaPwd2017");
+        Func<DbConnection> CreateConnection = () => new SqlConnection(DefaultConnString);
 
         [TestInitialize]
         public async Task TestInitialize()
         {
             /*
              * Before the first run, download the image:
-             * docker pull mcr.microsoft.com/mssql/server:2017-CU12-ubuntu
+             * docker pull mcr.microsoft.com/mssql/server:2022-latest
              * */
 
             await DockerInitialize(
-                "mcr.microsoft.com/mssql/server:2017-CU12-ubuntu",
-                new List<string>()
-                {
+                "mcr.microsoft.com/mssql/server:2022-latest",
+                [
                     "ACCEPT_EULA=Y",
-                    "SA_PASSWORD=SaPwd2017"
-                },
+                    $"MSSQL_SA_PASSWORD={Pwd}"
+                ],
                 "1433",
                 CreateConnection
                 );
-        }
-
-        [TestCleanup]
-        public async Task TestCleanup()
-        {
-            await DockerCleanup(CreateConnection, con => new SqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", con as SqlConnection));
         }
 
         [TestMethod]
@@ -68,7 +66,7 @@ namespace DbUp.Cli.IntegrationTests
             var result = engine.Run("upgrade", "--ensure", GetConfigPath());
             result.Should().Be(0);
 
-            using (var connection = new SqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
+            using (var connection = new SqlConnection(DbUpConnString))
             using (var command = new SqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
             {
                 connection.Open();
@@ -86,7 +84,7 @@ namespace DbUp.Cli.IntegrationTests
             engine.Run("upgrade", "--ensure", GetConfigPath());
             var result = engine.Run("drop", GetConfigPath());
             result.Should().Be(0);
-            using (var connection = new SqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
+            using (var connection = new SqlConnection(DbUpConnString))
             using (var command = new SqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
             {
                 Action a = () => connection.Open();
@@ -97,7 +95,7 @@ namespace DbUp.Cli.IntegrationTests
         [TestMethod]
         public void DatabaseShouldNotExistBeforeTestRun()
         {
-            using (var connection = new SqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
+            using (var connection = new SqlConnection(DbUpConnString))
             using (var command = new SqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
             {
                 Action a = () => connection.Open();
@@ -122,7 +120,7 @@ namespace DbUp.Cli.IntegrationTests
             var result = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "JournalTableScript"));
             result.Should().Be(0);
 
-            using (var connection = new SqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
+            using (var connection = new SqlConnection(DbUpConnString))
             using (var command = new SqlCommand("select count(*) from dbo.testTable where scriptname = '001.sql'", connection))
             {
                 connection.Open();

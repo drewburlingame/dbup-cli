@@ -2,9 +2,7 @@ using DbUp.Cli.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using System.Reflection;
 using FluentAssertions;
-using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Npgsql;
@@ -17,45 +15,35 @@ namespace DbUp.Cli.IntegrationTests
     {
         readonly CaptureLogsLogger Logger;
         readonly IEnvironment Env;
+        private static readonly string DbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, "PostgreSql");
 
         public PostgreSqlTests()
         {
             Env = new CliEnvironment();
             Logger = new CaptureLogsLogger();
 
-            Environment.SetEnvironmentVariable("CONNSTR", "Host=127.0.0.1;Database=dbup;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60");
+            Environment.SetEnvironmentVariable("CONNSTR", "Host=127.0.0.1;Database=dbup;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60;Pooling=False;");
         }
 
-        string GetBasePath(string subPath = "EmptyScript") =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, $@"..\Scripts\PostgreSql\{subPath}");
+        private static string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") =>
+            new DirectoryInfo(Path.Combine(DbScriptsDir, subPath, name)).FullName;
 
-        string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") => new DirectoryInfo(Path.Combine(GetBasePath(subPath), name)).FullName;
-
-        Func<DbConnection> CreateConnection = () => new NpgsqlConnection("Host=127.0.0.1;Database=postgres;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60");
+        Func<DbConnection> CreateConnection = () => new NpgsqlConnection("Host=127.0.0.1;Database=postgres;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60;Pooling=False;");
 
         [TestInitialize]
         public Task TestInitialize()
         {
             /*
              * Before the first run, download the image:
-             * docker pull postgres:11.2
+             * docker pull postgres:17.2
              * */
 
             return DockerInitialize(
-                "postgres:11.2",
-                new List<string>()
-                {
-                    "POSTGRES_PASSWORD=PostgresPwd2019"
-                },
+                "postgres:17.2",
+                ["POSTGRES_PASSWORD=PostgresPwd2019"],
                 "5432",
                 CreateConnection
                 );
-        }
-
-        [TestCleanup]
-        public Task TestCleanup()
-        {
-            return DockerCleanup(CreateConnection, con => new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", con as NpgsqlConnection));
         }
 
         [TestMethod]

@@ -21,13 +21,13 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public IDbTransaction BeginTransaction()
         {
-            logger.WriteDbOperation("Begin transaction");
+            logger.LogDbOperation("Begin transaction");
             return new RecordingDbTransaction(logger);
         }
 
         public IDbTransaction BeginTransaction(IsolationLevel il)
         {
-            logger.WriteDbOperation($"Begin transaction with isolationLevel of {il}");
+            logger.LogDbOperation($"Begin transaction with isolationLevel of {il}");
             return new RecordingDbTransaction(logger);
         }
 
@@ -48,12 +48,12 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public void Open()
         {
-            logger.WriteDbOperation("Open connection");
+            logger.LogDbOperation("Open connection");
         }
 
         public void Dispose()
         {
-            logger.WriteDbOperation("Dispose connection");
+            logger.LogDbOperation("Dispose connection");
         }
 
         public string ConnectionString { get; set; }

@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup Condition="'$(GlobalTool)' != false">
-		<TargetFrameworks>netcoreapp2.1;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace>DbUp.Cli</RootNamespace>
 		<PackAsTool>true</PackAsTool>
 	</PropertyGroup>
 
@@ -12,10 +14,8 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<RootNamespace>DbUp.Cli</RootNamespace>
 		<ToolCommandName>dbup</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
-		<LangVersion>latest</LangVersion>
 		<Product>DbUp Command Line Interface</Product>
 		<Authors>Sergey Tregub</Authors>
 		<Version>1.9.0</Version>
@@ -34,6 +34,7 @@
 		<PackageLicenseUrl></PackageLicenseUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -57,17 +58,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommandLineParser" Version="2.8.0" />
-		<PackageReference Include="dbup-core" Version="4.5.0" />
-		<PackageReference Include="dbup-mysql" Version="4.5.0" />
-		<PackageReference Include="dbup-postgresql" Version="4.5.0" />
-		<PackageReference Include="dbup-sqlserver" Version="4.5.0" />
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="dbup-core" Version="6.0.4" />
+		<PackageReference Include="dbup-mysql" Version="6.0.4" />
+		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
+		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
 		<PackageReference Include="dbup-cockroachdb" Version="1.0.4" />
-		<PackageReference Include="DotNetEnv" Version="2.1.1" />
-		<PackageReference Include="Npgsql" Version="3.2.7" />
+		<PackageReference Include="DotNetEnv" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
+		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
+		<PackageReference Include="Npgsql" Version="9.0.2" />
 		<PackageReference Include="Optional" Version="4.0.0" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
-		<PackageReference Include="YamlDotNet" Version="9.1.4" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+		<PackageReference Include="YamlDotNet" Version="16.2.1" />
 	</ItemGroup>
 
 </Project>

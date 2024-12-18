@@ -2,9 +2,7 @@ using DbUp.Cli.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using System.Reflection;
 using FluentAssertions;
-using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Npgsql;
@@ -12,13 +10,14 @@ using System.Data.Common;
 
 namespace DbUp.Cli.IntegrationTests
 {
-    [TestClass]
-    public class CocroachDbTests : DockerBasedTest
+    [TestClass, Ignore("cockroach packages are not maintained. support will be dropped.")]
+    public class CockroachDbTests : DockerBasedTest
     {
         readonly CaptureLogsLogger Logger;
         readonly IEnvironment Env;
-
-        public CocroachDbTests()
+        private static readonly string DbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, "CockroachDb");
+        
+        public CockroachDbTests()
         {
             Env = new CliEnvironment();
             Logger = new CaptureLogsLogger();
@@ -26,10 +25,7 @@ namespace DbUp.Cli.IntegrationTests
             Environment.SetEnvironmentVariable("CONNSTR", "Host=127.0.0.1;Port=26257;SSL Mode=Disable;Database=dbup;Username=root");
         }
 
-        string GetBasePath(string subPath = "EmptyScript") =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, $@"..\Scripts\CockroachDb\{subPath}");
-
-        string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") => new DirectoryInfo(Path.Combine(GetBasePath(subPath), name)).FullName;
+        private static string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") => new DirectoryInfo(Path.Combine(DbScriptsDir, subPath, name)).FullName;
 
         Func<DbConnection> CreateConnection = () => new NpgsqlConnection("Host=127.0.0.1;Port=26257;SSL Mode=Disable;Database=defaultdb;Username=root");
 
@@ -42,17 +38,11 @@ namespace DbUp.Cli.IntegrationTests
              * */
             return DockerInitialize(
                 "cockroachdb/cockroach:v22.1.1",
-                new List<string>() { },
-                new List<string>() { "start-single-node", "--insecure" },
+                [],
+                ["start-single-node", "--insecure"],
                 "26257",
                 CreateConnection
                 );
-        }
-
-        [TestCleanup]
-        public Task TestCleanup()
-        {
-            return DockerCleanup(CreateConnection, con => new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", con as NpgsqlConnection));
         }
 
         [TestMethod]
