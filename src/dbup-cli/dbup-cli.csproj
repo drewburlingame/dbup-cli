@@ -24,7 +24,7 @@
 		<Copyright>Copyright (c) 2024 Sergey Tregub</Copyright>
 		<PackageProjectUrl>https://github.com/drwatson1/dbup-cli</PackageProjectUrl>
 		<RepositoryType>GitHub</RepositoryType>
-		<PackageTags>dbup database migration sqlserver postgresql mysql cockroachdb</PackageTags>
+		<PackageTags>dbup database migration sqlserver postgresql mysql</PackageTags>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>dbup</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
@@ -63,7 +63,6 @@
 		<PackageReference Include="dbup-mysql" Version="6.0.4" />
 		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
 		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
-		<PackageReference Include="dbup-cockroachdb" Version="1.0.4" />
 		<PackageReference Include="DotNetEnv" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
 		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
