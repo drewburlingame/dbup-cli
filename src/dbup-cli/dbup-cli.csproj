@@ -1,44 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup Condition="'$(GlobalTool)' != false">
+	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<RootNamespace>DbUp.Cli</RootNamespace>
-		<PackAsTool>true</PackAsTool>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(GlobalTool)' == false">
-		<TargetFrameworks>net462</TargetFrameworks>
-		<PackAsTool>false</PackAsTool>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<ToolCommandName>dbup</ToolCommandName>
-		<PackageOutputPath>./nupkg</PackageOutputPath>
-		<Product>DbUp Command Line Interface</Product>
-		<Authors>Sergey Tregub</Authors>
-		<Version>1.9.0</Version>
-		<RepositoryUrl>https://github.com/drwatson1/dbup-cli</RepositoryUrl>
-		<Company />
-		<Copyright>Copyright (c) 2024 Sergey Tregub</Copyright>
-		<PackageProjectUrl>https://github.com/drwatson1/dbup-cli</PackageProjectUrl>
-		<RepositoryType>GitHub</RepositoryType>
-		<PackageTags>dbup database migration sqlserver postgresql mysql</PackageTags>
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>dbup</ToolCommandName>
-		<PackageOutputPath>./nupkg</PackageOutputPath>
-		<PackageReleaseNotes>Support .Net 8.0</PackageReleaseNotes>
-		<Title>DbUp Command Line Interface</Title>
-		<Description>Command line tool, that can be installed as a .Net global tool, that helps you to deploy changes to databases. It tracks which SQL scripts have been run already, and runs the change scripts that are needed to get your database up to date.</Description>
-		<PackageLicenseUrl></PackageLicenseUrl>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	<PropertyGroup Label="Nuget">
+		<PackAsTool>true</PackAsTool>
+		<OutputType>Exe</OutputType>
+		<ToolCommandName>dbup</ToolCommandName>
+		<Product>DbUp Command Line Interface</Product>
+		<Title>DbUp Command Line Interface</Title>
+		<Description>Command line tool, that can be installed as a .Net global tool, that helps you to deploy changes to databases. It tracks which SQL scripts have been run already, and runs the change scripts that are needed to get your database up to date.</Description>
+		<Authors>Drew Burlingame, Sergey Tregub</Authors>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<RepositoryType>GitHub</RepositoryType>
+		<RepositoryUrl>https://github.com/drewburlingame/dbup-cli</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/drewburlingame/dbup-cli</PackageProjectUrl>
+		<Company />
+		<Copyright>Copyright (c) 2024 Drew Burlingame</Copyright>
+		<PackageTags>dbup database migration sqlserver postgresql mysql</PackageTags>
+		<PackageReleaseNotes>https://github.com/drewburlingame/dbup-cli#release-notes</PackageReleaseNotes>
+		<PackageLicenseUrl>https://raw.githubusercontent.com/drewburlingame/dbup-cli/refs/heads/master/LICENSE</PackageLicenseUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
