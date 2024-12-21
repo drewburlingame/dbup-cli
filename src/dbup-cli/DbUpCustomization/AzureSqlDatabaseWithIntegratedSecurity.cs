@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Microsoft.Data.SqlClient;
 
 namespace DbUp.Cli.DbUpCustomization
 {
@@ -88,7 +89,7 @@ namespace DbUp.Cli.DbUpCustomization
                 command.ExecuteNonQuery();
             }
 
-            logger.WriteInformation(@"Created database {0}", databaseName);
+            logger.LogInformation(@"Created database {0}", databaseName);
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace DbUp.Cli.DbUpCustomization
                 command.ExecuteNonQuery();
             }
 
-            logger.WriteInformation("Dropped database {0}", databaseName);
+            logger.LogInformation("Dropped database {0}", databaseName);
         }
 
         static void GetMasterConnectionStringBuilder(string connectionString, IUpgradeLog logger, out string masterConnectionString, out string databaseName)
@@ -148,7 +149,7 @@ namespace DbUp.Cli.DbUpCustomization
                 Password = string.Empty.PadRight(masterConnectionStringBuilder.Password.Length, '*')
             };
 
-            logger.WriteInformation("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
+            logger.LogInformation("Master ConnectionString => {0}", logMasterConnectionStringBuilder.ConnectionString);
             masterConnectionString = masterConnectionStringBuilder.ConnectionString;
         }
 
@@ -185,7 +186,7 @@ namespace DbUp.Cli.DbUpCustomization
             }
             catch
             {
-                logger.WriteInformation("Could not connect to the database directly");
+                logger.LogInformation("Could not connect to the database directly");
                 return false;
             }
         }

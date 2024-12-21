@@ -18,6 +18,8 @@ namespace DbUp.Cli.Tests
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
 
+        string GetBasePath() => Path.Combine(ProjectPaths.ScriptsDir, "Default");
+
         public ScriptProviderHelperTests()
         {
             Logger = new CaptureLogsLogger();
@@ -48,15 +50,16 @@ namespace DbUp.Cli.Tests
         {
             var current = Directory.GetCurrentDirectory();
             var path = ScriptProviderHelper.GetFolder(current, "upgrades");
-            path.Should().Be($"{current}\\upgrades");
+            path.Should().Be( Path.Combine(current, "upgrades"));
         }
 
         [TestMethod]
         public void ScriptProviderHelper_GetFolder_ShouldReturnOriginalFolder_IfTheFolderIsAFullyQualifiedPath()
         {
             var current = Directory.GetCurrentDirectory();
-            var path = ScriptProviderHelper.GetFolder(current, "d:\\upgrades");
-            path.Should().Be("d:\\upgrades");
+            var upgradesRootedPath = ProjectPaths.GetTempPath("upgrades");
+            var path = ScriptProviderHelper.GetFolder(current, upgradesRootedPath);
+            path.Should().Be(upgradesRootedPath);
         }
 
         [TestMethod]
@@ -147,8 +150,5 @@ namespace DbUp.Cli.Tests
 
             upgradeEngineBuilder.HasValue.Should().BeFalse();
         }
-
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Default");
     }
 }

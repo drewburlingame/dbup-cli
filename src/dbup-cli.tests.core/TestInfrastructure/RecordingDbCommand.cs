@@ -27,7 +27,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public void Dispose()
         {
-            logger.WriteDbOperation("Dispose command");
+            logger.LogDbOperation("Dispose command");
         }
 
         public void Prepare()
@@ -42,13 +42,13 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public IDbDataParameter CreateParameter()
         {
-            logger.WriteDbOperation("Create parameter");
+            logger.LogDbOperation("Create parameter");
             return new RecordingDbDataParameter();
         }
 
         public int ExecuteNonQuery()
         {
-            logger.WriteDbOperation($"Execute non query command: {CommandText}");
+            logger.LogDbOperation($"Execute non query command: {CommandText}");
 
             if (CommandText == "error")
                 ThrowError();
@@ -65,7 +65,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public IDataReader ExecuteReader()
         {
-            logger.WriteDbOperation($"Execute reader command: {CommandText}");
+            logger.LogDbOperation($"Execute reader command: {CommandText}");
 
             if (CommandText == "error")
                 ThrowError();
@@ -86,7 +86,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public object ExecuteScalar()
         {
-            logger.WriteDbOperation($"Execute scalar command: {CommandText}");
+            logger.LogDbOperation($"Execute scalar command: {CommandText}");
 
             if (CommandText == "error")
                 ThrowError();

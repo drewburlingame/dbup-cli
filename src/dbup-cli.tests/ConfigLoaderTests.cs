@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace DbUp.Cli.Tests
 {
@@ -16,11 +15,8 @@ namespace DbUp.Cli.Tests
         readonly CaptureLogsLogger Logger;
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
-
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Config");
-
-        string GetConfigPath(string name) => new DirectoryInfo(Path.Combine(GetBasePath(), name)).FullName;
+        private readonly string tempDbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
+        private readonly string tempScriptsPath = ProjectPaths.GetTempPath("scripts");
 
         public ConfigLoaderTests()
         {
@@ -32,7 +28,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_MinVersionOfYml_ShouldSetTheValidDefaultParameters()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("min.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("min.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -42,7 +38,7 @@ namespace DbUp.Cli.Tests
 
                 x.Scripts.Should().HaveCount(1);
                 x.Scripts[0].Encoding.Should().Be(Constants.Default.Encoding);
-                x.Scripts[0].Folder.Should().Be(new FileInfo(GetConfigPath("min.yml")).Directory.FullName);
+                x.Scripts[0].Folder.Should().Be(new FileInfo(ProjectPaths.GetConfigPath("min.yml")).Directory.FullName);
                 x.Scripts[0].Order.Should().Be(Constants.Default.Order);
                 x.Scripts[0].RunAlways.Should().BeFalse();
                 x.Scripts[0].SubFolders.Should().BeFalse();
@@ -78,7 +74,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldLoadAValidTimeout()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("timeout.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("timeout.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -89,7 +85,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_WhenVersionOfConfigFileNotEqualsTo1_0_ShouldFail()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("wrongversion.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("wrongversion.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -100,7 +96,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_MinVersionOfYml_ShouldSetValidProviderAndConnectionString()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("min.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("min.yml").Some<string, Error>());
 
             migration.MatchSome(x => x.Provider.Should().Be(Provider.SqlServer));
             migration.MatchSome(x => x.ConnectionString.Should().Be(@"(localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True"));
@@ -109,7 +105,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldSetValidTransactionOptions()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("tran.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("tran.yml").Some<string, Error>());
 
             migration.MatchSome(x => x.Transaction.Should().Be(Transaction.PerScript));
         }
@@ -117,13 +113,13 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldSetValidScriptOptions()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("script.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("script.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
                 x.Scripts.Should().HaveCount(2);
-                x.Scripts[0].Folder.Should().Be($@"{new FileInfo(GetConfigPath("script.yml")).Directory.FullName}\upgrades");
-                x.Scripts[1].Folder.Should().Be($@"{new FileInfo(GetConfigPath("script.yml")).Directory.FullName}\views");
+                x.Scripts[0].Folder.Should().Be( Path.Combine(new FileInfo(ProjectPaths.GetConfigPath("script.yml")).Directory.FullName, "upgrades"));
+                x.Scripts[1].Folder.Should().Be(Path.Combine(new FileInfo(ProjectPaths.GetConfigPath("script.yml")).Directory.FullName, "views"));
 
                 x.Scripts[0].SubFolders.Should().BeTrue();
                 x.Scripts[1].SubFolders.Should().BeTrue();
@@ -139,7 +135,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldNotThrow_InCaseOfSyntacticError()
         {
-            Action a = () => ConfigLoader.LoadMigration(GetConfigPath("syntax-error.yml").Some<string, Error>());
+            Action a = () => ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("syntax-error.yml").Some<string, Error>());
 
             a.Should().NotThrow();
         }
@@ -147,7 +143,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldReturnNoneWithError_InCaseOfSyntacticError()
         {
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("syntax-error.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("syntax-error.yml").Some<string, Error>());
 
             migrationOrNone.Match(
                 some: m => Assert.Fail("Migration should not be loaded in case of syntactic error"),
@@ -158,21 +154,21 @@ namespace DbUp.Cli.Tests
         public void GetConfigFilePath_ShouldReturnFileFromTheCurrentDirectory_IfOnlyAFilenameSpecified()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-            A.CallTo(() => env.FileExists(@"c:\test\dbup.yml")).Returns(true);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(true);
 
             var configPath = ConfigLoader.GetFilePath(env, "dbup.yml");
             configPath.HasValue.Should().BeTrue();
 
-            configPath.MatchSome(x => x.Should().Be(@"c:\test\dbup.yml"));
+            configPath.MatchSome(x => x.Should().Be(tempDbupYmlPath));
         }
 
         [TestMethod]
         public void GetConfigFilePath_ShouldReturnNone_IfAFileNotExists()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-            A.CallTo(() => env.FileExists(@"c:\test\dbup.yml")).Returns(false);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(false);
 
             var configPath = ConfigLoader.GetFilePath(env, "dbup.yml");
             configPath.HasValue.Should().BeFalse();
@@ -182,32 +178,32 @@ namespace DbUp.Cli.Tests
         public void GetConfigFilePath_ShouldReturnAValidFileName_IfARelativePathSpecified()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test\scripts");
-            A.CallTo(() => env.FileExists(@"c:\test\dbup.yml")).Returns(true);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(tempScriptsPath);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(true);
 
-            var configPath = ConfigLoader.GetFilePath(env, @"..\dbup.yml");
+            var configPath = ConfigLoader.GetFilePath(env, Path.Combine("..", "dbup.yml"));
             configPath.HasValue.Should().BeTrue();
 
-            configPath.MatchSome(x => x.Should().Be(@"c:\test\dbup.yml"));
+            configPath.MatchSome(x => x.Should().Be(tempDbupYmlPath));
         }
 
         [TestMethod]
         public void GetConfigFilePath_ShouldReturnAValidFileName_IfAnAbsolutePathSpecified()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-            A.CallTo(() => env.FileExists(@"d:\temp\scripts\dbup.yml")).Returns(true);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(true);
 
-            var configPath = ConfigLoader.GetFilePath(env, @"d:\temp\scripts\dbup.yml");
+            var configPath = ConfigLoader.GetFilePath(env, tempDbupYmlPath);
             configPath.HasValue.Should().BeTrue();
 
-            configPath.MatchSome(x => x.Should().Be(@"d:\temp\scripts\dbup.yml"));
+            configPath.MatchSome(x => x.Should().Be(tempDbupYmlPath));
         }
 
         [TestMethod]
         public void LoadMigration_ShouldNotThrow_IfNoVarsPresent()
         {
-            Action a = () => ConfigLoader.LoadMigration(GetConfigPath("no-vars.yml").Some<string, Error>());
+            Action a = () => ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("no-vars.yml").Some<string, Error>());
 
             a.Should().NotThrow();
         }
@@ -215,7 +211,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldNotThrow_IfNoScriptsPresent()
         {
-            Action a = () => ConfigLoader.LoadMigration(GetConfigPath("no-scripts.yml").Some<string, Error>());
+            Action a = () => ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("no-scripts.yml").Some<string, Error>());
 
             a.Should().NotThrow();
         }
@@ -224,7 +220,7 @@ namespace DbUp.Cli.Tests
         public void LoadMigration_ShouldRespectScriptEncoding()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x =>
             {
                 var res = File.Exists(x.Arguments[0] as string);
@@ -233,7 +229,7 @@ namespace DbUp.Cli.Tests
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("upgrade", GetConfigPath("encoding.yml"));
+            var result = engine.Run("upgrade", ProjectPaths.GetConfigPath("encoding.yml"));
             result.Should().Be(0);
 
             Logger.Log.Should().Contain("print 'Превед, медвед'");
@@ -242,7 +238,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldSetValidNamingOptions()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("naming.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("naming.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -255,7 +251,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldSetValidJournalToOptions()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("journalTo.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("journalTo.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -268,7 +264,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldSetValidJournalToNull()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("journalTo-null.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("journalTo-null.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -279,7 +275,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldPrintReadableError_WhenProviderIsInvalid()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("invalid-provider.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("invalid-provider.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {
@@ -290,7 +286,7 @@ namespace DbUp.Cli.Tests
         [TestMethod]
         public void LoadMigration_ShouldPrintReadableError_WhenTransactionIsInvalid()
         {
-            var migration = ConfigLoader.LoadMigration(GetConfigPath("invalid-transaction.yml").Some<string, Error>());
+            var migration = ConfigLoader.LoadMigration(ProjectPaths.GetConfigPath("invalid-transaction.yml").Some<string, Error>());
 
             migration.MatchSome(x =>
             {

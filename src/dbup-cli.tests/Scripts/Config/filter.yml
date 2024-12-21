@@ -8,5 +8,5 @@ dbUp:
     -   folder: FilterRegex
         filter: /d0a+1\.sql/
     -   folder: FilterWithFullPath
-        filter: "*\\FilterWithFullPath\\e0?1.sql"
+        filter: "*/FilterWithFullPath/e0?1.sql"
         matchFullPath: yes

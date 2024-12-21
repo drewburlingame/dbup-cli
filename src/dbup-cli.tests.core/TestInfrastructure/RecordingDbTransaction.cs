@@ -14,12 +14,12 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 
         public void Dispose()
         {
-            logger.WriteDbOperation("Dispose transaction");
+            logger.LogDbOperation("Dispose transaction");
         }
 
         public void Commit()
         {
-            logger.WriteDbOperation("Commit transaction");
+            logger.LogDbOperation("Commit transaction");
         }
 
         public void Rollback()

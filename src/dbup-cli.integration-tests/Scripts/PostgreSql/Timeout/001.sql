@@ -1,1 +1,1 @@
-﻿SELECT pg_sleep(60);
+﻿SELECT pg_sleep(20);

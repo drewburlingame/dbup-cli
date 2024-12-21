@@ -2,7 +2,9 @@
 
 [![NuGet](https://img.shields.io/nuget/v/DbUp-CLI.svg)](https://www.nuget.org/packages/dbup-cli)
 
-This project is inspired and based on [DbUp](https://dbup.readthedocs.io/en/latest/) project. That is how its authors describe their project:
+This project is inspired and based on [DbUp](dbup.github.io) project... and forked from [drwatson1/dbup-cli](https://github.com/drwatson1/dbup-cli) after Sergey was no longer able to maintain it.
+
+How DbUp authors describe their project:
 
 > DbUp is a .NET library that helps you to deploy changes to SQL Server databases. It tracks which SQL scripts have been run already, and runs the change scripts that are needed to get your database up to date. [from official documentation](https://dbup.readthedocs.io/en/latest/)
 
@@ -58,23 +60,23 @@ The tool has almost all the features the DbUp has, but without a single line of 
 
 ## Release Notes
 
-|Date|Version|Description|
-|-|-|-|
-|2024-01-18|1.9.0|Add support of .Net 8.0
-|2023-06-12|1.8.1|Improve error reporting
-|2023-01-18|1.8.0|Add support of .Net 7.0
-|2022-06-11|1.7.0|Add support of CockroachDB, thanks to @lbguilherme
-|2022-05-10|1.6.6|Add support of .Net 6
-|2022-02-14|1.6.5|Support of DisableVars
-|2022-02-06|1.6.4|Support of drop and ensure for Azure SQL
-|2022-02-02|1.6.3|Support of AzureSQL integrated security
-|2022-01-30|1.6.2|PostgreSQL SCRAM authentication support interim fix
-|2022-01-29|1.6.1|BUGFIX: 'version' and '--version' should return exit code 0
-|2021-10-03|1.6.0|Add a 'journalTo' option to dbup.yml
-|2021-03-28|1.5.0|Add support of .Net Core 3.1 and .Net 5.0
-|2021-03-27|1.4.0|Add script naming options<BR>Load .env.local after .env
-|2020-05-30|1.3.0|Support of MySQL, improve stability of integration tests
-|2020-03-20|1.2.0|Add a connectionTimeoutSec option
-|2019-08-27|1.1.2|Minor fixes
-|2019-04-11|1.1.0|PostgreSQL support
-|2019-03-25|1.0.1|Initial version (DbUp 4.2)
+|Date| Version |Description|
+|-|---------|-|
+|2024-01-18| 2.0.0   |Support net8 & net9, dropping all older frameworks. Upgrade to DbUp v6.  DbUp support for Postgres is [beta](https://www.nuget.org/packages/dbup-postgresql) for v6. Drop Coachroach as [dbup package](https://www.nuget.org/packages/dbup-cockroachdb/) is outdated. It can be added back if someone provides an updated package.
+|2023-06-12| 1.8.1   |Improve error reporting
+|2023-01-18| 1.8.0   |Add support of .Net 7.0
+|2022-06-11| 1.7.0   |Add support of CockroachDB, thanks to @lbguilherme
+|2022-05-10| 1.6.6   |Add support of .Net 6
+|2022-02-14| 1.6.5   |Support of DisableVars
+|2022-02-06| 1.6.4   |Support of drop and ensure for Azure SQL
+|2022-02-02| 1.6.3   |Support of AzureSQL integrated security
+|2022-01-30| 1.6.2   |PostgreSQL SCRAM authentication support interim fix
+|2022-01-29| 1.6.1   |BUGFIX: 'version' and '--version' should return exit code 0
+|2021-10-03| 1.6.0   |Add a 'journalTo' option to dbup.yml
+|2021-03-28| 1.5.0   |Add support of .Net Core 3.1 and .Net 5.0
+|2021-03-27| 1.4.0   |Add script naming options<BR>Load .env.local after .env
+|2020-05-30| 1.3.0   |Support of MySQL, improve stability of integration tests
+|2020-03-20| 1.2.0   |Add a connectionTimeoutSec option
+|2019-08-27| 1.1.2   |Minor fixes
+|2019-04-11| 1.1.0   |PostgreSQL support
+|2019-03-25| 1.0.1   |Initial version (DbUp 4.2)

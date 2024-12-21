@@ -39,9 +39,6 @@ namespace DbUp.Cli
                 Provider.MySQL => DeployChanges.To.MySqlDatabase(connectionString)
                                         .WithExecutionTimeout(timeout)
                                         .Some<UpgradeEngineBuilder, Error>(),
-                Provider.CockroachDB => DeployChanges.To.CockroachDbDatabase(connectionString)
-                                        .WithExecutionTimeout(timeout)
-                                        .Some<UpgradeEngineBuilder, Error>(),
                 _ => Option.None<UpgradeEngineBuilder, Error>(Error.Create(Constants.ConsoleMessages.UnsupportedProvider, provider.ToString())),
             };
         }
@@ -70,9 +67,6 @@ namespace DbUp.Cli
                         return true.Some<bool, Error>();
                     case Provider.MySQL:
                         EnsureDatabase.For.MySqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        return true.Some<bool, Error>();
-                    case Provider.CockroachDB:
-                        EnsureDatabase.For.CockroachDbDatabase(connectionString, logger); // Cockroach provider does not support timeout...
                         return true.Some<bool, Error>();
                 }
             }
@@ -107,8 +101,6 @@ namespace DbUp.Cli
                         return Option.None<bool, Error>(Error.Create("PostgreSQL database provider does not support 'drop' command for now"));
                     case Provider.MySQL:
                         return Option.None<bool, Error>(Error.Create("MySQL database provider does not support 'drop' command for now"));
-                    case Provider.CockroachDB:
-                        return Option.None<bool, Error>(Error.Create("CockroachDB database provider does not support 'drop' command for now"));
                 }
             }
             catch (Exception ex)
@@ -139,9 +131,6 @@ namespace DbUp.Cli
                                 break;
                             case Provider.PostgreSQL:
                                 builder.JournalToPostgresqlTable(journal.Schema, journal.Table);
-                                break;
-                            case Provider.CockroachDB:
-                                builder.JournalToCockroachDbTable(journal.Schema, journal.Table);
                                 break;
                             default:
                                 return Option.None<UpgradeEngineBuilder, Error>(Error.Create($"JournalTo does not support a provider {provider}"));

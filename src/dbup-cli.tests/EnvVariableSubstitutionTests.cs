@@ -14,14 +14,11 @@ namespace DbUp.Cli.Tests
     [TestClass]
     public class EnvVariableSubstitutionTests
     {
+        private static readonly string EnvVarsYmlPath = ProjectPaths.GetConfigPath("env-vars.yml");
+        private static readonly string DotEnvCurrentFolder = ProjectPaths.GetConfigPath("DotEnv-CurrentFolder");
         readonly CaptureLogsLogger Logger;
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
-
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Config");
-
-        string GetConfigPath(string name) => new DirectoryInfo(Path.Combine(GetBasePath(), name)).FullName;
 
         public EnvVariableSubstitutionTests()
         {
@@ -36,7 +33,7 @@ namespace DbUp.Cli.Tests
             const string connstr = "connection string";
             Environment.SetEnvironmentVariable(nameof(connstr), connstr);
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("env-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -52,7 +49,7 @@ namespace DbUp.Cli.Tests
             const string folder = "folder_name";
             Environment.SetEnvironmentVariable(nameof(folder), folder);
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("env-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -68,7 +65,7 @@ namespace DbUp.Cli.Tests
             const string var1 = "variable_value";
             Environment.SetEnvironmentVariable(nameof(var1), var1);
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("env-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -84,13 +81,15 @@ namespace DbUp.Cli.Tests
             const string varA = "va1";
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(new DirectoryInfo(Path.Combine(GetBasePath(), "DotEnv-CurrentFolder")).FullName);
-            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
-
-            ConfigurationHelper.LoadEnvironmentVariables(env, GetConfigPath("dotenv-vars.yml"), new List<string>())
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+            
+            var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
+            
+            ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>())
                 .MatchNone(error => Assert.Fail(error.Message));
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("dotenv-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -106,13 +105,15 @@ namespace DbUp.Cli.Tests
             const string varB = "vb2";
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(new DirectoryInfo(Path.Combine(GetBasePath(), "DotEnv-CurrentFolder")).FullName);
-            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
-            ConfigurationHelper.LoadEnvironmentVariables(env, GetConfigPath("dotenv-vars.yml"), new List<string>())
+            var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
+            
+            ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>())
                 .MatchNone(error => Assert.Fail(error.Message));
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("dotenv-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -129,17 +130,19 @@ namespace DbUp.Cli.Tests
             const string varD = "vd3";
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(new DirectoryInfo(Path.Combine(GetBasePath(), "DotEnv-CurrentFolder")).FullName);
-            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
-            ConfigurationHelper.LoadEnvironmentVariables(env, GetConfigPath("dotenv-vars.yml"), new List<string>()
+            var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
+            
+            ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>()
             {
-                "../varC.env",              // relative path
-                GetConfigPath("varD.env")   // absolute path
+                Path.Combine("..", "varC.env"),   // relative path
+                ProjectPaths.GetConfigPath("varD.env")   // absolute path
             })
                 .MatchNone(error => Assert.Fail(error.Message));
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("dotenv-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>
@@ -186,17 +189,19 @@ namespace DbUp.Cli.Tests
             const string varD = "vd4";
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(new DirectoryInfo(Path.Combine(GetBasePath(), "DotEnv-VarsOverride/CurrentFolder")).FullName);
-            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
-
-            ConfigurationHelper.LoadEnvironmentVariables(env, GetConfigPath("DotEnv-VarsOverride/ConfigFolder/dotenv-vars.yml"), new List<string>()
-            {
-                "../file3.env",              
-                "../file4.env"
-            })
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "CurrentFolder"));
+            A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+            
+            var dotEnvVarsPath = ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "ConfigFolder", "dotenv-vars.yml");
+            
+            ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>()
+                {
+                    Path.Combine("..", "file3.env"),
+                    Path.Combine("..", "file4.env")
+                })
                 .MatchNone(error => Assert.Fail(error.Message));
 
-            var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("DotEnv-VarsOverride/ConfigFolder/dotenv-vars.yml").Some<string, Error>());
+            var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
 
             migrationOrNone.Match(
                 some: migration =>

@@ -102,18 +102,18 @@ namespace DbUp.Cli
 
                                             if (opts.NotExecuted)
                                             {
-                                                Logger.WriteInformation("");
+                                                Logger.LogInformation("");
                                                 PrintScriptsToExecute(scriptsToExecute);
                                             }
                                         }
                                         else
                                         {
-                                            Logger.WriteInformation("Database is up-to-date. Upgrade is not required.");
+                                            Logger.LogInformation("Database is up-to-date. Upgrade is not required.");
                                         }
 
                                         if (opts.Executed)
                                         {
-                                            Logger.WriteInformation("");
+                                            Logger.LogInformation("");
                                             PrintExecutedScripts(engine);
                                         }
 
@@ -125,15 +125,15 @@ namespace DbUp.Cli
 
         private void PrintGeneralUpgradeInformation(List<string> scripts)
         {
-            Logger.WriteInformation("Database upgrade is required.");
-            Logger.WriteInformation($"You have {scripts.Count} more scripts to execute.");
+            Logger.LogInformation("Database upgrade is required.");
+            Logger.LogInformation($"You have {scripts.Count} more scripts to execute.");
         }
 
         private void PrintScriptsToExecute(List<string> scripts)
         {
-            Logger.WriteInformation("These scripts will be executed:");
+            Logger.LogInformation("These scripts will be executed:");
 
-            scripts.ForEach(s => Logger.WriteInformation($"    {s}"));
+            scripts.ForEach(s => Logger.LogInformation($"    {s}"));
         }
 
         private void PrintExecutedScripts(Engine.UpgradeEngine engine)
@@ -141,13 +141,13 @@ namespace DbUp.Cli
             var executed = engine.GetExecutedScripts();
             if (executed.Count == 0)
             {
-                Logger.WriteInformation("It seems you have no scripts executed yet.");
+                Logger.LogInformation("It seems you have no scripts executed yet.");
             }
             else
             {
-                Logger.WriteInformation("");
-                Logger.WriteInformation("Already executed scripts:");
-                executed.ForEach(s => Logger.WriteInformation($"    {s}"));
+                Logger.LogInformation("");
+                Logger.LogInformation("Already executed scripts:");
+                executed.ForEach(s => Logger.LogInformation($"    {s}"));
             }
         }
 

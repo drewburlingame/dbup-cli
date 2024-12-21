@@ -17,9 +17,6 @@ namespace DbUp.Cli.Tests
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
 
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Config");
-
         public NamingOptionsTests()
         {
             Logger = new CaptureLogsLogger();
@@ -71,7 +68,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = NamingOptions.Default;
@@ -97,7 +94,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(useOnlyFileName: true, false, null);
@@ -123,7 +120,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(false, includeBaseFolderName: true, null);
@@ -149,7 +146,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(useOnlyFileName: true, includeBaseFolderName: true, null);
@@ -175,7 +172,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(false, false, "prefix_");
@@ -201,7 +198,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(false, false, " prefix_ ");
@@ -227,7 +224,7 @@ namespace DbUp.Cli.Tests
         {
             var scripts = new List<ScriptBatch>()
             {
-                new ScriptBatch(ScriptProviderHelper.GetFolder(GetBasePath(), "Naming"), false, true, 0, Constants.Default.Encoding)
+                new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
             };
 
             var namingOptions = new NamingOptions(false, includeBaseFolderName: true, "prefix_");
