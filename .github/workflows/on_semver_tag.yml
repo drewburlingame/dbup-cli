@@ -1,0 +1,74 @@
+name: publish nuget package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"    # Trigger on semantic versioning tags, e.g., v1.0.0
+      - 'v*.*.*-*'  # Pre-release tags, e.g., v1.0.0-beta, v2.1.0-alpha
+
+jobs:
+  build-and-test:
+    # uses: drewburlingame/dbup-cli/.github/workflows/build_and_test.yml@main
+    uses: ./.github/workflows/build_and_test.yml
+    
+  publish:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+      # Extract version from tag (e.g., v1.2.3 -> 1.2.3)
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: version
+        run: echo "The extracted version is $VERSION"
+        env:
+          VERSION: ${{ env.VERSION }}
+        
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: pwd
+        run: pwd
+
+      - name: ls
+        run: ls -a
+
+      - name: Pack NuGet package
+        run: |
+          dotnet pack ./src/dbup-cli/dbup-cli.csproj \
+            --configuration Release \
+            /p:PackageVersion=$VERSION \
+            /p:ContinuousIntegrationBuild=true
+        env:
+          VERSION: ${{ env.VERSION }}
+        
+      # Publish the package to NuGet.org
+      - name: Publish NuGet Package
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          VERSION: ${{ env.VERSION }}
+        run: |
+          dotnet nuget push ./src/dbup-cli/nupkg/*.nupkg \
+            --skip-duplicate \
+            --api-key $NUGET_API_KEY \
+            --source "https://api.nuget.org/v3/index.json"
+
+      # Create a GitHub release with auto-generated release notes
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./src/dbup-cli/nupkg/*.nupkg
+          generate_release_notes: true
+          draft: true
+          prerelease: ${{ contains(env.VERSION, '-') }} # Mark as prerelease if contains '-' prerelease version
+          token: ${{ secrets.GITHUB_TOKEN }}

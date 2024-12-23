@@ -9,7 +9,7 @@ namespace DbUp.Cli.IntegrationTests
 {
     [TestClass]
     public class PostgreSqlTests()
-        : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("postgresql")
+        : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("PostgreSql")
     {
         protected override PostgreSqlBuilder NewBuilder => new();
 

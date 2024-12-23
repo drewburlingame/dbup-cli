@@ -10,6 +10,7 @@
 	<PropertyGroup Label="Nuget">
 		<PackAsTool>true</PackAsTool>
 		<OutputType>Exe</OutputType>
+		<PackageId>dbup-cli-2</PackageId>
 		<ToolCommandName>dbup</ToolCommandName>
 		<Product>DbUp Command Line Interface</Product>
 		<Title>DbUp Command Line Interface</Title>
@@ -23,7 +24,6 @@
 		<Copyright>Copyright (c) 2024 Drew Burlingame</Copyright>
 		<PackageTags>dbup database migration sqlserver postgresql mysql</PackageTags>
 		<PackageReleaseNotes>https://github.com/drewburlingame/dbup-cli#release-notes</PackageReleaseNotes>
-		<PackageLicenseUrl>https://raw.githubusercontent.com/drewburlingame/dbup-cli/refs/heads/master/LICENSE</PackageLicenseUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>

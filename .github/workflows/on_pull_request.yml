@@ -1,0 +1,9 @@
+name: pull request validation
+
+on:
+  pull_request:
+
+jobs:
+  build-and-publish:
+    # uses: drewburlingame/dbup-cli/.github/workflows/build_and_test.yml@main
+    uses: ./.github/workflows/build_and_test.yml
