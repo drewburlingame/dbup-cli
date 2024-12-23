@@ -1,16 +1,32 @@
 ﻿using DbUp.Engine.Output;
 using System;
+using DotNetEnv;
 
 namespace DbUp.Cli
 {
     public class ConsoleLogger: IUpgradeLog
     {
-        public void WriteError(string format, params object[] args)
+        public void LogTrace(string format, params object[] args) => Write("T", string.Format(format, args));
+
+        public void LogDebug(string format, params object[] args) => Write("D", string.Format(format, args));
+
+        public void LogInformation(string format, params object[] args) => Write("I", string.Format(format, args));
+
+        public void LogWarning(string format, params object[] args) => 
+            WriteWithColor("W", ConsoleColor.Yellow, string.Format(format, args));
+
+        public void LogError(string format, params object[] args) => 
+            WriteWithColor("E", ConsoleColor.Red, string.Format(format, args));
+
+        public void LogError(Exception ex, string format, params object[] args) => 
+            WriteWithColor("E", ConsoleColor.Red, $"{string.Format(format, args)}{Environment.NewLine}{ex}");
+
+        private static void WriteWithColor(string level, ConsoleColor color, string log)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = color;
             try
             {
-                Console.WriteLine($"[ERR] {string.Format(format, args)}");
+                Write(level, log);
             }
             finally
             {
@@ -18,23 +34,6 @@ namespace DbUp.Cli
             }
         }
 
-        public void WriteInformation(string format, params object[] args)
-        {
-            Console.WriteLine(string.Format(format, args));
-        }
-
-        public void WriteWarning(string format, params object[] args)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            try
-            {
-                Console.WriteLine($"[WRN] {string.Format(format, args)}");
-            }
-            finally
-            {
-                Console.ResetColor();
-            }
-
-        }
+        private static void Write(string level, string log) => Console.WriteLine($"[{level}] {log}");
     }
 }

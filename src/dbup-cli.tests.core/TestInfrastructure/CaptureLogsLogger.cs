@@ -7,43 +7,54 @@ namespace DbUp.Cli.Tests.TestInfrastructure
 {
     public class CaptureLogsLogger: IUpgradeLog
     {
-        readonly StringBuilder logBuilder = new StringBuilder();
-        public List<string> InfoMessages { get; } = new List<string>();
-        public List<string> WarnMessages { get; } = new List<string>();
-        public List<string> ErrorMessages { get; } = new List<string>();
+        private readonly StringBuilder logBuilder = new();
+        private readonly ConsoleLogger inner = new();
+        
+        public List<string> InfoMessages { get; } = new();
 
         public string Log => logBuilder.ToString();
 
-        public void WriteInformation(string format, params object[] args)
+        public void LogTrace(string format, params object[] args)
         {
+            inner.LogTrace(format, args);
+            logBuilder.AppendLine("[T] " + string.Format(format, args));
+        }
+
+        public void LogDebug(string format, params object[] args)
+        {
+            inner.LogDebug(format, args);
+            logBuilder.AppendLine("[D] " + string.Format(format, args));
+        }
+
+        public void LogInformation(string format, params object[] args)
+        {
+            inner.LogInformation(format, args);
             var formattedMsg = string.Format(format, args);
-            var value = "Info:         " + formattedMsg;
-            Console.WriteLine(value);
-            logBuilder.AppendLine(value);
             InfoMessages.Add(formattedMsg);
+            logBuilder.AppendLine("[I] " + formattedMsg);
         }
 
-        public void WriteWarning(string format, params object[] args)
+        public void LogWarning(string format, params object[] args)
         {
-            var formattedValue = string.Format(format, args);
-            var value = "Warn:         " + formattedValue;
-            Console.WriteLine(value);
-            logBuilder.AppendLine(value);
-            WarnMessages.Add(formattedValue);
+            inner.LogWarning(format, args);
+            logBuilder.AppendLine("[W] " + string.Format(format, args));
         }
 
-        public void WriteError(string format, params object[] args)
+        public void LogError(string format, params object[] args)
         {
-            var formattedMessage = string.Format(format, args);
-            var value = "Error:        " + formattedMessage;
-            Console.WriteLine(value);
-            logBuilder.AppendLine(value);
-            ErrorMessages.Add(formattedMessage);
+            inner.LogError(format, args);
+            logBuilder.AppendLine("[E] " + string.Format(format, args));
         }
 
-        public void WriteDbOperation(string operation)
+        public void LogError(Exception ex, string format, params object[] args)
         {
-            var value = "DB Operation: " + operation;
+            inner.LogError(format, args);
+            logBuilder.AppendLine("[E] " + $"{string.Format(format, args)}{Environment.NewLine}{ex}");
+        }
+
+        public void LogDbOperation(string operation)
+        {
+            var value = "[O] " + operation;
             Console.WriteLine(value);
             logBuilder.AppendLine(value);
         }

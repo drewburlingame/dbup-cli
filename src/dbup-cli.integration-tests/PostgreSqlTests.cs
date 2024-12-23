@@ -1,137 +1,40 @@
-using DbUp.Cli.Tests.TestInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.IO;
-using System.Reflection;
 using FluentAssertions;
-using System.Data.SqlClient;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Data;
 using Npgsql;
-using System.Data.Common;
+using Testcontainers.PostgreSql;
 
 namespace DbUp.Cli.IntegrationTests
 {
     [TestClass]
-    public class PostgreSqlTests : DockerBasedTest
+    public class PostgreSqlTests()
+        : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("postgresql")
     {
-        readonly CaptureLogsLogger Logger;
-        readonly IEnvironment Env;
+        protected override PostgreSqlBuilder NewBuilder => new();
 
-        public PostgreSqlTests()
+        protected override string ReplaceDbInConnString(string connectionString, string dbName) =>
+            connectionString.Replace(";Database=postgres;", $";Database={dbName};");
+
+        protected override IDbConnection GetConnection(string connectionString) =>
+            new NpgsqlConnection(connectionString);
+
+        protected override void AssertDbDoesNotExist(string connectionString, string dbName)
         {
-            Env = new CliEnvironment();
-            Logger = new CaptureLogsLogger();
-
-            Environment.SetEnvironmentVariable("CONNSTR", "Host=127.0.0.1;Database=dbup;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60");
+            using var connection = GetConnection(connectionString);
+            Action a = () => connection.Open();
+            a.Should().Throw<PostgresException>($"Database {dbName} should not exist");
         }
 
-        string GetBasePath(string subPath = "EmptyScript") =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, $@"..\Scripts\PostgreSql\{subPath}");
+        protected override string QueryCountOfScript001 =>
+            "select count(*) from SchemaVersions where scriptname = '001.sql'";
 
-        string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") => new DirectoryInfo(Path.Combine(GetBasePath(subPath), name)).FullName;
+        protected override string QueryCountOfScript001FromCustomJournal =>
+            "select count(*) from journal where scriptname = '001.sql'";
 
-        Func<DbConnection> CreateConnection = () => new NpgsqlConnection("Host=127.0.0.1;Database=postgres;Username=postgres;Password=PostgresPwd2019;Port=5432;Timeout=60;CommandTimeout=60");
-
-        [TestInitialize]
-        public Task TestInitialize()
+        [Ignore("Not supported")]
+        public override void Drop_DropADb()
         {
-            /*
-             * Before the first run, download the image:
-             * docker pull postgres:11.2
-             * */
-
-            return DockerInitialize(
-                "postgres:11.2",
-                new List<string>()
-                {
-                    "POSTGRES_PASSWORD=PostgresPwd2019"
-                },
-                "5432",
-                CreateConnection
-                );
         }
-
-        [TestCleanup]
-        public Task TestCleanup()
-        {
-            return DockerCleanup(CreateConnection, con => new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", con as NpgsqlConnection));
-        }
-
-        [TestMethod]
-        public void Ensure_CreateANewDb()
-        {
-            var engine = new ToolEngine(Env, Logger);
-
-            var result = engine.Run("upgrade", "--ensure", GetConfigPath());
-            result.Should().Be(0);
-
-            using (var connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
-            using (var command = new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
-            {
-                connection.Open();
-                var count = command.ExecuteScalar();
-
-                count.Should().Be(1);
-            }
-        }
-
-        /*
-         // Drop database does not supported for PostgreSQL by DbUp
-        [TestMethod]
-        public void Drop_DropADb()
-        {
-            var engine = new ToolEngine(Env, Logger);
-
-            engine.Run("upgrade", "--ensure", GetConfigPath());
-            var result = engine.Run("drop", GetConfigPath());
-            result.Should().Be(0);
-            using (var connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
-            using (var command = new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
-            {
-                Action a = () => connection.Open();
-                a.Should().Throw<SqlException>("Database DbUp should not exist");
-            }
-        }
-        */
-
-        [TestMethod]
-        public void DatabaseShouldNotExistBeforeTestRun()
-        {
-            using (var connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
-            using (var command = new NpgsqlCommand("select count(*) from SchemaVersions where scriptname = '001.sql'", connection))
-            {
-                Action a = () => { connection.Open(); command.ExecuteScalar(); };
-                a.Should().Throw<Exception>("Database DbUp should not exist");
-            }
-        }
-
-        [TestMethod]
-        public void UpgradeCommand_ShouldUseConnectionTimeoutForLongrunningQueries()
-        {
-            var engine = new ToolEngine(Env, Logger);
-
-            var r = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "Timeout"));
-            r.Should().Be(1);
-        }
-
-        [TestMethod]
-        public void UpgradeCommand_ShouldUseASpecifiedJournal()
-        {
-            var engine = new ToolEngine(Env, Logger);
-
-            var result = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "JournalTableScript"));
-            result.Should().Be(0);
-
-            using (var connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("CONNSTR")))
-            using (var command = new NpgsqlCommand("select count(*) from public.journal where scriptname = '001.sql'", connection))
-            {
-                connection.Open();
-                var count = command.ExecuteScalar();
-
-                count.Should().Be(1);
-            }
-        }
-
     }
 }

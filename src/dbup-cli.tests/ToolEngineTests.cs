@@ -17,10 +17,7 @@ namespace DbUp.Cli.Tests
         readonly CaptureLogsLogger Logger;
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
-
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Config");
-        string GetConfigPath(string name) => new DirectoryInfo(Path.Combine(GetBasePath(), name)).FullName;
+        private readonly string tempDbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
 
         public ToolEngineTests()
         {
@@ -35,8 +32,8 @@ namespace DbUp.Cli.Tests
             var saved = false;
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-            A.CallTo(() => env.FileExists(@"c:\test\dbup.yml")).Returns(false);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(false);
             A.CallTo(() => env.WriteFile("", "")).WithAnyArguments().ReturnsLazily(x => { saved = true; return true.Some<bool, Error>(); });
 
             var engine = new ToolEngine(env, A.Fake<IUpgradeLog>());
@@ -51,8 +48,8 @@ namespace DbUp.Cli.Tests
             var saved = false;
 
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-            A.CallTo(() => env.FileExists(@"c:\test\dbup.yml")).Returns(true);
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
+            A.CallTo(() => env.FileExists(tempDbupYmlPath)).Returns(true);
             A.CallTo(() => env.WriteFile("", "")).WithAnyArguments().ReturnsLazily(x => { saved = true; return true.Some<bool, Error>(); });
 
             var engine = new ToolEngine(env, A.Fake<IUpgradeLog>());
@@ -76,12 +73,12 @@ namespace DbUp.Cli.Tests
         public void StatusCommand_ShouldPrintGeneralInformation_IfNoScriptsToExecute()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("status", GetConfigPath("noscripts.yml"));
+            var result = engine.Run("status", ProjectPaths.GetConfigPath("noscripts.yml"));
             result.Should().Be(0);
 
             Logger.InfoMessages.Last().Should().StartWith("Database is up-to-date");
@@ -91,12 +88,12 @@ namespace DbUp.Cli.Tests
         public void StatusCommand_ShouldPrintGeneralInformation_IfThereAreTheScriptsToExecute()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("status", GetConfigPath("onescript.yml"));
+            var result = engine.Run("status", ProjectPaths.GetConfigPath("onescript.yml"));
 
             Logger.InfoMessages.Last().Should().StartWith("You have 1 more scripts");
         }
@@ -105,12 +102,12 @@ namespace DbUp.Cli.Tests
         public void StatusCommand_ShouldPrintScriptName_IfThereAreTheScriptsToExecute()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("status", GetConfigPath("onescript.yml"), "-n");
+            var result = engine.Run("status", ProjectPaths.GetConfigPath("onescript.yml"), "-n");
 
             Logger.InfoMessages.Last().Should().EndWith("c001.sql");
         }
@@ -119,12 +116,12 @@ namespace DbUp.Cli.Tests
         public void StatusCommand_ShouldReturnMinusOne_IfThereAreTheScriptsToExecute()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("status", GetConfigPath("onescript.yml"), "-n");
+            var result = engine.Run("status", ProjectPaths.GetConfigPath("onescript.yml"), "-n");
             result.Should().Be(-1);
         }
 
@@ -132,13 +129,13 @@ namespace DbUp.Cli.Tests
         public void StatusCommand_ShouldUseSpecifiedEnvFiles()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
 
-            var result = engine.Run("status", GetConfigPath("Status/status.yml"), "-n",
-                "--env", GetConfigPath("Status/file1.env"), GetConfigPath("Status/file2.env"));
+            var result = engine.Run("status", ProjectPaths.GetConfigPath("Status", "status.yml"), "-n",
+                "--env", ProjectPaths.GetConfigPath("Status", "file1.env"), ProjectPaths.GetConfigPath("Status", "file2.env"));
 
             Logger.InfoMessages.Last().Should().EndWith("c001.sql");
         }
@@ -147,11 +144,11 @@ namespace DbUp.Cli.Tests
         public void MarkAsExecutedCommand_WhenCalled_ShouldNotMakeAnyChangesInDb()
         {
             var env = A.Fake<IEnvironment>();
-            A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
+            A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
             A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => { return File.Exists(x.Arguments[0] as string); });
 
             var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-            var result = engine.Run("mark-as-executed", GetConfigPath("mark-as-executed.yml"));
+            var result = engine.Run("mark-as-executed", ProjectPaths.GetConfigPath("mark-as-executed.yml"));
             result.Should().Be(0);
 
             Logger.Log.Should().NotContain("print 'You should not see this message'");

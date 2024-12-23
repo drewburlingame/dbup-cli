@@ -6,7 +6,6 @@
         SqlServer,
         PostgreSQL,
         MySQL,
-        AzureSql,
-        CockroachDB
+        AzureSql
     }
 }

@@ -18,10 +18,7 @@ namespace DbUp.Cli.Tests
         readonly DelegateConnectionFactory testConnectionFactory;
         readonly RecordingDbConnection recordingConnection;
 
-        string GetBasePath() =>
-            Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\Scripts\Config");
-
-        string GetConfigPath(string name) => new DirectoryInfo(Path.Combine(GetBasePath(), name)).FullName;
+        string GetConfigPath(string name) => ProjectPaths.GetConfigPath(name);
 
         public VariableSubstitutionTests()
         {
