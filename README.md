@@ -62,7 +62,7 @@ The tool has almost all the features the DbUp has, but without a single line of 
 
 |Date| Version |Description|
 |-|---------|-|
-|2024-01-18| 2.0.0   |Support net8 & net9, dropping all older frameworks. Upgrade to DbUp v6.  DbUp support for Postgres is [beta](https://www.nuget.org/packages/dbup-postgresql) for v6. Drop Coachroach as [dbup package](https://www.nuget.org/packages/dbup-cockroachdb/) is outdated. It can be added back if someone provides an updated package.
+|2024-01-18| 2.0.0   |Support net8 & net9, dropping all older frameworks. Upgrade DbUp to v6.0.4. See [DbUp releases](https://github.com/DbUp/DbUp/releases) for additional behavior changes From 4.5.0 to 6.4.0. DbUp support for Postgres is [beta](https://www.nuget.org/packages/dbup-postgresql) for v6. Drop Coachroach as [dbup package](https://www.nuget.org/packages/dbup-cockroachdb/) is outdated. It can be added back if someone provides an updated package.
 |2023-06-12| 1.8.1   |Improve error reporting
 |2023-01-18| 1.8.0   |Add support of .Net 7.0
 |2022-06-11| 1.7.0   |Add support of CockroachDB, thanks to @lbguilherme
