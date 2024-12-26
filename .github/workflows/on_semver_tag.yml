@@ -43,4 +43,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ./src/dbup-cli/nupkg/*.nupkg
-        generate_release_notes: true
+          generate_release_notes: true
+          draft: true
+          prerelease: ${{ contains(env.VERSION, '-') }} # Mark as prerelease if contains '-' prerelease version
+          token: ${{ secrets.GITHUB_TOKEN }}
