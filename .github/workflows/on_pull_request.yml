@@ -5,5 +5,5 @@ on:
 
 jobs:
   build-and-publish:
-    # uses: drewburlingame/dotnet-cli/.github/workflows/build_and_test.yml@main
-    uses: ./.github/workflows/build_and_test.yml
+    uses: drewburlingame/dbup-cli/.github/workflows/build_and_test.yml@main
+    # uses: ./.github/workflows/build_and_test.yml
