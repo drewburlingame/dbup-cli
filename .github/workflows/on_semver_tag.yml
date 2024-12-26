@@ -3,12 +3,13 @@ name: publish nuget package
 on:
   push:
     tags:
-      - "v*.*.*" # Trigger on semantic versioning tags, e.g., v1.0.0
+      - "v*.*.*"    # Trigger on semantic versioning tags, e.g., v1.0.0
+      - 'v*.*.*-*'  # Pre-release tags, e.g., v1.0.0-beta, v2.1.0-alpha
 
 jobs:
   build-and-test:
-    # uses: drewburlingame/dotnet-cli/.github/workflows/build_and_test.yml@main
-    uses: ./.github/workflows/build_and_test.yml
+    uses: drewburlingame/dbup-cli/.github/workflows/build_and_test.yml@main
+    # uses: ./.github/workflows/build_and_test.yml
     
   publish:
     runs-on: ubuntu-latest
@@ -21,7 +22,6 @@ jobs:
         run: echo "##[set-output name=VERSION;]${GITHUB_REF/refs\/tags\/v/}"
         shell: bash
 
-      # Pack NuGet package
       - name: Pack NuGet package
         run: |
           dotnet pack src/dbup-cli/dbup-cli.csproj \
@@ -38,16 +38,9 @@ jobs:
             --api-key $NUGET_API_KEY \
             --source "https://api.nuget.org/v3/index.json"
 
-      # Create a GitHub release
-      - name: Create GitHub Release
-        uses: elgohr/Github-Release-Action@v5
+      # Create a GitHub release with auto-generated release notes
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag: ${{ github.ref_name }} # The tag, e.g. v1.0.0
-          title: Release ${{ github.ref_name }}
-          body: |
-            ## What’s Changed
-            See the [changelog](https://github.com/drewburlingame/dbup-cli/releases/tag/${{ github.ref_name }}).
-          draft: true
-          prerelease: ${{ contains(env.VERSION, '-') || github.ref != 'refs/heads/master' }} # Mark as prerelease if not master branch or contains '-'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: ./src/dbup-cli/nupkg/*.nupkg
+        generate_release_notes: true

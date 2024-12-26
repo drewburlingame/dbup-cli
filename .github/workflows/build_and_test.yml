@@ -13,19 +13,9 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Avoid pre-populating the NuGet package cache
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # all
 
-      - name: pwd
-        run: pwd
-
-      - name: ls
-        run: ls ./src/dbup-cli.integration-tests/Scripts/SqlServer/EmptyScript/
-
-      # Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
@@ -33,14 +23,11 @@ jobs:
             8.0.x
             9.0.x
 
-      # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore src/dbup-cli.sln
-      
-      # Run tests for dbup-cli.tests
+        run: dotnet restore
+        
       - name: Run unit tests
-        run: dotnet test ./src/dbup-cli.tests --no-restore --collect:"XPlat Code Coverage"
+        run: dotnet test ./tests/dbup-cli.tests --no-restore --collect:"XPlat Code Coverage"
 
-      # Run tests for dbup-cli.integration-tests
       - name: Run integration tests
-        run: dotnet test ./src/dbup-cli.integration-tests --no-restore --collect:"XPlat Code Coverage"
+        run: dotnet test ./tests/dbup-cli.integration-tests --no-restore --collect:"XPlat Code Coverage"
