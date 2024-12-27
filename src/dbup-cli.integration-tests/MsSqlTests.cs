@@ -1,11 +1,9 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
-using Npgsql;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Testcontainers.MsSql;
-using Testcontainers.PostgreSql;
 
 namespace DbUp.Cli.IntegrationTests
 {

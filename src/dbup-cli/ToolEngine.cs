@@ -1,13 +1,14 @@
-﻿using CommandLine;
-using DbUp.Cli.CommandLineOptions;
-using DbUp.Engine.Output;
-using DbUp.Engine.Transactions;
-using Optional;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using CommandLine;
+using DbUp.Cli.CommandLineOptions;
+using DbUp.Engine;
+using DbUp.Engine.Output;
+using DbUp.Engine.Transactions;
+using Optional;
 
 namespace DbUp.Cli
 {
@@ -136,7 +137,7 @@ namespace DbUp.Cli
             scripts.ForEach(s => Logger.LogInformation($"    {s}"));
         }
 
-        private void PrintExecutedScripts(Engine.UpgradeEngine engine)
+        private void PrintExecutedScripts(UpgradeEngine engine)
         {
             var executed = engine.GetExecutedScripts();
             if (executed.Count == 0)

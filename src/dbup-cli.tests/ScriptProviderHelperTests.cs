@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
-using System.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
+using DbUp.Support;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
-using System.Reflection;
-using DbUp.Builder;
 
 namespace DbUp.Cli.Tests
 {
@@ -68,7 +68,7 @@ namespace DbUp.Cli.Tests
             var batch = new ScriptBatch("", runAlways: false, false, 1, "");
             var options = ScriptProviderHelper.GetSqlScriptOptions(batch);
 
-            options.ScriptType.Should().Be(Support.ScriptType.RunOnce);
+            options.ScriptType.Should().Be(ScriptType.RunOnce);
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace DbUp.Cli.Tests
             var batch = new ScriptBatch("", runAlways: true, false, 1, "");
             var options = ScriptProviderHelper.GetSqlScriptOptions(batch);
 
-            options.ScriptType.Should().Be(Support.ScriptType.RunAlways);
+            options.ScriptType.Should().Be(ScriptType.RunAlways);
         }
 
         [TestMethod]

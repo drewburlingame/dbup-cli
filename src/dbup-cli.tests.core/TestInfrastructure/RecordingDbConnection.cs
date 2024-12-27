@@ -1,7 +1,7 @@
-using DbUp.Engine;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using DbUp.Engine;
 
 namespace DbUp.Cli.Tests.TestInfrastructure
 {

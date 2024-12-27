@@ -1,13 +1,12 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DbUp.Cli;
-using FluentAssertions;
 using System;
+using System.Collections.Generic;
+using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
+using DbUp.Engine;
 using DbUp.Engine.Transactions;
 using DbUp.SqlServer;
-using System.Collections.Generic;
-using DbUp.Engine;
-using DbUp.Builder;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests

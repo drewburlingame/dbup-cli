@@ -1,11 +1,12 @@
-﻿using Optional;
-using System;
+﻿using System;
+using DbUp.Engine;
+using Optional;
 
 namespace DbUp.Cli
 {
     internal class ResultBuilder
     {
-        public Option<int, Error> FromUpgradeResult(Engine.DatabaseUpgradeResult result)
+        public Option<int, Error> FromUpgradeResult(DatabaseUpgradeResult result)
         {
             if (result == null)
             {

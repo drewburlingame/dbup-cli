@@ -1,6 +1,5 @@
-﻿using DbUp.Engine.Output;
-using System;
-using DotNetEnv;
+﻿using System;
+using DbUp.Engine.Output;
 
 namespace DbUp.Cli
 {

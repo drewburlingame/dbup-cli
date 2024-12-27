@@ -1,9 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FluentAssertions;
-using FakeItEasy;
+﻿using System.IO;
 using DbUp.Cli.Tests.TestInfrastructure;
-using System.IO;
 using DbUp.Engine.Transactions;
+using FakeItEasy;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests

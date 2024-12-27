@@ -1,6 +1,4 @@
-﻿using Optional;
-
-namespace DbUp.Cli
+﻿namespace DbUp.Cli
 {
     public class Journal
     {

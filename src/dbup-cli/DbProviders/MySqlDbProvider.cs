@@ -1,5 +1,6 @@
 using DbUp.Builder;
 using DbUp.Engine.Output;
+using DbUp.MySql;
 using Optional;
 
 namespace DbUp.Cli.DbProviders;
@@ -22,7 +23,7 @@ public class MySqlDbProvider : DbProvider
 
     public override Option<UpgradeEngineBuilder, Error> SelectJournal(UpgradeEngineBuilder builder, Journal journal)
     {
-        builder.Configure(c => c.Journal = new MySql.MySqlTableJournal(() => c.ConnectionManager, () => c.Log, journal.Schema, journal.Table));
+        builder.Configure(c => c.Journal = new MySqlTableJournal(() => c.ConnectionManager, () => c.Log, journal.Schema, journal.Table));
         return builder.Some<UpgradeEngineBuilder, Error>();
     }
 }

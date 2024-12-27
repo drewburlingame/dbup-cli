@@ -1,7 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using FluentAssertions;
 using System.Data;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Npgsql;
 using Testcontainers.PostgreSql;
 

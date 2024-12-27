@@ -1,7 +1,7 @@
-﻿using Optional;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
+using Optional;
 
 namespace DbUp.Cli
 {

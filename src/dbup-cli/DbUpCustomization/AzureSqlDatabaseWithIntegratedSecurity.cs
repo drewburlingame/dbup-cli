@@ -1,11 +1,8 @@
-﻿using DbUp.Engine.Output;
+﻿using System;
+using System.Data;
+using DbUp.Engine.Output;
 using DbUp.SqlServer;
 using Microsoft.Azure.Services.AppAuthentication;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Text;
 using Microsoft.Data.SqlClient;
 
 namespace DbUp.Cli.DbUpCustomization

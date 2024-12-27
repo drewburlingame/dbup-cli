@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DbUp.Cli
+﻿namespace DbUp.Cli
 {
     public class ScriptBatch
     {

@@ -1,13 +1,12 @@
-﻿using DbUp.Builder;
-using DbUp.Engine;
-using DbUp.ScriptProviders;
-using Optional;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DbUp.Builder;
+using DbUp.Engine;
+using DbUp.Support;
+using Optional;
 
 namespace DbUp.Cli
 {
@@ -25,7 +24,7 @@ namespace DbUp.Cli
         public static SqlScriptOptions GetSqlScriptOptions(ScriptBatch batch) =>
             new()
             {
-                ScriptType = batch.RunAlways ? Support.ScriptType.RunAlways : Support.ScriptType.RunOnce,
+                ScriptType = batch.RunAlways ? ScriptType.RunAlways : ScriptType.RunOnce,
                 RunGroupOrder = batch.Order
             };
 

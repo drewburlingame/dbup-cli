@@ -1,14 +1,14 @@
-﻿using DbUp.Builder;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using DbUp.Builder;
 using DbUp.Cli.CommandLineOptions;
-using DbUp.Cli.DbUpCustomization;
+using DbUp.Cli.DbProviders;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
 using DbUp.Helpers;
+using DotNetEnv;
 using Optional;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using DbUp.Cli.DbProviders;
 
 namespace DbUp.Cli
 {
@@ -121,26 +121,26 @@ namespace DbUp.Cli
             var defaultEnvFile = Path.Combine(environment.GetCurrentDirectory(), Constants.Default.DotEnvFileName);
             if (environment.FileExists(defaultEnvFile))
             {
-                DotNetEnv.Env.Load(defaultEnvFile);
+                Env.Load(defaultEnvFile);
             }
             // .env.local file  in a current folder
             var defaultEnvLocalFile = Path.Combine(environment.GetCurrentDirectory(), Constants.Default.DotEnvLocalFileName);
             if (environment.FileExists(defaultEnvLocalFile))
             {
-                DotNetEnv.Env.Load(defaultEnvLocalFile);
+                Env.Load(defaultEnvLocalFile);
             }
 
             // .env file next to a dbup.yml
             var configFileEnv = Path.Combine(new FileInfo(configFilePath).DirectoryName, Constants.Default.DotEnvFileName);
             if (environment.FileExists(configFileEnv))
             {
-                DotNetEnv.Env.Load(configFileEnv);
+                Env.Load(configFileEnv);
             }
             // .env.local file next to a dbup.yml
             var configFileEnvLocal = Path.Combine(new FileInfo(configFilePath).DirectoryName, Constants.Default.DotEnvLocalFileName);
             if (environment.FileExists(configFileEnvLocal))
             {
-                DotNetEnv.Env.Load(configFileEnvLocal);
+                Env.Load(configFileEnvLocal);
             }
 
             if (envFiles != null)
@@ -150,7 +150,7 @@ namespace DbUp.Cli
                     Error error = null;
                     ConfigLoader.GetFilePath(environment, file)
                         .Match(
-                            some: path => DotNetEnv.Env.Load(path),
+                            some: path => Env.Load(path),
                             none: err => error = err);
 
                     if (error != null)

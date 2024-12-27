@@ -1,7 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Data;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySql.Data.MySqlClient;
 using Testcontainers.MySql;
 using MySqlConfiguration = Testcontainers.MySql.MySqlConfiguration;
