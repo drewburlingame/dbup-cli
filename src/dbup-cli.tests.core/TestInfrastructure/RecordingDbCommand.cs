@@ -1,131 +1,130 @@
-using DbUp.Engine;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using DbUp.Engine;
 
-namespace DbUp.Cli.Tests.TestInfrastructure
+namespace DbUp.Cli.Tests.TestInfrastructure;
+
+public class RecordingDbCommand: IDbCommand
 {
-    public class RecordingDbCommand: IDbCommand
+    private readonly CaptureLogsLogger logger;
+    private readonly SqlScript[] runScripts;
+    private readonly string schemaTableName;
+    private readonly Dictionary<string, Func<object>> scalarResults;
+    private readonly Dictionary<string, Func<int>> nonQueryResults;
+
+    public RecordingDbCommand(CaptureLogsLogger logger, SqlScript[] runScripts, string schemaTableName,
+        Dictionary<string, Func<object>> scalarResults, Dictionary<string, Func<int>> nonQueryResults)
     {
-        readonly CaptureLogsLogger logger;
-        readonly SqlScript[] runScripts;
-        readonly string schemaTableName;
-        readonly Dictionary<string, Func<object>> scalarResults;
-        readonly Dictionary<string, Func<int>> nonQueryResults;
+        this.logger = logger;
+        this.runScripts = runScripts;
+        this.schemaTableName = schemaTableName;
+        this.scalarResults = scalarResults;
+        this.nonQueryResults = nonQueryResults;
+        Parameters = new RecordingDataParameterCollection(logger);
+    }
 
-        public RecordingDbCommand(CaptureLogsLogger logger, SqlScript[] runScripts, string schemaTableName,
-            Dictionary<string, Func<object>> scalarResults, Dictionary<string, Func<int>> nonQueryResults)
+    public void Dispose()
+    {
+        logger.LogDbOperation("Dispose command");
+    }
+
+    public void Prepare()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Cancel()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IDbDataParameter CreateParameter()
+    {
+        logger.LogDbOperation("Create parameter");
+        return new RecordingDbDataParameter();
+    }
+
+    public int ExecuteNonQuery()
+    {
+        logger.LogDbOperation($"Execute non query command: {CommandText}");
+
+        if (CommandText == "error")
+            ThrowError();
+
+        if (nonQueryResults.ContainsKey(CommandText))
+            return nonQueryResults[CommandText]();
+        return 0;
+    }
+
+    private void ThrowError()
+    {
+        throw new TestDbException();
+    }
+
+    public IDataReader ExecuteReader()
+    {
+        logger.LogDbOperation($"Execute reader command: {CommandText}");
+
+        if (CommandText == "error")
+            ThrowError();
+
+        // Reading SchemaVersions
+        if (CommandText.IndexOf(schemaTableName, StringComparison.OrdinalIgnoreCase) != -1)
         {
-            this.logger = logger;
-            this.runScripts = runScripts;
-            this.schemaTableName = schemaTableName;
-            this.scalarResults = scalarResults;
-            this.nonQueryResults = nonQueryResults;
-            Parameters = new RecordingDataParameterCollection(logger);
+            return new ScriptReader(runScripts);
         }
 
-        public void Dispose()
+        return new EmptyReader();
+    }
+
+    public IDataReader ExecuteReader(CommandBehavior behavior)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object ExecuteScalar()
+    {
+        logger.LogDbOperation($"Execute scalar command: {CommandText}");
+
+        if (CommandText == "error")
+            ThrowError();
+
+        // Are we checking if schemaversions exists
+        if (CommandText.IndexOf(schemaTableName, StringComparison.OrdinalIgnoreCase) != -1)
         {
-            logger.LogDbOperation("Dispose command");
-        }
-
-        public void Prepare()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Cancel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDbDataParameter CreateParameter()
-        {
-            logger.LogDbOperation("Create parameter");
-            return new RecordingDbDataParameter();
-        }
-
-        public int ExecuteNonQuery()
-        {
-            logger.LogDbOperation($"Execute non query command: {CommandText}");
-
-            if (CommandText == "error")
-                ThrowError();
-
-            if (nonQueryResults.ContainsKey(CommandText))
-                return nonQueryResults[CommandText]();
+            if (runScripts != null)
+                return 1;
             return 0;
         }
 
-        void ThrowError()
+        if (scalarResults.ContainsKey(CommandText))
         {
-            throw new TestDbException();
+            return scalarResults[CommandText]();
         }
 
-        public IDataReader ExecuteReader()
-        {
-            logger.LogDbOperation($"Execute reader command: {CommandText}");
+        return null;
+    }
 
-            if (CommandText == "error")
-                ThrowError();
+    public IDbConnection Connection { get; set; }
 
-            // Reading SchemaVersions
-            if (CommandText.IndexOf(schemaTableName, StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                return new ScriptReader(runScripts);
-            }
+    public IDbTransaction Transaction { get; set; }
 
-            return new EmptyReader();
-        }
+    /// <summary>
+    /// Set to 'error' to throw when executed
+    /// </summary>
+    public string CommandText { get; set; }
 
-        public IDataReader ExecuteReader(CommandBehavior behavior)
-        {
-            throw new NotImplementedException();
-        }
+    public int CommandTimeout { get; set; }
 
-        public object ExecuteScalar()
-        {
-            logger.LogDbOperation($"Execute scalar command: {CommandText}");
+    public CommandType CommandType { get; set; }
 
-            if (CommandText == "error")
-                ThrowError();
+    public IDataParameterCollection Parameters { get; }
 
-            // Are we checking if schemaversions exists
-            if (CommandText.IndexOf(schemaTableName, StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                if (runScripts != null)
-                    return 1;
-                return 0;
-            }
+    public UpdateRowSource UpdatedRowSource { get; set; }
 
-            if (scalarResults.ContainsKey(CommandText))
-            {
-                return scalarResults[CommandText]();
-            }
-
-            return null;
-        }
-
-        public IDbConnection Connection { get; set; }
-
-        public IDbTransaction Transaction { get; set; }
-
-        /// <summary>
-        /// Set to 'error' to throw when executed
-        /// </summary>
-        public string CommandText { get; set; }
-
-        public int CommandTimeout { get; set; }
-
-        public CommandType CommandType { get; set; }
-
-        public IDataParameterCollection Parameters { get; }
-
-        public UpdateRowSource UpdatedRowSource { get; set; }
-
-        class TestDbException: DbException
-        {
-        }
+    private class TestDbException: DbException
+    {
     }
 }

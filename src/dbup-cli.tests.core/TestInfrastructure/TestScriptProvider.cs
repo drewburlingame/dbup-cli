@@ -1,21 +1,20 @@
-﻿using DbUp.Engine;
+﻿using System.Collections.Generic;
+using DbUp.Engine;
 using DbUp.Engine.Transactions;
-using System.Collections.Generic;
 
-namespace DbUp.Cli.Tests.TestInfrastructure
+namespace DbUp.Cli.Tests.TestInfrastructure;
+
+public class TestScriptProvider: IScriptProvider
 {
-    public class TestScriptProvider: IScriptProvider
+    private readonly List<SqlScript> sqlScripts;
+
+    public TestScriptProvider(List<SqlScript> sqlScripts)
     {
-        readonly List<SqlScript> sqlScripts;
+        this.sqlScripts = sqlScripts;
+    }
 
-        public TestScriptProvider(List<SqlScript> sqlScripts)
-        {
-            this.sqlScripts = sqlScripts;
-        }
-
-        public IEnumerable<SqlScript> GetScripts(IConnectionManager connectionManager)
-        {
-            return sqlScripts;
-        }
+    public IEnumerable<SqlScript> GetScripts(IConnectionManager connectionManager)
+    {
+        return sqlScripts;
     }
 }

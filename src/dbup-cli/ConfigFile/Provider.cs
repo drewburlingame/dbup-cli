@@ -1,11 +1,10 @@
-﻿namespace DbUp.Cli
+﻿namespace DbUp.Cli;
+
+public enum Provider
 {
-    public enum Provider
-    {
-        UnsupportedProvider,
-        SqlServer,
-        PostgreSQL,
-        MySQL,
-        AzureSql
-    }
+    UnsupportedProvider,
+    SqlServer,
+    PostgreSQL,
+    MySQL,
+    AzureSql
 }
