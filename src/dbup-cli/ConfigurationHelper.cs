@@ -8,142 +8,65 @@ using Optional;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DbUp.Cli.DbProviders;
 
 namespace DbUp.Cli
 {
     public static class ConfigurationHelper
     {
-        private static bool UseAzureSqlIntegratedSecurity(string connectionString)
-        {
-            // Use IndexOf to make the code compatible with .NetFramework 4.6
-            return !(connectionString.IndexOf("Password", StringComparison.InvariantCultureIgnoreCase) >= 0 ||
-                                          connectionString.IndexOf("Integrated Security", StringComparison.InvariantCultureIgnoreCase) >= 0 ||
-                                          connectionString.IndexOf("Trusted_Connection", StringComparison.InvariantCultureIgnoreCase) >= 0);
-        }
-
-        public static Option<UpgradeEngineBuilder, Error> SelectDbProvider(Provider provider, string connectionString, int connectionTimeoutSec)
-        {
-            var timeout = TimeSpan.FromSeconds(connectionTimeoutSec);
-
-            return provider switch
+        private static Option<DbProvider, Error> ProviderFor(Provider provider) =>
+            provider switch
             {
-                Provider.SqlServer => DeployChanges.To.SqlDatabase(connectionString)
-                                        .WithExecutionTimeout(timeout)
-                                        .Some<UpgradeEngineBuilder, Error>(),
-                Provider.AzureSql => DeployChanges.To.SqlDatabase(connectionString, null, UseAzureSqlIntegratedSecurity(connectionString))
-                                        .WithExecutionTimeout(timeout)
-                                        .Some<UpgradeEngineBuilder, Error>(),
-                Provider.PostgreSQL => DeployChanges.To.PostgresqlDatabase(connectionString)
-                                        .WithExecutionTimeout(timeout)
-                                        .Some<UpgradeEngineBuilder, Error>(),
-                Provider.MySQL => DeployChanges.To.MySqlDatabase(connectionString)
-                                        .WithExecutionTimeout(timeout)
-                                        .Some<UpgradeEngineBuilder, Error>(),
-                _ => Option.None<UpgradeEngineBuilder, Error>(Error.Create(Constants.ConsoleMessages.UnsupportedProvider, provider.ToString())),
+                Provider.SqlServer => new SqlServerDbProvider().Some<DbProvider, Error>(),
+                Provider.AzureSql => new AzureSqlServerDbProvider().Some<DbProvider, Error>(),
+                Provider.PostgreSQL => new PostgresDbProvider().Some<DbProvider, Error>(),
+                Provider.MySQL => new MySqlDbProvider().Some<DbProvider, Error>(),
+                _ => Option.None<DbProvider, Error>(Error.Create(Constants.ConsoleMessages.UnsupportedProvider, provider.ToString()))
             };
-        }
+
+        public static Option<UpgradeEngineBuilder, Error> SelectDbProvider(Provider provider, string connectionString, int connectionTimeoutSec) =>
+            ProviderFor(provider).Match(
+                    some: p => p.SelectDbProvider(new ConnectionInfo(connectionString, connectionTimeoutSec)),
+                    none: Option.None<UpgradeEngineBuilder,  Error>);
 
         public static Option<bool, Error> EnsureDb(IUpgradeLog logger, Provider provider, string connectionString, int connectionTimeoutSec)
         {
             try
             {
-                switch (provider)
-                {
-                    case Provider.SqlServer:
-                        EnsureDatabase.For.SqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        return true.Some<bool, Error>();
-                    case Provider.AzureSql:
-                        if (UseAzureSqlIntegratedSecurity(connectionString))
-                        {
-                            EnsureDatabase.For.AzureSqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        }
-                        else
-                        {
-                            EnsureDatabase.For.SqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        }
-                        return true.Some<bool, Error>();
-                    case Provider.PostgreSQL:
-                        EnsureDatabase.For.PostgresqlDatabase(connectionString, logger); // Postgres provider does not support timeout...
-                        return true.Some<bool, Error>();
-                    case Provider.MySQL:
-                        EnsureDatabase.For.MySqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        return true.Some<bool, Error>();
-                }
+                return ProviderFor(provider).Match(
+                    some: p => p.EnsureDb(logger, new ConnectionInfo(connectionString, connectionTimeoutSec)),
+                    none: Option.None<bool, Error>);
             }
             catch (Exception ex)
             {
                 return Option.None<bool, Error>(Error.Create("EnsureDb failed: {0}", ex.Message));
             }
-
-            return Option.None<bool, Error>(Error.Create(Constants.ConsoleMessages.UnsupportedProvider, provider.ToString()));
         }
 
         public static Option<bool, Error> DropDb(IUpgradeLog logger, Provider provider, string connectionString, int connectionTimeoutSec)
         {
             try
             {
-                switch (provider)
-                {
-                    case Provider.SqlServer:
-                        DropDatabase.For.SqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        return true.Some<bool, Error>();
-                    case Provider.AzureSql:
-                        if (UseAzureSqlIntegratedSecurity(connectionString))
-                        {
-                            DropDatabase.For.AzureSqlDatabase(connectionString, logger);
-                        }
-                        else
-                        {
-                            DropDatabase.For.SqlDatabase(connectionString, logger, connectionTimeoutSec);
-                        }
-                        return true.Some<bool, Error>();
-                    case Provider.PostgreSQL:
-                        return Option.None<bool, Error>(Error.Create("PostgreSQL database provider does not support 'drop' command for now"));
-                    case Provider.MySQL:
-                        return Option.None<bool, Error>(Error.Create("MySQL database provider does not support 'drop' command for now"));
-                }
+                return ProviderFor(provider).Match(
+                    some: p => p.DropDb(logger, new ConnectionInfo(connectionString, connectionTimeoutSec)),
+                    none: Option.None<bool, Error>);
             }
             catch (Exception ex)
             {
                 return Option.None<bool, Error>(Error.Create("DropDb failed: {0}", ex.Message));
             }
-
-            return Option.None<bool, Error>(Error.Create(Constants.ConsoleMessages.UnsupportedProvider, provider.ToString()));
         }
 
         public static Option<UpgradeEngineBuilder, Error> SelectJournal(this Option<UpgradeEngineBuilder, Error> builderOrNone, Provider provider, Journal journal) =>
             builderOrNone.Match(
-                some: builder =>
-                {
-                    if (journal == null)
-                    {
-                        return builder.JournalTo(new NullJournal()).Some<UpgradeEngineBuilder, Error>();
-                    }
-                    else if (!journal.IsDefault)
-                    {
-                        switch (provider)
-                        {
-                            case Provider.SqlServer:
-                                builder.JournalToSqlTable(journal.Schema, journal.Table);
-                                break;
-                            case Provider.MySQL:
-                                builder.Configure(c => c.Journal = new MySql.MySqlTableJournal(() => c.ConnectionManager, () => c.Log, journal.Schema, journal.Table));
-                                break;
-                            case Provider.PostgreSQL:
-                                builder.JournalToPostgresqlTable(journal.Schema, journal.Table);
-                                break;
-                            default:
-                                return Option.None<UpgradeEngineBuilder, Error>(Error.Create($"JournalTo does not support a provider {provider}"));
-                        }
-
-                        return builder.Some<UpgradeEngineBuilder, Error>();
-                    }
-                    else
-                    {
-                        return builder.Some<UpgradeEngineBuilder, Error>();
-                    }
-                },
-                none: error => Option.None<UpgradeEngineBuilder, Error>(error));
+                some: builder => journal == null
+                    ? builder.JournalTo(new NullJournal()).Some<UpgradeEngineBuilder, Error>()
+                    : journal.IsDefault
+                        ? builder.Some<UpgradeEngineBuilder, Error>()
+                        : ProviderFor(provider).Match(
+                            some: p => p.SelectJournal(builder, journal),
+                            none: Option.None<UpgradeEngineBuilder, Error>),
+                none: Option.None<UpgradeEngineBuilder, Error>);
 
         public static Option<UpgradeEngineBuilder, Error> SelectTransaction(this Option<UpgradeEngineBuilder, Error> builderOrNone, Transaction tran) =>
             builderOrNone.Match(
@@ -155,7 +78,7 @@ namespace DbUp.Cli
                                 : tran == Transaction.Single
                                     ? builder.WithTransaction().Some<UpgradeEngineBuilder, Error>()
                                     : Option.None<UpgradeEngineBuilder, Error>(Error.Create(Constants.ConsoleMessages.InvalidTransaction, tran)),
-                none: error => Option.None<UpgradeEngineBuilder, Error>(error));
+                none: Option.None<UpgradeEngineBuilder, Error>);
 
         public static Option<UpgradeEngineBuilder, Error> SelectLogOptions(this Option<UpgradeEngineBuilder, Error> builderOrNone, IUpgradeLog logger, VerbosityLevel verbosity) =>
             builderOrNone
@@ -168,7 +91,7 @@ namespace DbUp.Cli
                     some: builder => verbosity == VerbosityLevel.Detail
                             ? builder.LogScriptOutput().Some<UpgradeEngineBuilder, Error>()
                             : builderOrNone,
-                    none: error => Option.None<UpgradeEngineBuilder, Error>(error));
+                    none: Option.None<UpgradeEngineBuilder, Error>);
 
         public static Option<UpgradeEngineBuilder, Error> OverrideConnectionFactory(this Option<UpgradeEngineBuilder, Error> builderOrNone, Option<IConnectionFactory> connectionFactory) =>
             builderOrNone.Match(
@@ -179,12 +102,12 @@ namespace DbUp.Cli
                         return builder.Some<UpgradeEngineBuilder, Error>();
                     },
                     none: () => builderOrNone),
-                none: error => Option.None<UpgradeEngineBuilder, Error>(error));
+                none: Option.None<UpgradeEngineBuilder, Error>);
 
         public static Option<UpgradeEngineBuilder, Error> AddVariables(this Option<UpgradeEngineBuilder, Error> builderOrNone, Dictionary<string, string> vars, bool disableVars) =>
             builderOrNone.Match(
                 some: builder => (disableVars ? builder.WithVariablesDisabled() : builder.WithVariables(vars)).Some<UpgradeEngineBuilder, Error>(),
-                none: error => Option.None<UpgradeEngineBuilder, Error>(error)
+                none: Option.None<UpgradeEngineBuilder, Error>
             );
 
         public static Option<bool, Error> LoadEnvironmentVariables(IEnvironment environment, string configFilePath, IEnumerable<string> envFiles)
