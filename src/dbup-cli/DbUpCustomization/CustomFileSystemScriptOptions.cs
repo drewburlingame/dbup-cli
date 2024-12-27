@@ -1,10 +1,9 @@
 ﻿using DbUp.ScriptProviders;
 
-namespace DbUp.Cli
+namespace DbUp.Cli;
+
+public class CustomFileSystemScriptOptions: FileSystemScriptOptions
 {
-    public class CustomFileSystemScriptOptions: FileSystemScriptOptions
-    {
-        public bool PrefixScriptNameWithBaseFolderName { get; set; }
-        public string Prefix { get; set; }
-    }
+    public bool PrefixScriptNameWithBaseFolderName { get; set; }
+    public string Prefix { get; set; }
 }

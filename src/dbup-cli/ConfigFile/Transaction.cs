@@ -1,9 +1,8 @@
-﻿namespace DbUp.Cli
+﻿namespace DbUp.Cli;
+
+public enum Transaction
 {
-    public enum Transaction
-    {
-        None,
-        PerScript,
-        Single
-    }
+    None,
+    PerScript,
+    Single
 }

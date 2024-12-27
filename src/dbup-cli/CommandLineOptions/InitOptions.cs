@@ -1,9 +1,8 @@
 ﻿using CommandLine;
 
-namespace DbUp.Cli.CommandLineOptions
+namespace DbUp.Cli.CommandLineOptions;
+
+[Verb("init", HelpText = "Create a new config file")]
+internal class InitOptions: OptionsBase
 {
-    [Verb("init", HelpText = "Create a new config file")]
-    class InitOptions: OptionsBase
-    {
-    }
 }

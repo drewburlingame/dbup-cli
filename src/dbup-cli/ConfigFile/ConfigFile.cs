@@ -1,7 +1,6 @@
-﻿namespace DbUp.Cli
+﻿namespace DbUp.Cli;
+
+internal class ConfigFile
 {
-    class ConfigFile
-    {
-        public Migration DbUp { get; set; }
-    }
+    public Migration DbUp { get; set; }
 }

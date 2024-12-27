@@ -19,7 +19,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     private readonly string DbScriptsDir;
     private readonly CaptureLogsLogger Logger;
     private readonly IEnvironment Env;
-    private ToolEngine engine;
+    private readonly ToolEngine engine;
 
     private static IDatabaseContainer Container;
     private static string ServerConnString;
