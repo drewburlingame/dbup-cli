@@ -29,7 +29,9 @@ The tool has almost all the features the DbUp has, but without a single line of 
 
 ## Documentation
 
-* [Installation](https://github.com/drwatson1/dbup-cli/wiki/Home#installation)
+> most documentation is  still hosted on the wiki at [drwatson1/dbup-cli](https://github.com/drwatson1/dbup-cli). I will gradually migrate it to this repo.
+
+* [Installation](https://github.com/drewburlingame/dbup-cli#installation)
 * [Getting Started](https://github.com/drwatson1/dbup-cli/wiki/Home#getting-started)
 * [Supported DB Providers](https://github.com/drwatson1/dbup-cli/Home#supported-db-providers)
 * [Configuration File](https://github.com/drwatson1/dbup-cli/wiki/Home#configuration-file)
@@ -56,13 +58,27 @@ The tool has almost all the features the DbUp has, but without a single line of 
 * AzureSQL
 * PostgreSQL
 * MySQL
-* CockroachDB (by @lbguilherme)
+
+## Installation
+
+Requires .Net 8 or 9.
+
+From a console run the following command:
+
+```dotnet tool install --global dbup-cli-2```
+
+The tool is available now anywhere in your system. You can check this by typing:
+
+```dbup --version```
+
+> If the previous `dbup-cli` tool is installed, it must be uninstalled before `dbup-cli-2` can be installed.
 
 ## Release Notes
 
+See [GitHub Releases](https://github.com/drewburlingame/dbup-cli/releases) for release notes starting from 2.0.0
+
 |Date| Version |Description|
 |-|---------|-|
-|2024-01-18| 2.0.0   |Support net8 & net9, dropping all older frameworks. Upgrade DbUp to v6.0.4. See [DbUp releases](https://github.com/DbUp/DbUp/releases) for additional behavior changes From 4.5.0 to 6.4.0. DbUp support for Postgres is [beta](https://www.nuget.org/packages/dbup-postgresql) for v6. Drop Coachroach as [dbup package](https://www.nuget.org/packages/dbup-cockroachdb/) is outdated. It can be added back if someone provides an updated package.
 |2023-06-12| 1.8.1   |Improve error reporting
 |2023-01-18| 1.8.0   |Add support of .Net 7.0
 |2022-06-11| 1.7.0   |Add support of CockroachDB, thanks to @lbguilherme
