@@ -48,7 +48,7 @@
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="dbup-core" Version="6.0.4" />
 		<PackageReference Include="dbup-mysql" Version="6.0.4" />
-		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
+		<PackageReference Include="dbup-postgresql" Version="6.0.0-beta.44" />
 		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
 		<PackageReference Include="DotNetEnv" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
