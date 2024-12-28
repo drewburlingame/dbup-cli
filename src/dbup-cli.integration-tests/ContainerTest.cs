@@ -1,7 +1,4 @@
-using System;
 using System.Data;
-using System.IO;
-using System.Threading.Tasks;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;

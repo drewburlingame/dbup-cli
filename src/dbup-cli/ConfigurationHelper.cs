@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using DbUp.Builder;
+﻿using DbUp.Builder;
 using DbUp.Cli.CommandLineOptions;
 using DbUp.Cli.DbProviders;
 using DbUp.Engine.Output;

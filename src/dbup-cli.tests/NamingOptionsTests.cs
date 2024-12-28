@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using DbUp.Builder;
+﻿using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
 using FluentAssertions;

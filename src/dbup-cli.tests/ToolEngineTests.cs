@@ -1,5 +1,3 @@
-using System.IO;
-using System.Linq;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;

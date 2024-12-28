@@ -1,4 +1,3 @@
-using System;
 using DbUp.Builder;
 using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine.Output;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using DbUp.Engine;
+﻿using DbUp.Engine;
 using DbUp.Engine.Transactions;
 using DbUp.ScriptProviders;
 

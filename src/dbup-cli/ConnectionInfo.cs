@@ -1,5 +1,3 @@
-using System;
-
 namespace DbUp.Cli;
 
 public record ConnectionInfo(string ConnectionString, int ConnectionTimeoutSec)

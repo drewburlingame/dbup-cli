@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;
