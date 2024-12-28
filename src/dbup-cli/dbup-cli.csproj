@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-		<LangVersion>latest</LangVersion>
 		<RootNamespace>DbUp.Cli</RootNamespace>
-		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Label="Nuget">
@@ -45,18 +42,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="dbup-core" Version="6.0.4" />
-		<PackageReference Include="dbup-mysql" Version="6.0.4" />
-		<PackageReference Include="dbup-postgresql" Version="6.0.0-beta.44" />
-		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
-		<PackageReference Include="DotNetEnv" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
-		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
-		<PackageReference Include="Npgsql" Version="9.0.2" />
-		<PackageReference Include="Optional" Version="4.0.0" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
-		<PackageReference Include="YamlDotNet" Version="16.2.1" />
+		<PackageReference Include="CommandLineParser" />
+		<PackageReference Include="dbup-core" />
+		<PackageReference Include="dbup-mysql" />
+		<PackageReference Include="dbup-postgresql" />
+		<PackageReference Include="dbup-sqlserver" />
+		<PackageReference Include="DotNetEnv" />
+		<PackageReference Include="Microsoft.Azure.KeyVault" />
+		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" />
+		<PackageReference Include="Npgsql" />
+		<PackageReference Include="Optional" />
+		<PackageReference Include="System.Text.Encoding.CodePages" />
+		<PackageReference Include="YamlDotNet" />
 	</ItemGroup>
 
 </Project>

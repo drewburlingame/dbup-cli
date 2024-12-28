@@ -1,0 +1,25 @@
+<Project>
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <!-- warnings: 612 [Obsolete], 618 [Obsolete("with message")] -->
+        <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
+    </PropertyGroup>
+
+    <Choose>
+        <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectName), '.*tests'))">
+            <PropertyGroup>
+                <IsPackable>false</IsPackable>
+                <Nullable>disable</Nullable>
+                <IsTestProject>true</IsTestProject>
+            </PropertyGroup>
+            <ItemGroup>
+            </ItemGroup>
+        </When>
+    </Choose>
+
+</Project>

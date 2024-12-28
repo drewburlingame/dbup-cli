@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 	  <RootNamespace>DbUp.Cli.Tests</RootNamespace>
   </PropertyGroup>
 
@@ -10,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="dbup-postgresql" Version="6.0.0-beta.44" />
+    <PackageReference Include="dbup-postgresql" />
   </ItemGroup>
 
 </Project>
