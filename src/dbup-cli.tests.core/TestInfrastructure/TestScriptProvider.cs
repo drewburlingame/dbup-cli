@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using DbUp.Engine;
+﻿using DbUp.Engine;
 using DbUp.Engine.Transactions;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using DbUp.Engine.Output;
 using DbUp.SqlServer;
 using Microsoft.Azure.Services.AppAuthentication;

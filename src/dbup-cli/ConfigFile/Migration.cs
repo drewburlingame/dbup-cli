@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DbUp.Cli;
+﻿namespace DbUp.Cli;
 
 public class Migration
 {

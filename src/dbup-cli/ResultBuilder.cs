@@ -1,5 +1,4 @@
-﻿using System;
-using DbUp.Engine;
+﻿using DbUp.Engine;
 using Optional;
 
 namespace DbUp.Cli;

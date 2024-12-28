@@ -1,5 +1,4 @@
-﻿using System.IO;
-using DbUp.Cli.Tests.TestInfrastructure;
+﻿using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
 using FakeItEasy;
 using FluentAssertions;
