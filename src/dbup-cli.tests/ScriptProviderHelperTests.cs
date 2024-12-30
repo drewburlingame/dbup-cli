@@ -11,18 +11,9 @@ namespace DbUp.Cli.Tests;
 [TestClass]
 public class ScriptProviderHelperTests
 {
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
+    private readonly TestHost host = new();
 
     private string GetBasePath() => Path.Combine(ProjectPaths.ScriptsDir, "Default");
-
-    public ScriptProviderHelperTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
 
     [TestMethod]
     public void ScriptProviderHelper_GetFolder_ShouldReturnCurrentFolder_IfTheFolderIsNullOrWhiteSpace()
@@ -117,8 +108,8 @@ public class ScriptProviderHelperTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, NamingOptions.Default);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -126,7 +117,7 @@ public class ScriptProviderHelperTests
             x.Build().PerformUpgrade();
         });
 
-        var excutedScripts = Logger.GetExecutedScripts();
+        var excutedScripts = host.Logger.GetExecutedScripts();
 
         excutedScripts.Should().HaveCount(3);
         excutedScripts[0].Should().Be("003.sql");
@@ -141,8 +132,8 @@ public class ScriptProviderHelperTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, NamingOptions.Default);
 
         upgradeEngineBuilder.HasValue.Should().BeFalse();

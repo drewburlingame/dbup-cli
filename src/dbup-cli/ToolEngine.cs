@@ -35,7 +35,7 @@ public class ToolEngine
     {
     }
 
-    public int Run(params string[] args) =>
+    public RunResult Run(params string[] args) =>
         ArgsParser
             .ParseArguments<InitOptions, UpgradeOptions, MarkAsExecutedOptions, DropOptions, StatusOptions>(args)
             .MapResult(
@@ -46,8 +46,8 @@ public class ToolEngine
                 (StatusOptions opts) => WrapException(() => RunStatusCommand(opts)),
                 parseErrors => WrapException(() => ParseErrors(parseErrors)))
             .Match(
-                some: x => x,
-                none: error => { Console.WriteLine(error.Message); return 1; });
+                some: x => new RunResult(x, null),
+                none: error => { Console.WriteLine(error.Message); return new RunResult(1, error.Message); });
 
     private Option<int, Error> ParseErrors(IEnumerable<CommandLine.Error> parseErrors)
     {
@@ -71,7 +71,7 @@ public class ToolEngine
     private Option<int, Error> RunStatusCommand(StatusOptions opts) =>
         ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File))
+                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
                     .Match(
                         some: x =>
                             ConfigurationHelper
@@ -152,7 +152,7 @@ public class ToolEngine
     private Option<int, Error> RunUpgradeCommand(UpgradeOptions opts) =>
         ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File))
+                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
                     .Match(
                         some: x =>
                             ConfigurationHelper
@@ -189,7 +189,7 @@ public class ToolEngine
     private Option<int, Error> RunMarkAsExecutedCommand(MarkAsExecutedOptions opts) =>
         ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File))
+                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
                     .Match(
                         some: x =>
                             ConfigurationHelper
@@ -236,7 +236,7 @@ public class ToolEngine
     private Option<int, Error> RunDropCommand(DropOptions opts) =>
         ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File))
+                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
                     .Match(
                         some: x =>
                             ConfigurationHelper

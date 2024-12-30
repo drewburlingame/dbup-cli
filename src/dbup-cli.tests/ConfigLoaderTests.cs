@@ -1,5 +1,4 @@
 ﻿using DbUp.Cli.Tests.TestInfrastructure;
-using DbUp.Engine.Transactions;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,18 +9,9 @@ namespace DbUp.Cli.Tests;
 [TestClass]
 public class ConfigLoaderTests
 {
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
+    private readonly TestHost host = new();
     private readonly string tempDbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
     private readonly string tempScriptsPath = ProjectPaths.GetTempPath("scripts");
-
-    public ConfigLoaderTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
 
     [TestMethod]
     public void LoadMigration_MinVersionOfYml_ShouldSetTheValidDefaultParameters()
@@ -217,20 +207,11 @@ public class ConfigLoaderTests
     [TestMethod]
     public void LoadMigration_ShouldRespectScriptEncoding()
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x =>
-        {
-            var res = File.Exists(x.Arguments[0] as string);
-            return res;
-        });
+        host.ToolEngine
+            .Run("upgrade", ProjectPaths.GetConfigPath("encoding.yml"))
+            .ShouldSucceed();
 
-        var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-
-        var result = engine.Run("upgrade", ProjectPaths.GetConfigPath("encoding.yml"));
-        result.Should().Be(0);
-
-        Logger.Log.Should().Contain("print 'Превед, медвед'");
+        host.Logger.Log.Should().Contain("print 'Превед, медвед'");
     }
 
     [TestMethod]

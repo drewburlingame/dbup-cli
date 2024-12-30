@@ -25,11 +25,17 @@ public static class ConfigLoader
         );
     }
 
-    public static Option<Migration, Error> LoadMigration(Option<string, Error> configFilePath) =>
+    // environment should eventually be required. Using optional param for now as incremental step to keep tests passing during refactor.
+    public static Option<Migration, Error> LoadMigration(Option<string, Error> configFilePath, IEnvironment environment = null) =>
         configFilePath.Match(
             some: path =>
             {
-                var input = new StringReader(File.ReadAllText(path, Encoding.UTF8));
+                var yml = environment is null
+                    ? File.ReadAllText(path, Encoding.UTF8)
+                    : environment.ReadFile(path);
+                
+                if(yml is null)
+                    return Option.None<Migration, Error>(Error.Create("config not found at {0}", configFilePath));
 
                 var deserializer = new DeserializerBuilder()
                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -39,7 +45,7 @@ public static class ConfigLoader
 
                 try
                 {
-                    migration = deserializer.Deserialize<ConfigFile>(input).DbUp;
+                    migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
                 }
                 catch (YamlException ex)
                 {

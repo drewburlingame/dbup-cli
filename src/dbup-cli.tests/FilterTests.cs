@@ -1,25 +1,13 @@
 ﻿using DbUp.Cli.Tests.TestInfrastructure;
-using DbUp.Engine.Transactions;
-using FakeItEasy;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Optional;
 
 namespace DbUp.Cli.Tests;
 
 [TestClass]
 public class FilterTests
 {
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
-
-    public FilterTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
+    private readonly TestHost host = new();
 
     [TestMethod]
     public void CreateFilter_NullOrWhiteSpaceString_ShouldReturnNull()
@@ -105,16 +93,11 @@ public class FilterTests
     [DataTestMethod]
     public void ToolEngine_ShouldRespectScriptFiltersAndMatchFiles(string filename)
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+        host.ToolEngine
+            .Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
+            .ShouldSucceed();
 
-        var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-
-        var result = engine.Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"));
-        result.Should().Be(0);
-
-        Logger.Log.Should().Contain(filename);
+        host.Logger.Log.Should().Contain(filename);
     }
 
     [DataRow("d001.sql")]
@@ -127,15 +110,10 @@ public class FilterTests
     [DataTestMethod]
     public void ToolEngine_ShouldRespectScriptFiltersAndNotMatchFiles(string filename)
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.TempDir);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+        host.ToolEngine
+            .Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
+            .ShouldSucceed();
 
-        var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-
-        var result = engine.Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"));
-        result.Should().Be(0);
-
-        Logger.Log.Should().NotContain(filename);
+        host.Logger.Log.Should().NotContain(filename);
     }
 }

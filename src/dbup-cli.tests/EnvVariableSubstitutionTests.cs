@@ -1,5 +1,4 @@
 using DbUp.Cli.Tests.TestInfrastructure;
-using DbUp.Engine.Transactions;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,16 +11,6 @@ public class EnvVariableSubstitutionTests
 {
     private static readonly string EnvVarsYmlPath = ProjectPaths.GetConfigPath("env-vars.yml");
     private static readonly string DotEnvCurrentFolder = ProjectPaths.GetConfigPath("DotEnv-CurrentFolder");
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
-
-    public EnvVariableSubstitutionTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
 
     [TestMethod]
     public void LoadMigration_ShouldSubstituteEnvVars_ToConnectionString()

@@ -1,7 +1,6 @@
 using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
-using DbUp.Engine.Transactions;
 using DbUp.SqlServer;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,29 +12,22 @@ namespace DbUp.Cli.Tests;
 public class ConfigurationHelperTests
 {
     private readonly List<SqlScript> scripts;
-    private readonly CaptureLogsLogger logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
     private readonly UpgradeEngineBuilder upgradeEngineBuilder;
+    private readonly TestHost host = new();
 
     public ConfigurationHelperTests()
     {
-        scripts = new List<SqlScript>
-        {
+        scripts = [
             new SqlScript("Script1.sql", "create table Foo (Id int identity)")
             //new SqlScript("Script2.sql", "alter table Foo add column Name varchar(255)"),
             //new SqlScript("Script3.sql", "insert into Foo (Name) values ('test')")
-        };
-
-        logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
+        ];
 
         upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
             .WithScripts(new TestScriptProvider(scripts))
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(logger);
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger);
     }
 
     [TestMethod]
@@ -70,7 +62,7 @@ public class ConfigurationHelperTests
 
         upgradeEngineBuilder.Build().PerformUpgrade();
 
-        logger.InfoMessages.Should().Contain("Creating the [test_scheme].[test_SchemaVersion] table");
+        host.Logger.InfoMessages.Should().Contain("Creating the [test_scheme].[test_SchemaVersion] table");
     }
 
     [TestMethod]
@@ -81,7 +73,7 @@ public class ConfigurationHelperTests
 
         upgradeEngineBuilder.Build().PerformUpgrade();
 
-        logger.InfoMessages.Should().Contain("Creating the [SchemaVersions] table");
+        host.Logger.InfoMessages.Should().Contain("Creating the [SchemaVersions] table");
     }
 
     [TestMethod]
@@ -91,6 +83,6 @@ public class ConfigurationHelperTests
             .SelectJournal(Provider.SqlServer, null);
 
         upgradeEngineBuilder.Build().PerformUpgrade();
-        logger.InfoMessages.Should().NotContain(x => x.StartsWith("Creating the ", StringComparison.Ordinal));
+        host.Logger.InfoMessages.Should().NotContain(x => x.StartsWith("Creating the ", StringComparison.Ordinal));
     }
 }

@@ -8,10 +8,13 @@ namespace DbUp.Cli;
 /// </summary>
 public class CliEnvironment: IEnvironment
 {
-    public bool DirectoryExists(string path) => Directory.Exists(path);
-    public bool FileExists(string path) => File.Exists(path);
-    public string GetCurrentDirectory() => Directory.GetCurrentDirectory();
-    public Option<bool, Error> WriteFile(string path, string content)
+    public virtual bool DirectoryExists(string path) => Directory.Exists(path);
+    public virtual bool FileExists(string path) => File.Exists(path);
+    public virtual string GetCurrentDirectory() => Directory.GetCurrentDirectory();
+    
+    public string ReadFile(string path) => File.ReadAllText(path, Encoding.UTF8);
+    
+    public virtual Option<bool, Error> WriteFile(string path, string content)
     {
         if (path == null)
             throw new ArgumentNullException(nameof(path));

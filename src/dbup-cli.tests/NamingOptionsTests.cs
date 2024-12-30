@@ -10,16 +10,7 @@ namespace DbUp.Cli.Tests;
 [TestClass]
 public class NamingOptionsTests
 {
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
-
-    public NamingOptionsTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
+    private readonly TestHost host = new();
 
     [TestMethod]
     public void ScriptProviderHelper_WhenOptionIsSpecified_ShouldReturnValid_UseOnlyFilenameForScriptName_Option()
@@ -72,8 +63,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -81,7 +72,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("SubFolder.001.sql");
     }
@@ -98,8 +89,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -107,7 +98,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("001.sql");
     }
@@ -124,8 +115,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -133,7 +124,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("Naming.SubFolder.001.sql");
     }
@@ -150,8 +141,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -159,7 +150,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("Naming.001.sql");
     }
@@ -176,8 +167,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -185,7 +176,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("prefix_SubFolder.001.sql");
     }
@@ -202,8 +193,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -211,7 +202,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("prefix_SubFolder.001.sql");
     }
@@ -228,8 +219,8 @@ public class NamingOptionsTests
 
         var upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .OverrideConnectionFactory(testConnectionFactory)
-            .LogTo(Logger).Some<UpgradeEngineBuilder, Error>()
+            .OverrideConnectionFactory(host.TestConnectionFactory)
+            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
             .SelectScripts(scripts, namingOptions);
 
         upgradeEngineBuilder.MatchSome(x =>
@@ -237,7 +228,7 @@ public class NamingOptionsTests
             x.Build().PerformUpgrade();
         });
 
-        var executedScripts = Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
         executedScripts[0].Should().Be("prefix_Naming.SubFolder.001.sql");
     }

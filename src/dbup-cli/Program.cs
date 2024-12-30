@@ -15,6 +15,6 @@ internal class Program
          * Use minimatch or regex as a file pattern
          */
 
-        return new ToolEngine(new CliEnvironment(), new ConsoleLogger()).Run(args);
+        return new ToolEngine(new CliEnvironment(), new ConsoleLogger()).Run(args).ExitCode;
     }
 }
