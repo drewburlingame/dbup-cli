@@ -150,6 +150,6 @@ public static class ScriptProviderHelper
                                 GetSqlScriptOptions(script)));
                         return builder.Some<UpgradeEngineBuilder, Error>();
                     },
-                    none: error => Option.None<UpgradeEngineBuilder, Error>(error)),
-            none: error => Option.None<UpgradeEngineBuilder, Error>(error));
+                    none: Option.None<UpgradeEngineBuilder, Error>),
+            none: Option.None<UpgradeEngineBuilder, Error>);
 }

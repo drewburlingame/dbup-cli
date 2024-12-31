@@ -9,7 +9,7 @@ public class AzureSqlServerDbProvider : DbProvider
 {
     public override Provider Provider => Provider.SqlServer;
 
-    public override Option<UpgradeEngineBuilder, Error> SelectDbProvider(ConnectionInfo connectionInfo) =>
+    public override Option<UpgradeEngineBuilder, Error> CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         UseAzureSqlIntegratedSecurity(connectionInfo.ConnectionString)
             ? DeployChanges.To
                 .AzureSqlDatabaseWithIntegratedSecurity(connectionInfo.ConnectionString)

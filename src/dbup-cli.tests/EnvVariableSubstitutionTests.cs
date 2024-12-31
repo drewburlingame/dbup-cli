@@ -71,7 +71,7 @@ public class EnvVariableSubstitutionTests
             
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
             
-        ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>())
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>())
             .MatchNone(error => Assert.Fail(error.Message));
 
         var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
@@ -95,7 +95,7 @@ public class EnvVariableSubstitutionTests
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
             
-        ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>())
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>())
             .MatchNone(error => Assert.Fail(error.Message));
 
         var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
@@ -120,7 +120,7 @@ public class EnvVariableSubstitutionTests
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
             
-        ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>
             {
                 Path.Combine("..", "varC.env"),   // relative path
                 ProjectPaths.GetConfigPath("varD.env")   // absolute path
@@ -178,8 +178,8 @@ public class EnvVariableSubstitutionTests
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
             
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "ConfigFolder", "dotenv-vars.yml");
-            
-        ConfigurationHelper.LoadEnvironmentVariables(env, dotEnvVarsPath, new List<string>
+        
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>
             {
                 Path.Combine("..", "file3.env"),
                 Path.Combine("..", "file4.env")

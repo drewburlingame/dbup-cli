@@ -69,13 +69,13 @@ public class ToolEngine
     }
 
     private Option<int, Error> RunStatusCommand(StatusOptions opts) =>
-        ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
+                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
                     .Match(
                         some: x =>
-                            ConfigurationHelper
-                                .SelectDbProvider(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+                            Providers
+                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
                                 .SelectJournal(x.Provider, x.JournalTo)
                                 .SelectTransaction(x.Transaction)
                                 .SelectLogOptions(Logger, VerbosityLevel.Min)
@@ -150,13 +150,13 @@ public class ToolEngine
     }
 
     private Option<int, Error> RunUpgradeCommand(UpgradeOptions opts) =>
-        ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
+                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
                     .Match(
                         some: x =>
-                            ConfigurationHelper
-                                .SelectDbProvider(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+                            Providers
+                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
                                 .SelectJournal(x.Provider, x.JournalTo)
                                 .SelectTransaction(x.Transaction)
                                 .SelectLogOptions(Logger, opts.Verbosity)
@@ -169,7 +169,7 @@ public class ToolEngine
                                         var engine = builder.Build();
                                         if (opts.Ensure)
                                         {
-                                            var res = ConfigurationHelper.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
+                                            var res = Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
                                             if (!res.HasValue)
                                             {
                                                 Error err = null;
@@ -187,13 +187,13 @@ public class ToolEngine
                 none: Option.None<int, Error>);
 
     private Option<int, Error> RunMarkAsExecutedCommand(MarkAsExecutedOptions opts) =>
-        ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
+                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
                     .Match(
                         some: x =>
-                            ConfigurationHelper
-                                .SelectDbProvider(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+                            Providers
+                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
                                 .SelectJournal(x.Provider, x.JournalTo)
                                 .SelectTransaction(x.Transaction)
                                 .SelectLogOptions(Logger, opts.Verbosity)
@@ -206,7 +206,7 @@ public class ToolEngine
                                         var engine = builder.Build();
                                         if (opts.Ensure)
                                         {
-                                            var res = ConfigurationHelper.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
+                                            var res = Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
                                             if (!res.HasValue)
                                             {
                                                 Error err = null;
@@ -234,19 +234,19 @@ public class ToolEngine
                 none: Option.None<int, Error>);
 
     private Option<int, Error> RunDropCommand(DropOptions opts) =>
-        ConfigurationHelper.LoadEnvironmentVariables(Environment, opts.File, opts.EnvFiles)
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
             .Match(
-                some: _ => ConfigLoader.LoadMigration(ConfigLoader.GetFilePath(Environment, opts.File), Environment)
+                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
                     .Match(
                         some: x =>
-                            ConfigurationHelper
-                                .SelectDbProvider(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+                            Providers
+                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
                                 .SelectLogOptions(Logger, opts.Verbosity)
                                 .OverrideConnectionFactory(ConnectionFactory)
                                 .Match(
                                     some: builder =>
                                     {
-                                        var res = ConfigurationHelper.DropDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
+                                        var res = Providers.DropDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
                                         if (!res.HasValue)
                                         {
                                             Error err = null;
@@ -273,19 +273,20 @@ public class ToolEngine
     }
 
     private Option<int, Error> RunInitCommand(InitOptions opts)
-        => ConfigLoader.GetFilePath(Environment, opts.File, false)
+        => Environment.GetFilePath(opts.File, fileShouldExist: false)
             .Match(
-                some: path => Environment.FileExists(path)
-                    ? Option.None<int, Error>(Error.Create(Constants.ConsoleMessages.FileAlreadyExists, path))
-                    : Environment.WriteFile(path, GetDefaultConfigFile()).Match(
+                some: path => Environment.WriteFile(path, GetDefaultConfigFile()).Match(
                         some: x => 0.Some<int, Error>(),
                         none: Option.None<int, Error>),
                 none: Option.None<int, Error>);
 
     public static string GetDefaultConfigFile()
     {
-        using var reader = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.Default.ConfigFileResourceName));
-
+        using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.Default.ConfigFileResourceName);
+        if (resourceStream is null) 
+            throw new Exception($"Missing default embedded resource: {Constants.Default.ConfigFileResourceName}");
+        
+        using var reader = new StreamReader(resourceStream);
         return reader.ReadToEnd();
     }
 }

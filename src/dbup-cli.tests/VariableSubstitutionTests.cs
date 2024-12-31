@@ -1,5 +1,4 @@
 using DbUp.Cli.Tests.TestInfrastructure;
-using FakeItEasy;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
@@ -16,7 +15,8 @@ public class VariableSubstitutionTests
     [TestMethod]
     public void LoadMigration_ShouldLoadVariablesFromConfig()
     {
-        var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("vars.yml").Some<string, Error>());
+        var migrationOrNone = ConfigLoader.LoadMigration(
+            GetConfigPath("vars.yml").Some<string, Error>(), host.Environment);
 
         migrationOrNone.Match(
             some: migration =>
@@ -40,7 +40,8 @@ public class VariableSubstitutionTests
          *
          * Variables can only contain letters, digits, _ and -.
          */
-        var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("invalid-vars.yml").Some<string, Error>());
+        var migrationOrNone = ConfigLoader.LoadMigration(
+            GetConfigPath("invalid-vars.yml").Some<string, Error>(), host.Environment);
 
         migrationOrNone.MatchSome(
             migration =>
@@ -52,10 +53,6 @@ public class VariableSubstitutionTests
     [TestMethod]
     public void LoadMigration_ShouldSubstituteVariablesToScript()
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-        A.CallTo(() => env.FileExists(A<string>.Ignored)).ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-
         host.ToolEngine
             .Run("upgrade", GetConfigPath("vars.yml"))
             .ShouldSucceed();

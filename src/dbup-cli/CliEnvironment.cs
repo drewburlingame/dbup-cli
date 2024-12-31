@@ -12,7 +12,7 @@ public class CliEnvironment: IEnvironment
     public virtual bool FileExists(string path) => File.Exists(path);
     public virtual string GetCurrentDirectory() => Directory.GetCurrentDirectory();
     
-    public string ReadFile(string path) => File.ReadAllText(path, Encoding.UTF8);
+    public virtual string ReadFile(string path) => File.ReadAllText(path, Encoding.UTF8);
     
     public virtual Option<bool, Error> WriteFile(string path, string content)
     {

@@ -1,7 +1,6 @@
 using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
-using DbUp.SqlServer;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
@@ -9,59 +8,31 @@ using Optional;
 namespace DbUp.Cli.Tests;
 
 [TestClass]
-public class ConfigurationHelperTests
+public class UpgradeEngineBuilderExtensionsTests
 {
-    private readonly List<SqlScript> scripts;
     private readonly UpgradeEngineBuilder upgradeEngineBuilder;
     private readonly TestHost host = new();
 
-    public ConfigurationHelperTests()
+    public UpgradeEngineBuilderExtensionsTests()
     {
-        scripts = [
-            new SqlScript("Script1.sql", "create table Foo (Id int identity)")
-            //new SqlScript("Script2.sql", "alter table Foo add column Name varchar(255)"),
-            //new SqlScript("Script3.sql", "insert into Foo (Name) values ('test')")
+        List<SqlScript> scripts1 = [
+            new("Script1.sql", "create table Foo (Id int identity)")
         ];
 
         upgradeEngineBuilder = DeployChanges.To
             .SqlDatabase("testconn")
-            .WithScripts(new TestScriptProvider(scripts))
+            .WithScripts(new TestScriptProvider(scripts1))
             .OverrideConnectionFactory(host.TestConnectionFactory)
             .LogTo(host.Logger);
-    }
-
-    [TestMethod]
-    public void SelectDbProvider_ShouldReturnNone_IfAProviderIsNotSupported()
-    {
-        var builder = ConfigurationHelper.SelectDbProvider(Provider.UnsupportedProvider, @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True", 60);
-
-        builder.HasValue.Should().BeFalse();
-    }
-
-    [TestMethod]
-    public void SelectDbProvider_ShouldReturnReturnAValidProvider_ForSqlServer()
-    {
-        var builder = ConfigurationHelper.SelectDbProvider(Provider.SqlServer, @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True", 60);
-        builder.MatchSome(b => b.Configure(c => c.ConnectionManager.Should().BeOfType(typeof(SqlConnectionManager))));
-
-        builder.HasValue.Should().BeTrue();
-        builder.MatchSome(x =>
-        {
-            x.WithScripts(new TestScriptProvider(scripts));
-            x.Build();
-        });
     }
 
     [TestMethod]
     public void PerformUpgrade_ShouldUseCustomVersionsTable_IfCustomJournalIsPassed()
     {
         upgradeEngineBuilder.Some<UpgradeEngineBuilder, Error>()
-            .SelectJournal(
-                Provider.SqlServer, new Journal("test_scheme", "test_SchemaVersion")
-            );
+            .SelectJournal(Provider.SqlServer, new Journal("test_scheme", "test_SchemaVersion"));
 
         upgradeEngineBuilder.Build().PerformUpgrade();
-
         host.Logger.InfoMessages.Should().Contain("Creating the [test_scheme].[test_SchemaVersion] table");
     }
 
@@ -72,7 +43,6 @@ public class ConfigurationHelperTests
             .SelectJournal(Provider.SqlServer, Journal.Default);
 
         upgradeEngineBuilder.Build().PerformUpgrade();
-
         host.Logger.InfoMessages.Should().Contain("Creating the [SchemaVersions] table");
     }
 
