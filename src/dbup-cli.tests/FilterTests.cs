@@ -1,13 +1,10 @@
-﻿using DbUp.Cli.Tests.TestInfrastructure;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FluentAssertions;
 
 namespace DbUp.Cli.Tests;
 
-[TestClass]
 public class FilterTests
 {
-    [TestMethod]
+    [Fact]
     public void CreateFilter_NullOrWhiteSpaceString_ShouldReturnNull()
     {
         var filter = ScriptProviderHelper.CreateFilter("  ");
@@ -17,7 +14,7 @@ public class FilterTests
         filter.Should().BeNull();
     }
 
-    [TestMethod]
+    [Fact]
     public void CreateFilter_GeneralString_ShouldMatchTheSameStringInTheDifferentLetterCase()
     {
         var filter = ScriptProviderHelper.CreateFilter("script.sql");
@@ -25,7 +22,7 @@ public class FilterTests
         result.Should().BeTrue();
     }
 
-    [TestMethod]
+    [Fact]
     public void CreateFilter_GeneralString_ShouldNotMatchTheSubstring()
     {
         var filter = ScriptProviderHelper.CreateFilter("script.sql");
@@ -33,10 +30,10 @@ public class FilterTests
         result.Should().BeFalse();
     }
 
-    [DataRow("scr?ipt.sql", "scrAipt.SQL")]
-    [DataRow("scr*ipt.sql", "script.SQL")]
-    [DataRow("scr*ipt.sql", "scrAAAipt.SQL")]
-    [DataTestMethod]
+    [InlineData("scr?ipt.sql", "scrAipt.SQL")]
+    [InlineData("scr*ipt.sql", "script.SQL")]
+    [InlineData("scr*ipt.sql", "scrAAAipt.SQL")]
+    [Theory]
     public void CreateFilter_WildcardString_ShouldMatchTheTestedString(string filterString, string testedString)
     {
         var filter = ScriptProviderHelper.CreateFilter(filterString);
@@ -44,10 +41,10 @@ public class FilterTests
         result.Should().BeTrue();
     }
 
-    [DataRow("scr?ipt.sql", "script.sql")]
-    [DataRow("scr?ipt.sql", "scrAAipt.sql")]
-    [DataRow("scr?ipt.sql", "1scrAipt.sql")]
-    [DataTestMethod]
+    [InlineData("scr?ipt.sql", "script.sql")]
+    [InlineData("scr?ipt.sql", "scrAAipt.sql")]
+    [InlineData("scr?ipt.sql", "1scrAipt.sql")]
+    [Theory]
     public void CreateFilter_WildcardString_ShouldNotMatchTheTestedString(string filterString, string testedString)
     {
         var filter = ScriptProviderHelper.CreateFilter(filterString);
@@ -55,11 +52,11 @@ public class FilterTests
         result.Should().BeFalse();
     }
 
-    [DataRow("/scr.ipt\\.sql/", "scrAipt.SQL")]
-    [DataRow("/scr.?ipt\\.sql/", "script.SQL")]
-    //[DataRow("//script\\.sql//", "/script.SQL/")] // TODO: test this later
-    [DataRow("//", "it is equal to empty filter")]
-    [DataTestMethod]
+    [InlineData("/scr.ipt\\.sql/", "scrAipt.SQL")]
+    [InlineData("/scr.?ipt\\.sql/", "script.SQL")]
+    //[InlineData("//script\\.sql//", "/script.SQL/")] // TODO: test this later
+    [InlineData("//", "it is equal to empty filter")]
+    [Theory]
     public void CreateFilter_RegexString_ShouldMatchTheTestedString(string filterString, string testedString)
     {
         var filter = ScriptProviderHelper.CreateFilter(filterString);
@@ -67,12 +64,12 @@ public class FilterTests
         result.Should().BeTrue();
     }
 
-    [DataRow("/scr.ipt\\.sql/", "script.SQL")]
-    [DataRow("/scr.ipt\\.sql/", "scrAAipt.SQL")]
-    [DataRow("/scr.?ipt\\.sql/", "scrAAipt.SQL")]
-    [DataRow("/scr.ipt\\.sql/", "1scrAipt.SQL")]
-    [DataRow("/scr.ipt\\.sql/", "scrAipt.SQL1")]
-    [DataTestMethod]
+    [InlineData("/scr.ipt\\.sql/", "script.SQL")]
+    [InlineData("/scr.ipt\\.sql/", "scrAAipt.SQL")]
+    [InlineData("/scr.?ipt\\.sql/", "scrAAipt.SQL")]
+    [InlineData("/scr.ipt\\.sql/", "1scrAipt.SQL")]
+    [InlineData("/scr.ipt\\.sql/", "scrAipt.SQL1")]
+    [Theory]
     public void CreateFilter_RegexString_ShouldNotMatchTheTestedString(string filterString, string testedString)
     {
         var filter = ScriptProviderHelper.CreateFilter(filterString);

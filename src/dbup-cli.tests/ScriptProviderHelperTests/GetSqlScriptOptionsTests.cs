@@ -1,13 +1,11 @@
 using DbUp.Support;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
-[TestClass]
 public class GetSqlScriptOptionsTests
 {
-    [TestMethod]
+    [Fact]
     public void ShouldSetScriptTypeToRunOnce_IfRunAlwaysIsSetToFalse()
     {
         var batch = new ScriptBatch("", runAlways: false, false, 1, "");
@@ -16,7 +14,7 @@ public class GetSqlScriptOptionsTests
         options.ScriptType.Should().Be(ScriptType.RunOnce);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetScriptTypeToRunAlways_IfRunAlwaysIsSetToTrue()
     {
         var batch = new ScriptBatch("", runAlways: true, false, 1, "");
@@ -25,7 +23,7 @@ public class GetSqlScriptOptionsTests
         options.ScriptType.Should().Be(ScriptType.RunAlways);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetGroupOrderToValidValue()
     {
         var batch = new ScriptBatch("", runAlways: true, false, 5, "");

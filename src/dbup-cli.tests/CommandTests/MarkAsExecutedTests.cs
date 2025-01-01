@@ -1,15 +1,13 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.CommandTests;
 
-[TestClass]
 public class MarkAsExecutedTests
 {
     private readonly TestHost host = new();
 
-    [TestMethod]
+    [Fact]
     public void WhenCalled_ShouldNotMakeAnyChangesInDb()
     {
         host.ToolEngine

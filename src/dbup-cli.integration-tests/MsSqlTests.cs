@@ -1,12 +1,10 @@
 using System.Data;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Testcontainers.MsSql;
 
 namespace DbUp.Cli.IntegrationTests;
 
-[TestClass]
 public class MsSqlTests() 
     : ContainerTest<MsSqlBuilder, MsSqlContainer, MsSqlConfiguration>("SqlServer")
 {

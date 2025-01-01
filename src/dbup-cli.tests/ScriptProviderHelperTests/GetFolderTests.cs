@@ -1,13 +1,11 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
-[TestClass]
 public class GetFolderTests
 {
-    [TestMethod]
+    [Fact]
     public void ShouldReturnCurrentFolder_IfTheFolderIsNullOrWhiteSpace()
     {
         var current = Directory.GetCurrentDirectory();
@@ -15,7 +13,7 @@ public class GetFolderTests
         path.Should().Be(current);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldThrowAnException_IfTheBaseFolderIsNullOrWhiteSpace()
     {
         Action nullAction = () => ScriptProviderHelper.GetFolder(null, null);
@@ -25,7 +23,7 @@ public class GetFolderTests
         whitespaceAction.Should().Throw<ArgumentException>();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldReturnFullyQualifiedFolder_IfTheFolderIsARelativePath()
     {
         var current = Directory.GetCurrentDirectory();
@@ -33,7 +31,7 @@ public class GetFolderTests
         path.Should().Be( Path.Combine(current, "upgrades"));
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldReturnOriginalFolder_IfTheFolderIsAFullyQualifiedPath()
     {
         var current = Directory.GetCurrentDirectory();

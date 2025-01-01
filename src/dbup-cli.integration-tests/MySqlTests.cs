@@ -1,13 +1,11 @@
 using System.Data;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySql.Data.MySqlClient;
 using Testcontainers.MySql;
 using MySqlConfiguration = Testcontainers.MySql.MySqlConfiguration;
 
 namespace DbUp.Cli.IntegrationTests;
 
-[TestClass]
 public class MySqlTests()
     : ContainerTest<MySqlBuilder, MySqlContainer, MySqlConfiguration>("MySql")
 {
@@ -35,12 +33,12 @@ public class MySqlTests()
     protected override string QueryCountOfScript001FromCustomJournal =>
         "select count(*) from journal where scriptname = '001.sql'";
 
-    [Ignore("MySql provider does not throw on timeout. Find another way to confirm.")]
+    [Fact(Skip = "MySql provider does not throw on timeout. Find another way to confirm.")]
     public override void UpgradeCommand_ShouldFailOnCommandTimeout()
     {
     }
 
-    [Ignore("Not supported")]
+    [Fact(Skip = "Not supported")]
     public override void Drop_DropADb()
     {
     }

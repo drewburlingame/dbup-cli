@@ -1,19 +1,17 @@
 ﻿using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
-[TestClass]
 public class SelectJournalTests
 {
     private readonly TestHost host = new();
 
     private string GetBasePath() => Path.Combine(ProjectPaths.ScriptsDir, "Default");
 
-    [TestMethod]
+    [Fact]
     public void ScriptProviderHelper_SelectJournal_ShouldAddAllTheScripts()
     {
         var scripts = new List<ScriptBatch>
@@ -41,7 +39,7 @@ public class SelectJournalTests
         excutedScripts[2].Should().Be("005.sql");
     }
 
-    [TestMethod]
+    [Fact]
     public void ScriptProviderHelper_SelectJournal_ShouldReturnNone_IfTheListOfScriptsIsEmpty()
     {
         var scripts = new List<ScriptBatch>();

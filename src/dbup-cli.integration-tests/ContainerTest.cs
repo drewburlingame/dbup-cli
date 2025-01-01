@@ -4,25 +4,25 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.IntegrationTests;
 
 public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigurationEntity>(string provider)
+: IAsyncLifetime
     where TBuilderEntity : ContainerBuilder<TBuilderEntity, TContainerEntity, TConfigurationEntity>
     where TContainerEntity : IDatabaseContainer
     where TConfigurationEntity : IContainerConfiguration
 {
-    
     private readonly string dbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, provider);
     private readonly ToolEngine engine = new(new CliEnvironment(), new CaptureLogsLogger());
+
+    private static readonly Dictionary<Type, IDatabaseContainer> ContainerMap = new();
+    private static readonly SemaphoreSlim semaphore = new(1);
 
     private IDatabaseContainer container;
     private string serverConnString;
     private string dbConnString;
     private string dbName;
-
-    public TestContext TestContext { get; set; }
 
     protected abstract TBuilderEntity NewBuilder { get; }
     protected virtual int DbNameLengthLimit => 60;
@@ -36,34 +36,24 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     
     private string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") =>
         new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, name)).FullName;
-    
-    [TestInitialize]
-    public async Task TestInitialize()
+
+    public async ValueTask InitializeAsync()
     {
-        if (container is null)
-        {
-            container = NewBuilder
-                .WithCleanUp(true) // in case test run crashes or stopped while debugging
-                .WithAutoRemove(true) // for faster removal in prep for next test
-                .Build();
-
-            await container.StartAsync();
-            serverConnString = container.GetConnectionString();
-        }
-
-        dbName = $"DbUp_{TestContext.TestName}";
+        dbName = $"DbUp_{TestContext.Current.TestMethod!.MethodName}";
         dbName.Length.Should().BeLessOrEqualTo(DbNameLengthLimit);
+        
+        container = await GetContainer(() => NewBuilder);
+        serverConnString = container.GetConnectionString();
         dbConnString = ReplaceDbInConnString(serverConnString, dbName);
         Environment.SetEnvironmentVariable("CONNSTR", dbConnString);
     }
 
-    [TestCleanup]
-    public async Task TestCleanup() => await (container?.StopAsync() ?? Task.CompletedTask);
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-    [TestMethod]
+    [Fact]
     public void DatabaseShouldNotExistBeforeTestRun() => AssertDbDoesNotExist();
 
-    [TestMethod]
+    [Fact]
     public void Ensure_CreateANewDb()
     {
         var result = engine.Run("upgrade", "--ensure", GetConfigPath());
@@ -71,7 +61,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
 
-    [TestMethod]
+    [Fact]
     public void UpgradeCommand_ShouldUseASpecifiedJournal()
     {
         var result = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "JournalTableScript"));
@@ -79,7 +69,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
-    [TestMethod]
+    [Fact]
     public virtual void UpgradeCommand_ShouldFailOnCommandTimeout()
     {
         var r = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "Timeout"));
@@ -87,7 +77,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
     }
     
-    [TestMethod]
+    [Fact]
     public virtual void Drop_DropADb()
     {
         engine.Run("upgrade", "--ensure", GetConfigPath());
@@ -112,5 +102,37 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         command.CommandText = query;
         var count = command.ExecuteScalar();
         return count;
+    }
+
+    private static async Task<IDatabaseContainer> GetContainer(Func<TBuilderEntity> builder)
+    {
+        if (ContainerMap.TryGetValue(typeof(TContainerEntity), out var container))
+        {
+            return container;
+        }
+
+        await semaphore.WaitAsync();
+        try
+        {
+            if (ContainerMap.TryGetValue(typeof(TContainerEntity), out container))
+            {
+                return container;
+            }
+            else
+            {
+                container = builder()
+                    .WithCleanUp(true) // in case test run crashes or stopped while debugging
+                    .WithAutoRemove(true) // for faster removal in prep for next test
+                    .Build();
+
+                await container.StartAsync();
+                ContainerMap.Add(typeof(TContainerEntity), container);
+                return container;
+            }
+        }
+        finally
+        {
+            semaphore.Release();
+        }
     }
 }

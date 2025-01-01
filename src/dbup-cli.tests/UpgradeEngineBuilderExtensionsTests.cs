@@ -2,12 +2,10 @@ using DbUp.Builder;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests;
 
-[TestClass]
 public class UpgradeEngineBuilderExtensionsTests
 {
     private readonly UpgradeEngineBuilder upgradeEngineBuilder;
@@ -26,7 +24,7 @@ public class UpgradeEngineBuilderExtensionsTests
             .LogTo(host.Logger);
     }
 
-    [TestMethod]
+    [Fact]
     public void PerformUpgrade_ShouldUseCustomVersionsTable_IfCustomJournalIsPassed()
     {
         upgradeEngineBuilder.Some<UpgradeEngineBuilder, Error>()
@@ -36,7 +34,7 @@ public class UpgradeEngineBuilderExtensionsTests
         host.Logger.InfoMessages.Should().Contain("Creating the [test_scheme].[test_SchemaVersion] table");
     }
 
-    [TestMethod]
+    [Fact]
     public void PerformUpgrade_ShouldUseDefaultVersionsTable_IfDefaultJournalIsPassed()
     {
         upgradeEngineBuilder.Some<UpgradeEngineBuilder, Error>()
@@ -46,7 +44,7 @@ public class UpgradeEngineBuilderExtensionsTests
         host.Logger.InfoMessages.Should().Contain("Creating the [SchemaVersions] table");
     }
 
-    [TestMethod]
+    [Fact]
     public void SelectJournal_ShouldSelectNullJournal_IfNoneValueIsPassed()
     {
         upgradeEngineBuilder.Some<UpgradeEngineBuilder, Error>()

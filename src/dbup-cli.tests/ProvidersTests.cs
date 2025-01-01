@@ -3,12 +3,10 @@ using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
 using DbUp.SqlServer;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests;
 
-[TestClass]
 public class ProvidersTests
 {
     private readonly List<SqlScript> scripts =
@@ -18,7 +16,7 @@ public class ProvidersTests
         //new SqlScript("Script3.sql", "insert into Foo (Name) values ('test')")
     ];
 
-    [TestMethod]
+    [Fact]
     public void SelectDbProvider_ShouldReturnNone_IfAProviderIsNotSupported()
     {
         var builder = Providers.CreateUpgradeEngineBuilder(Provider.UnsupportedProvider, 
@@ -27,7 +25,7 @@ public class ProvidersTests
         builder.GetErrorOrThrow().Should().Be("Unsupported provider: UnsupportedProvider");
     }
 
-    [TestMethod]
+    [Fact]
     public void SelectDbProvider_ShouldReturnReturnAValidProvider_ForSqlServer()
     {
         var option = Providers.CreateUpgradeEngineBuilder(Provider.SqlServer, 

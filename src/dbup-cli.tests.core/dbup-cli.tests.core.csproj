@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="dbup-postgresql" />
-    <PackageReference Include="FluentAssertions" />
   </ItemGroup>
 
 </Project>

@@ -1,18 +1,16 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests;
 
-[TestClass]
 public class VariableSubstitutionTests
 {
     private readonly TestHost host = new();
 
     private string GetConfigPath(string name) => ProjectPaths.GetConfigPath(name);
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldLoadVariablesFromConfig()
     {
         var migrationOrNone = ConfigLoader.LoadMigration(
@@ -33,7 +31,7 @@ public class VariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldReturnAnError_IfVarNameContainsInvalidChars()
     {
         /* According to https://dbup.readthedocs.io/en/latest/more-info/variable-substitution/:
@@ -50,7 +48,7 @@ public class VariableSubstitutionTests
             });
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldSubstituteVariablesToScript()
     {
         host.ToolEngine
@@ -62,7 +60,7 @@ public class VariableSubstitutionTests
         host.Logger.Log.Should().Contain("print 'Var3 Value'");
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldNotSubstituteVariablesToScript()
     {
         host.ToolEngine

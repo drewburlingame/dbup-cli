@@ -1,11 +1,9 @@
 ﻿using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests.ConfigLoaderTests;
 
-[TestClass]
 public class LoadMigrationTests
 {
     private const string MinYaml =
@@ -18,14 +16,14 @@ public class LoadMigrationTests
 
     private readonly TestHost host = new();
 
-    [TestMethod]
+    [Fact]
     public void DefaultConfigFile_ShouldLoadItWithoutErrors()
     {
         var configFilePath = host.Environment.WriteFileInMem(ToolEngine.GetDefaultConfigFile()); 
         LoadMigration(configFilePath);
     }
 
-    [TestMethod]
+    [Fact]
     public void WhenVersionOfConfigFileNotEqualsTo1_0_ShouldFail()
     {
         var error = LoadMigrationError(host.Environment.WriteFileInMem(
@@ -36,7 +34,7 @@ public class LoadMigrationTests
         error.Should().Be("The only supported version of a config file is '1'");
     }
 
-    [TestMethod]
+    [Fact]
     public void MinVersionOfYml_ShouldSet_ValidProviderAndConnectionString_And_DefaultParameters()
     {
         var path = host.Environment.WriteFileInMem(MinYaml);
@@ -61,7 +59,7 @@ public class LoadMigrationTests
         migration.Naming.Prefix.Should().BeNullOrEmpty();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldLoadAValidTimeout()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -71,7 +69,7 @@ public class LoadMigrationTests
         migration.ConnectionTimeoutSec.Should().Be(45);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetValidTransactionOptions()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -81,7 +79,7 @@ public class LoadMigrationTests
         migration.Transaction.Should().Be(Transaction.PerScript);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetValidScriptOptions()
     {
         var path = host.Environment.WriteFileInMem($"""
@@ -112,7 +110,7 @@ public class LoadMigrationTests
         x.Scripts[1].RunAlways.Should().BeTrue();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldReturnNoneWithError_InCaseOfSyntacticError()
     {
         var error = LoadMigrationErrorFromYaml("""
@@ -125,7 +123,7 @@ public class LoadMigrationTests
         error.Should().Be("Configuration file error: While scanning for the next token, found character that cannot start any token.");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldNotThrow_IfNoVarsPresent()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -137,7 +135,7 @@ public class LoadMigrationTests
         migration.Vars.Should().BeEmpty();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldNotThrow_IfNoScriptsPresent()
     {
         // I'm not clear on what this it testing, but keeping it around since I'm likely missing something.
@@ -148,7 +146,7 @@ public class LoadMigrationTests
                                """);
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetValidNamingOptions()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -163,7 +161,7 @@ public class LoadMigrationTests
         migration.Naming.Prefix.Should().Be("scriptpreffix");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetValidJournalToOptions()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -177,7 +175,7 @@ public class LoadMigrationTests
         migration.JournalTo.Table.Should().Be("test-table");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetValidJournalToNull()
     {
         var migration = LoadMigrationFromYaml($"""
@@ -187,7 +185,7 @@ public class LoadMigrationTests
         migration.JournalTo.Should().BeNull();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldPrintReadableError_WhenProviderIsInvalid()
     {
         var error = LoadMigrationErrorFromYaml("""
@@ -199,7 +197,7 @@ public class LoadMigrationTests
         error.Should().Be("Configuration file error: Requested value 'postgre1' was not found. Exception during deserialization");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldPrintReadableError_WhenTransactionIsInvalid()
     {
         var error = LoadMigrationErrorFromYaml($"""

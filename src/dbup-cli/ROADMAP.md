@@ -8,8 +8,8 @@
 *[ ] inline config files so they're easy to view with the tests instead of forcing to navigate to a separate folder
 *[ ] move configs that aren't inlined into folders with the tests so it's more obvious how they are used.
 *[ ] use Verify for tests
-*[ ] organize unit tests by command where possible
-*[ ] convert to xunit or nunit
+*[x] organize unit tests by command where possible
+*[x] convert to xunit or nunit
 *[ ] remove Option to simplify code
 *[ ] convert to CommandDotNet to simplify command definitions 
 

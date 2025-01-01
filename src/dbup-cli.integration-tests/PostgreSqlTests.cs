@@ -1,12 +1,10 @@
 using System.Data;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Npgsql;
 using Testcontainers.PostgreSql;
 
 namespace DbUp.Cli.IntegrationTests;
 
-[TestClass]
 public class PostgreSqlTests()
     : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("PostgreSql")
 {
@@ -31,7 +29,7 @@ public class PostgreSqlTests()
     protected override string QueryCountOfScript001FromCustomJournal =>
         "select count(*) from journal where scriptname = '001.sql'";
 
-    [Ignore("Not supported")]
+    [Fact(Skip = "Not supported")]
     public override void Drop_DropADb()
     {
     }
