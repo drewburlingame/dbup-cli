@@ -54,6 +54,11 @@ public class GetFilePathTests
     public void ShouldReturnNone_IfAFileShouldNotExistButDoes()
     {
         var configPath = host.Environment.GetFilePath("dbup.yml", fileShouldExist: false);
+        if (configPath.HasValue)
+        {
+            var fileExists = host.Environment.FileExists("dbup.yml");
+            Assert.Fail($"HasValue should be false. fileExists:{fileExists} configPath:{configPath.GetValueOrNull()}");
+        }
         configPath.HasValue.Should().BeFalse();
         configPath.GetErrorOrThrow().Should().Be("File already exists: dbup.yml");
     }

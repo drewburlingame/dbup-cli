@@ -17,11 +17,11 @@ public static class EnvironmentExtensions
             : Path.Combine(environment.GetCurrentDirectory(), configFilePath)
         ).FullName;
 
-        string error = !fileShouldExist.HasValue || environment.FileExists(fullPath) == fileShouldExist.Value
-            ? null
-            : fileShouldExist.Value
+        string error = fileShouldExist.HasValue && environment.FileExists(fullPath) != fileShouldExist.Value
+            ? fileShouldExist.Value
                 ? Constants.ConsoleMessages.FileNotFound
-                : Constants.ConsoleMessages.FileAlreadyExists;
+                : Constants.ConsoleMessages.FileAlreadyExists
+            : null;
         
         // consider returning the fullPath. Is there a reason not to?
         return fullPath.SomeWhen(x => error == null, () => Error.Create(error, configFilePath));
