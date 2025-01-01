@@ -1,18 +1,16 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FakeItEasy;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
 
 namespace DbUp.Cli.Tests;
 
-[TestClass]
 public class EnvVariableSubstitutionTests
 {
     private static readonly string EnvVarsYmlPath = ProjectPaths.GetConfigPath("env-vars.yml");
     private static readonly string DotEnvCurrentFolder = ProjectPaths.GetConfigPath("DotEnv-CurrentFolder");
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldSubstituteEnvVars_ToConnectionString()
     {
         const string connstr = "connection string";
@@ -28,7 +26,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldSubstituteEnvVars_ToFolders()
     {
         const string folder = "folder_name";
@@ -44,7 +42,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadMigration_ShouldSubstituteEnvVars_ToVarValues()
     {
         const string var1 = "variable_value";
@@ -60,7 +58,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadEnvironmentVariables_ShouldLoadDotEnv_FromCurrentFolder()
     {
         const string varA = "va1";
@@ -84,7 +82,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadEnvironmentVariables_ShouldLoadDotEnv_FromConfigFileFolder()
     {
         const string varB = "vb2";
@@ -108,7 +106,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadEnvironmentVariables_ShouldLoadVars_FromSpecifiedFiles()
     {
         const string varC = "vc3";
@@ -138,7 +136,7 @@ public class EnvVariableSubstitutionTests
             none: err => Assert.Fail(err.Message));
     }
 
-    [TestMethod]
+    [Fact]
     public void LoadEnvironmentVariables_ShouldProperlyOverrideLoadedVariables()
     {
         // Loading order should be:

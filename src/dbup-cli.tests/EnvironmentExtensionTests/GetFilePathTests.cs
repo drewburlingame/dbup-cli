@@ -1,54 +1,45 @@
 ﻿using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.EnvironmentExtensionTests;
 
-[TestClass]
 public class GetFilePathTests
 {
     private readonly TestHost host = new();
     private static readonly string AbsolutePath = new TestHost().EnsureTempDbUpYmlFileExists();
-    
-    public static IEnumerable<object[]> FilePaths
+
+    public static TheoryData<string, string, string> FilePaths => new()
     {
-        get
-        {
-            yield return ["OnlyFileName", "dbup.yml", AbsolutePath];
-            yield return ["AbsolutePath", AbsolutePath, AbsolutePath];
-            yield return ["RelativePath", Path.Combine(".", "dbup.yml"), AbsolutePath];
-            yield return ["NonExistingPath", "missing.yml", ProjectPaths.GetTempPath("missing.yml")];
-        }
-    }
+        {"OnlyFileName", "dbup.yml", AbsolutePath},
+        {"AbsolutePath", AbsolutePath, AbsolutePath},
+        {"RelativePath", Path.Combine(".", "dbup.yml"), AbsolutePath},
+        {"NonExistingPath", "missing.yml", ProjectPaths.GetTempPath("missing.yml")}
+    };
     
-    [TestMethod]
+    [Fact]
     public void ConfirmFileExists()
     {
         if (File.Exists(AbsolutePath)) return;
         Assert.Fail($"Missing file: {AbsolutePath}");
     }
 
-    [DataTestMethod]
-    [DynamicData(nameof(FilePaths))]
-    public void ShouldReturnAValidFileName_When_(string type, string path, string expected)
+    [Theory]
+    [MemberData(nameof(FilePaths))]
+    public void ShouldReturnAValidFileName_When_(string _, string path, string expected)
     {
         var configPath = host.Environment.GetFilePath(path);
         configPath.HasValue.Should().BeTrue();
         configPath.GetValueOrThrow().Should().Be(expected);
     }
 
-
-    public static IEnumerable<object[]> FilesByExistence
+    public static TheoryData<string, bool> FilesByExistence => new()
     {
-        get
-        {
-            yield return ["dbup.yml", true];
-            yield return ["missing.yml", false];
-        }
-    }
+        {"dbup.yml", true},
+        {"missing.yml", false}
+    };
 
-    [DataTestMethod]
-    [DynamicData(nameof(FilesByExistence))]
+    [Theory]
+    [MemberData(nameof(FilesByExistence))]
     public void ShouldReturnNone_When_ExistingOrNonExistingDoesNotMatchExpectation(string filename, bool exists)
     {
         var configPath = host.Environment.GetFilePath(filename, fileShouldExist: !exists);
@@ -59,8 +50,8 @@ public class GetFilePathTests
                 : $"File is not found: {filename}");
     }
     
-    [DataTestMethod]
-    [DynamicData(nameof(FilesByExistence))]
+    [Theory]
+    [MemberData(nameof(FilesByExistence))]
     public void ShouldReturnFilePath_When_ExistingOrNonExistingMatchesExpectation(string filename, bool exists)
     {
         var configPath = host.Environment.GetFilePath(filename, fileShouldExist: exists);

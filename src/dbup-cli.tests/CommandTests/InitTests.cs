@@ -1,16 +1,14 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.CommandTests;
 
-[TestClass]
 public class InitTests
 {
     private readonly TestHost host = new();
     private readonly string tempDbUpYmlPath = ProjectPaths.GetTempPath("dbup.yml");
 
-    [TestMethod]
+    [Fact]
     public void ShouldCreateDefaultConfig_IfItIsNotPresent()
     {
         host.EnsureDirectoryExists(ProjectPaths.TempDir);
@@ -19,7 +17,7 @@ public class InitTests
         host.Environment.FileExists(tempDbUpYmlPath).Should().BeTrue();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldReturn1AndNotCreateConfig_IfItIsPresent()
     {
         // ensure exists

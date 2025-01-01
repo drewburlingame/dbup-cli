@@ -1,15 +1,13 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.CommandTests;
 
-[TestClass]
 public class StatusTests
 {
     private readonly TestHost host = new();
 
-    [TestMethod]
+    [Fact]
     public void ShouldPrintGeneralInformation_IfNoScriptsToExecute()
     {
         host.ToolEngine
@@ -19,7 +17,7 @@ public class StatusTests
         host.Logger.InfoMessages.Last().Should().StartWith("Database is up-to-date");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldPrintGeneralInformation_IfThereAreTheScriptsToExecute()
     {
         host.ToolEngine
@@ -29,7 +27,7 @@ public class StatusTests
         host.Logger.InfoMessages.Last().Should().StartWith("You have 1 more scripts");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldPrintScriptName_IfThereAreTheScriptsToExecute()
     {
         host.ToolEngine
@@ -39,7 +37,7 @@ public class StatusTests
         host.Logger.InfoMessages.Last().Should().EndWith("c001.sql");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldReturnMinusOne_IfThereAreTheScriptsToExecute()
     {
         host.ToolEngine
@@ -49,7 +47,7 @@ public class StatusTests
         host.Logger.InfoMessages.Last().Should().EndWith("c001.sql");
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldUseSpecifiedEnvFiles()
     {
         host.ToolEngine.Run("status", 

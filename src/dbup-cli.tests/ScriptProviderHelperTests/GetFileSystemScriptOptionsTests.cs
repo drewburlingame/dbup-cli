@@ -1,13 +1,11 @@
 ﻿using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
-[TestClass]
 public class GetFileSystemScriptOptionsTests
 {
-    [TestMethod]
+    [Fact]
     public void WhenOptionIsSpecified_ShouldReturnValid_UseOnlyFilenameForScriptName_Option()
     {
         var namingOptions = new NamingOptions(useOnlyFileName: true, false, null);
@@ -15,7 +13,7 @@ public class GetFileSystemScriptOptionsTests
         options.UseOnlyFilenameForScriptName.Should().BeTrue();
     }
 
-    [TestMethod]
+    [Fact]
     public void WhenOptionIsSpecified_ShouldReturnValid_PrefixScriptNameWithBaseFolderName_Option()
     {
         var namingOptions = new NamingOptions(false, includeBaseFolderName: true, null);
@@ -23,7 +21,7 @@ public class GetFileSystemScriptOptionsTests
         options.PrefixScriptNameWithBaseFolderName.Should().BeTrue();
     }
 
-    [TestMethod]
+    [Fact]
     public void WhenOptionIsSpecified_ShouldReturnValid_Prefix_Option()
     {
         var namingOptions = new NamingOptions(false, false, "customprefix");
@@ -31,14 +29,14 @@ public class GetFileSystemScriptOptionsTests
         options.Prefix.Should().Be("customprefix");
     }
     
-    [TestMethod]
+    [Fact]
     public void ShouldSetIncludeSubDirectoriesToFalse_IfSubFoldersIsSetToFalse()
     {
         var options = GetFileSystemScriptOptions(NamingOptions.Default, subFolders: false);
         options.IncludeSubDirectories.Should().BeFalse();
     }
 
-    [TestMethod]
+    [Fact]
     public void ShouldSetIncludeSubDirectoriesToTrue_IfSubFoldersIsSetToTrue()
     {
         var options = GetFileSystemScriptOptions(NamingOptions.Default, subFolders: true);
