@@ -8,7 +8,7 @@ public class SqlServerDbProvider : DbProvider
 {
     public override Provider Provider => Provider.SqlServer;
     
-    public override Option<UpgradeEngineBuilder, Error> SelectDbProvider(ConnectionInfo connectionInfo) =>
+    public override Option<UpgradeEngineBuilder, Error> CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         DeployChanges.To
             .SqlDatabase(connectionInfo.ConnectionString)
             .WithExecutionTimeout(connectionInfo.Timeout)

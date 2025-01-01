@@ -4,7 +4,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure;
 
 public static class ProjectPaths
 {
-    public static string RootDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.Parent.Parent.FullName;
+    public static string RootDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory!.Parent!.Parent!.FullName;
     public static string ScriptsDir = Path.Combine(RootDir, "..", "Scripts");
     public static string ConfigDir = Path.Combine(ScriptsDir, "Config");
     public static  string GetConfigPath(string name) => new DirectoryInfo(Path.Combine(ConfigDir, name)).FullName;

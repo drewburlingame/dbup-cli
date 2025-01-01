@@ -8,32 +8,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbUp.Cli.IntegrationTests;
 
-public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigurationEntity>
+public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigurationEntity>(string provider)
     where TBuilderEntity : ContainerBuilder<TBuilderEntity, TContainerEntity, TConfigurationEntity>
     where TContainerEntity : IDatabaseContainer
     where TConfigurationEntity : IContainerConfiguration
 {
-    private readonly string DbScriptsDir;
-    private readonly CaptureLogsLogger Logger;
-    private readonly IEnvironment Env;
-    private readonly ToolEngine engine;
+    
+    private readonly string dbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, provider);
+    private readonly ToolEngine engine = new(new CliEnvironment(), new CaptureLogsLogger());
 
-    private static IDatabaseContainer Container;
-    private static string ServerConnString;
-    private string DbConnString;
-    private string DbName;
+    private IDatabaseContainer container;
+    private string serverConnString;
+    private string dbConnString;
+    private string dbName;
 
     public TestContext TestContext { get; set; }
 
-    protected ContainerTest(string provider)
-    {
-        DbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, provider);
-        Logger = new CaptureLogsLogger();
-        Env = new CliEnvironment();
-        engine = new ToolEngine(Env, Logger);
-    }
-    
     protected abstract TBuilderEntity NewBuilder { get; }
+    protected virtual int DbNameLengthLimit => 60;
 
     protected abstract string ReplaceDbInConnString(string connectionString, string dbName);
     protected abstract IDbConnection GetConnection(string connectionString);
@@ -43,29 +35,30 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     protected abstract string QueryCountOfScript001FromCustomJournal { get; }
     
     private string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") =>
-        new DirectoryInfo(Path.Combine(DbScriptsDir, subPath, name)).FullName;
+        new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, name)).FullName;
     
     [TestInitialize]
     public async Task TestInitialize()
     {
-        if (Container is null)
+        if (container is null)
         {
-            Container = NewBuilder
+            container = NewBuilder
                 .WithCleanUp(true) // in case test run crashes or stopped while debugging
                 .WithAutoRemove(true) // for faster removal in prep for next test
                 .Build();
 
-            await Container.StartAsync();
-            ServerConnString = Container.GetConnectionString();
+            await container.StartAsync();
+            serverConnString = container.GetConnectionString();
         }
 
-        DbName = $"DbUp_{TestContext.TestName}";
-        DbConnString = ReplaceDbInConnString(ServerConnString, DbName);
-        Environment.SetEnvironmentVariable("CONNSTR", DbConnString);
+        dbName = $"DbUp_{TestContext.TestName}";
+        dbName.Length.Should().BeLessOrEqualTo(DbNameLengthLimit);
+        dbConnString = ReplaceDbInConnString(serverConnString, dbName);
+        Environment.SetEnvironmentVariable("CONNSTR", dbConnString);
     }
 
-    [ClassCleanup]
-    public static async Task ClassCleanup() => await (Container?.StopAsync() ?? Task.CompletedTask);
+    [TestCleanup]
+    public async Task TestCleanup() => await (container?.StopAsync() ?? Task.CompletedTask);
 
     [TestMethod]
     public void DatabaseShouldNotExistBeforeTestRun() => AssertDbDoesNotExist();
@@ -74,7 +67,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     public void Ensure_CreateANewDb()
     {
         var result = engine.Run("upgrade", "--ensure", GetConfigPath());
-        result.Should().Be(0);
+        result.ShouldSucceed();
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
 
@@ -82,15 +75,16 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     public void UpgradeCommand_ShouldUseASpecifiedJournal()
     {
         var result = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "JournalTableScript"));
-        result.Should().Be(0);
+        result.ShouldSucceed();
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
     [TestMethod]
-    public void UpgradeCommand_ShouldUseConnectionTimeoutForLongRunningQueries()
+    public virtual void UpgradeCommand_ShouldFailOnCommandTimeout()
     {
         var r = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "Timeout"));
-        r.Should().Be(1);
+        r.ShouldFail(assert: error => error.Should().StartWith("Failed to perform upgrade:").And.Contain("Timeout"));
+        GetCountOfScript(QueryCountOfScript001).Should().Be(0);
     }
     
     [TestMethod]
@@ -98,21 +92,25 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     {
         engine.Run("upgrade", "--ensure", GetConfigPath());
         var result = engine.Run("drop", GetConfigPath());
-        result.Should().Be(0);
+        result.ShouldSucceed();
         AssertDbDoesNotExist();
     }
 
-    private void AssertDbDoesNotExist() => AssertDbDoesNotExist(DbConnString, DbName);
+    private void AssertDbDoesNotExist() => AssertDbDoesNotExist(dbConnString, dbName);
 
     private void ConfirmUpgradeViaJournal(string query)
     {
-        using var connection = GetConnection(DbConnString);
+        GetCountOfScript(query).Should().Be(1);
+    }
+
+    private object GetCountOfScript(string query)
+    {
+        using var connection = GetConnection(dbConnString);
         connection.Open();
         
         using var command = connection.CreateCommand();
         command.CommandText = query;
         var count = command.ExecuteScalar();
-
-        count.Should().Be(1);
+        return count;
     }
 }

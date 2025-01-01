@@ -8,7 +8,7 @@ public class PostgresDbProvider : DbProvider
 {
     public override Provider Provider => Provider.PostgreSQL;
     
-    public override Option<UpgradeEngineBuilder, Error> SelectDbProvider(ConnectionInfo connectionInfo) =>
+    public override Option<UpgradeEngineBuilder, Error> CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         DeployChanges.To
             .PostgresqlDatabase(connectionInfo.ConnectionString)
             .WithExecutionTimeout(connectionInfo.Timeout)

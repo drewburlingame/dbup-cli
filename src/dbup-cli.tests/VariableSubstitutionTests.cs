@@ -1,6 +1,4 @@
 using DbUp.Cli.Tests.TestInfrastructure;
-using DbUp.Engine.Transactions;
-using FakeItEasy;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Optional;
@@ -10,23 +8,15 @@ namespace DbUp.Cli.Tests;
 [TestClass]
 public class VariableSubstitutionTests
 {
-    private readonly CaptureLogsLogger Logger;
-    private readonly DelegateConnectionFactory testConnectionFactory;
-    private readonly RecordingDbConnection recordingConnection;
+    private readonly TestHost host = new();
 
     private string GetConfigPath(string name) => ProjectPaths.GetConfigPath(name);
-
-    public VariableSubstitutionTests()
-    {
-        Logger = new CaptureLogsLogger();
-        recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
-        testConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-    }
 
     [TestMethod]
     public void LoadMigration_ShouldLoadVariablesFromConfig()
     {
-        var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("vars.yml").Some<string, Error>());
+        var migrationOrNone = ConfigLoader.LoadMigration(
+            GetConfigPath("vars.yml").Some<string, Error>(), host.Environment);
 
         migrationOrNone.Match(
             some: migration =>
@@ -50,7 +40,8 @@ public class VariableSubstitutionTests
          *
          * Variables can only contain letters, digits, _ and -.
          */
-        var migrationOrNone = ConfigLoader.LoadMigration(GetConfigPath("invalid-vars.yml").Some<string, Error>());
+        var migrationOrNone = ConfigLoader.LoadMigration(
+            GetConfigPath("invalid-vars.yml").Some<string, Error>(), host.Environment);
 
         migrationOrNone.MatchSome(
             migration =>
@@ -62,34 +53,24 @@ public class VariableSubstitutionTests
     [TestMethod]
     public void LoadMigration_ShouldSubstituteVariablesToScript()
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-        A.CallTo(() => env.FileExists(A<string>.Ignored)).ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+        host.ToolEngine
+            .Run("upgrade", GetConfigPath("vars.yml"))
+            .ShouldSucceed();
 
-        var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-
-        var result = engine.Run("upgrade", GetConfigPath("vars.yml"));
-        result.Should().Be(0);
-
-        Logger.Log.Should().Contain("print 'Var1Value'");
-        Logger.Log.Should().Contain("print 'Var2Value'");
-        Logger.Log.Should().Contain("print 'Var3 Value'");
+        host.Logger.Log.Should().Contain("print 'Var1Value'");
+        host.Logger.Log.Should().Contain("print 'Var2Value'");
+        host.Logger.Log.Should().Contain("print 'Var3 Value'");
     }
 
     [TestMethod]
     public void LoadMigration_ShouldNotSubstituteVariablesToScript()
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(@"c:\test");
-        A.CallTo(() => env.FileExists(A<string>.Ignored)).ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+        host.ToolEngine
+            .Run("upgrade", GetConfigPath("disable-vars.yml"))
+            .ShouldSucceed();
 
-        var engine = new ToolEngine(env, Logger, (testConnectionFactory as IConnectionFactory).Some());
-
-        var result = engine.Run("upgrade", GetConfigPath("disable-vars.yml"));
-        result.Should().Be(0);
-
-        Logger.Log.Should().Contain("print '$Var1$'");
-        Logger.Log.Should().Contain("print '$Var2$'");
-        Logger.Log.Should().Contain("print '$Var_3-1$'");
+        host.Logger.Log.Should().Contain("print '$Var1$'");
+        host.Logger.Log.Should().Contain("print '$Var2$'");
+        host.Logger.Log.Should().Contain("print '$Var_3-1$'");
     }
 }

@@ -9,27 +9,18 @@ namespace DbUp.Cli;
 
 public static class ConfigLoader
 {
-    public static Option<string, Error> GetFilePath(IEnvironment environment, string configFilePath, bool fileShouldExist = true)
-    {
-        if (environment == null)
-            throw new ArgumentNullException(nameof(environment));
-        if (string.IsNullOrWhiteSpace(configFilePath))
-            throw new ArgumentException("Parameter can't be null or white space", nameof(configFilePath));
-
-        return new FileInfo(Path.IsPathRooted(configFilePath)
-            ? configFilePath
-            : Path.Combine(environment.GetCurrentDirectory(), configFilePath)
-        ).FullName.SomeWhen(x =>
-                !fileShouldExist || environment.FileExists(x),
-            Error.Create(Constants.ConsoleMessages.FileNotFound, configFilePath)
-        );
-    }
-
-    public static Option<Migration, Error> LoadMigration(Option<string, Error> configFilePath) =>
+    // TODO: environment should eventually be required. Using optional param for now as incremental step to keep tests passing during refactor.
+    // will require using IEnvironment to get environment variables, with a bonus that we can isolate changes within tests
+    public static Option<Migration, Error> LoadMigration(Option<string, Error> configFilePath, IEnvironment environment = null) =>
         configFilePath.Match(
             some: path =>
             {
-                var input = new StringReader(File.ReadAllText(path, Encoding.UTF8));
+                var yml = environment is null
+                    ? File.ReadAllText(path, Encoding.UTF8)
+                    : environment.ReadFile(path);
+                
+                if(yml is null)
+                    return Option.None<Migration, Error>(Error.Create("config not found at {0}", configFilePath));
 
                 var deserializer = new DeserializerBuilder()
                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -39,7 +30,7 @@ public static class ConfigLoader
 
                 try
                 {
-                    migration = deserializer.Deserialize<ConfigFile>(input).DbUp;
+                    migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
                 }
                 catch (YamlException ex)
                 {

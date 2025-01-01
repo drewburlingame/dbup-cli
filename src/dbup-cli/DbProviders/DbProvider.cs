@@ -9,7 +9,7 @@ public abstract class DbProvider
     // todo: convert to string at the end of the refactor
     public abstract Provider Provider { get; }
 
-    public abstract Option<UpgradeEngineBuilder, Error> SelectDbProvider(ConnectionInfo connectionInfo);
+    public abstract Option<UpgradeEngineBuilder, Error> CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo);
 
     public abstract Option<bool, Error> EnsureDb(IUpgradeLog logger, ConnectionInfo connectionInfo);
 
