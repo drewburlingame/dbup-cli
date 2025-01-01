@@ -8,58 +8,58 @@ namespace DbUp.Cli.Tests.EnvironmentExtensionTests;
 public class GetFilePathTests
 {
     private readonly TestHost host = new();
-    private readonly string tempDbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
+    private static readonly string absolutePath = ProjectPaths.GetTempPath("dbup.yml");
 
-    [TestMethod]
-    public void ShouldReturnFileFromTheCurrentDirectory_IfOnlyAFilenameSpecified()
+    public static IEnumerable<object[]> FilePaths
     {
-        var configPath = host.Environment.GetFilePath("dbup.yml");
-        configPath.HasValue.Should().BeTrue();
-        configPath.GetValueOrThrow().Should().Be(tempDbupYmlPath);
-    }
-
-    [TestMethod]
-    public void ShouldReturnAValidFileName_IfAnAbsolutePathSpecified()
-    {
-        var configPath = host.Environment.GetFilePath(tempDbupYmlPath);
-        configPath.HasValue.Should().BeTrue();
-        configPath.GetValueOrThrow().Should().Be(tempDbupYmlPath);
-    }
-
-    [TestMethod]
-    public void ShouldReturnAValidFileName_IfARelativePathSpecified()
-    {
-        var configPath = host.Environment.GetFilePath(Path.Combine(".", "dbup.yml"));
-        configPath.HasValue.Should().BeTrue();
-        configPath.GetValueOrThrow().Should().Be(tempDbupYmlPath);
-    }
-
-    [TestMethod]
-    public void ShouldReturnAValidFileName_IfAFileDoesNotExist()
-    {
-        var configPath = host.Environment.GetFilePath("missing_dbup.yml");
-        configPath.HasValue.Should().BeTrue();
-        configPath.GetValueOrThrow().Should().Be(ProjectPaths.GetTempPath("missing_dbup.yml"));
-    }
-
-    [TestMethod]
-    public void ShouldReturnNone_IfAFileShouldExistButDoesNot()
-    {
-        var configPath = host.Environment.GetFilePath("missing_dbup.yml", fileShouldExist: true);
-        configPath.HasValue.Should().BeFalse();
-        configPath.GetErrorOrThrow().Should().Be("File is not found: missing_dbup.yml");
-    }
-
-    [TestMethod]
-    public void ShouldReturnNone_IfAFileShouldNotExistButDoes()
-    {
-        var configPath = host.Environment.GetFilePath("dbup.yml", fileShouldExist: false);
-        if (configPath.HasValue)
+        get
         {
-            var fileExists = host.Environment.FileExists("dbup.yml");
-            Assert.Fail($"HasValue should be false. fileExists:{fileExists} configPath:{configPath.GetValueOrNull()}");
+            yield return ["OnlyFileName", "dbup.yml", absolutePath];
+            yield return ["AbsolutePath", absolutePath, absolutePath];
+            yield return ["RelativePath", Path.Combine(".", "dbup.yml"), absolutePath];
+            yield return ["NonExistingPath", "missing.yml", ProjectPaths.GetTempPath("missing.yml")];
         }
+    }
+    
+    [TestMethod]
+    public void ConfirmFileExists() => File.Exists(absolutePath).Should().BeTrue();
+
+    [DataTestMethod]
+    [DynamicData(nameof(FilePaths))]
+    public void ShouldReturnAValidFileName_When_(string type, string path, string expected)
+    {
+        var configPath = host.Environment.GetFilePath(path);
+        configPath.HasValue.Should().BeTrue();
+        configPath.GetValueOrThrow().Should().Be(expected);
+    }
+
+
+    public static IEnumerable<object[]> FilesByExistence
+    {
+        get
+        {
+            yield return ["dbup.yml", true];
+            yield return ["missing.yml", false];
+        }
+    }
+
+    [DataTestMethod]
+    [DynamicData(nameof(FilesByExistence))]
+    public void ShouldReturnNone_When_ExistingOrNonExistingDoesNotMatchExpectation(string filename, bool exists)
+    {
+        var configPath = host.Environment.GetFilePath(filename, fileShouldExist: !exists);
         configPath.HasValue.Should().BeFalse();
-        configPath.GetErrorOrThrow().Should().Be("File already exists: dbup.yml");
+        configPath.GetErrorOrThrow().Should()
+            .Be(exists 
+                ? $"File already exists: {filename}" 
+                : $"File is not found: {filename}");
+    }
+    
+    [DataTestMethod]
+    [DynamicData(nameof(FilesByExistence))]
+    public void ShouldReturnFilePath_When_ExistingOrNonExistingMatchesExpectation(string filename, bool exists)
+    {
+        var configPath = host.Environment.GetFilePath(filename, fileShouldExist: exists);
+        configPath.HasValue.Should().BeTrue();
     }
 }
