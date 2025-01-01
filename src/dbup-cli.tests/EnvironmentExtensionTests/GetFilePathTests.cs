@@ -8,21 +8,25 @@ namespace DbUp.Cli.Tests.EnvironmentExtensionTests;
 public class GetFilePathTests
 {
     private readonly TestHost host = new();
-    private static readonly string absolutePath = ProjectPaths.GetTempPath("dbup.yml");
-
+    private static readonly string AbsolutePath = new TestHost().EnsureTempDbUpYmlFileExists();
+    
     public static IEnumerable<object[]> FilePaths
     {
         get
         {
-            yield return ["OnlyFileName", "dbup.yml", absolutePath];
-            yield return ["AbsolutePath", absolutePath, absolutePath];
-            yield return ["RelativePath", Path.Combine(".", "dbup.yml"), absolutePath];
+            yield return ["OnlyFileName", "dbup.yml", AbsolutePath];
+            yield return ["AbsolutePath", AbsolutePath, AbsolutePath];
+            yield return ["RelativePath", Path.Combine(".", "dbup.yml"), AbsolutePath];
             yield return ["NonExistingPath", "missing.yml", ProjectPaths.GetTempPath("missing.yml")];
         }
     }
     
     [TestMethod]
-    public void ConfirmFileExists() => File.Exists(absolutePath).Should().BeTrue();
+    public void ConfirmFileExists()
+    {
+        if (File.Exists(AbsolutePath)) return;
+        Assert.Fail($"Missing file: {AbsolutePath}");
+    }
 
     [DataTestMethod]
     [DynamicData(nameof(FilePaths))]

@@ -21,6 +21,17 @@ public class TestHost
         ToolEngine = new ToolEngine(Environment, Logger, (TestConnectionFactory as IConnectionFactory).Some()); 
     }
     
+    public string EnsureTempDbUpYmlFileExists()
+    {
+        var dbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
+        if (!File.Exists(dbupYmlPath))
+        {
+            EnsureDirectoryExists(ProjectPaths.TempDir);
+            File.WriteAllText(dbupYmlPath, ToolEngine.GetDefaultConfigFile());
+        }
+        return dbupYmlPath;
+    }
+    
     public void EnsureDirectoryExists(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
