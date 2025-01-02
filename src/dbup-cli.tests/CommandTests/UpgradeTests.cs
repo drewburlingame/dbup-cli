@@ -8,13 +8,14 @@ public class UpgradeTests
     private readonly TestHost host = new();
     
     [Fact]
-    public void ShouldRespectScriptEncoding()
+    public async Task ShouldRespectScriptEncoding()
     {
         host.ToolEngine
             .Run("upgrade", ProjectPaths.GetConfigPath("encoding.yml"))
             .ShouldSucceed();
 
-        host.Logger.Log.Should().Contain("print 'Превед, медвед'");
+        var logs = await Verify(host.Logger.SummaryText(CaptureLogsLogger.Level.Operation));
+        logs.Text.Should().Contain("print 'Превед, медвед'");
     }
     
     [InlineData("d0a1.sql")]
@@ -26,13 +27,14 @@ public class UpgradeTests
     [InlineData("e0a1.sql")]
     [InlineData("e0b1.sql")]
     [Theory]
-    public void ToolEngine_ShouldRespectScriptFiltersAndMatchFiles(string filename)
+    public async Task ToolEngine_ShouldRespectScriptFiltersAndMatchFiles(string filename)
     {
         host.ToolEngine
             .Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
             .ShouldSucceed();
-
-        host.Logger.Log.Should().Contain(filename);
+        
+        var logs = await Verify(host.Logger.SummaryText(CaptureLogsLogger.Level.Info));
+        logs.Text.Should().Contain(filename);
     }
 
     [InlineData("d001.sql")]
@@ -43,12 +45,13 @@ public class UpgradeTests
     [InlineData("e01.sql")]
     [InlineData("e0aa1.sql")]
     [Theory]
-    public void ToolEngine_ShouldRespectScriptFiltersAndNotMatchFiles(string filename)
+    public async Task ToolEngine_ShouldRespectScriptFiltersAndNotMatchFiles(string filename)
     {
         host.ToolEngine
             .Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
             .ShouldSucceed();
 
-        host.Logger.Log.Should().NotContain(filename);
+        var logs = await Verify(host.Logger.SummaryText(CaptureLogsLogger.Level.Info));
+        logs.Text.Should().NotContain(filename);
     }
 }

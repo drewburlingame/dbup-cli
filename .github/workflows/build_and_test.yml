@@ -31,3 +31,11 @@ jobs:
 
       - name: Run integration tests
         run: dotnet test ./src/dbup-cli.integration-tests --no-restore --collect:"XPlat Code Coverage"
+
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-test-results
+          path: |
+            **/*.received.*

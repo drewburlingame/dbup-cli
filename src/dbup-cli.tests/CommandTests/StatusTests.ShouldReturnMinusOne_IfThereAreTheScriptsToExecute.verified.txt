@@ -1,0 +1,5 @@
+﻿[I] Database upgrade is required.
+[I] You have 1 more scripts to execute.
+[I] 
+[I] These scripts will be executed:
+[I]     c001.sql

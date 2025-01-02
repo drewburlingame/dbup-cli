@@ -17,7 +17,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     private readonly ToolEngine engine = new(new CliEnvironment(), new CaptureLogsLogger());
 
     private static readonly Dictionary<Type, IDatabaseContainer> ContainerMap = new();
-    private static readonly SemaphoreSlim semaphore = new(1);
+    private static readonly SemaphoreSlim Semaphore = new(1);
 
     private IDatabaseContainer container;
     private string serverConnString;
@@ -111,7 +111,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
             return container;
         }
 
-        await semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
         try
         {
             if (ContainerMap.TryGetValue(typeof(TContainerEntity), out container))
@@ -132,7 +132,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         }
         finally
         {
-            semaphore.Release();
+            Semaphore.Release();
         }
     }
 }

@@ -31,7 +31,7 @@ public class UpgradeEngineBuilderExtensionsTests
             .SelectJournal(Provider.SqlServer, new Journal("test_scheme", "test_SchemaVersion"));
 
         upgradeEngineBuilder.Build().PerformUpgrade();
-        host.Logger.InfoMessages.Should().Contain("Creating the [test_scheme].[test_SchemaVersion] table");
+        host.Logger.InfoMessages.Should().Contain("[I] Creating the [test_scheme].[test_SchemaVersion] table");
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class UpgradeEngineBuilderExtensionsTests
             .SelectJournal(Provider.SqlServer, Journal.Default);
 
         upgradeEngineBuilder.Build().PerformUpgrade();
-        host.Logger.InfoMessages.Should().Contain("Creating the [SchemaVersions] table");
+        host.Logger.InfoMessages.Should().Contain("[I] Creating the [SchemaVersions] table");
     }
 
     [Fact]
