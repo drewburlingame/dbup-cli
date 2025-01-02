@@ -1,0 +1,9 @@
+﻿[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Checking whether journal table exists
+[I] Creating the [SchemaVersions] table
+[I] The [SchemaVersions] table has been created
+[I] DB Operation: Add parameter to command: scriptName=c001.sql
+[I] DB Operation: Add parameter to command: applied=DateTime_1
+[I] Marking script c001.sql as executed.
+[I] Script marking successful.

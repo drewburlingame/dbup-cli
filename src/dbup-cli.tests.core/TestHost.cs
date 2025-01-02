@@ -6,8 +6,6 @@ namespace DbUp.Cli.Tests;
 
 public class TestHost
 {
-    private readonly string tempDbUpYmlPath = ProjectPaths.GetTempPath("dbup.yml");
-
     public CaptureLogsLogger Logger { get; } = new();
     public TestEnvironment Environment { get; }
     public DelegateConnectionFactory TestConnectionFactory { get; }
@@ -18,7 +16,7 @@ public class TestHost
         Environment = new TestEnvironment();
         var recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
         TestConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-        ToolEngine = new ToolEngine(Environment, Logger, (TestConnectionFactory as IConnectionFactory).Some()); 
+        ToolEngine = new ToolEngine(Environment, Logger, ((IConnectionFactory) TestConnectionFactory).Some()); 
     }
     
     public string EnsureTempDbUpYmlFileExists()

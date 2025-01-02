@@ -55,9 +55,9 @@ public class VariableSubstitutionTests
             .Run("upgrade", GetConfigPath("vars.yml"))
             .ShouldSucceed();
 
-        host.Logger.Log.Should().Contain("print 'Var1Value'");
-        host.Logger.Log.Should().Contain("print 'Var2Value'");
-        host.Logger.Log.Should().Contain("print 'Var3 Value'");
+        host.Logger.SummaryText().Should().Contain("print 'Var1Value'");
+        host.Logger.SummaryText().Should().Contain("print 'Var2Value'");
+        host.Logger.SummaryText().Should().Contain("print 'Var3 Value'");
     }
 
     [Fact]
@@ -67,8 +67,8 @@ public class VariableSubstitutionTests
             .Run("upgrade", GetConfigPath("disable-vars.yml"))
             .ShouldSucceed();
 
-        host.Logger.Log.Should().Contain("print '$Var1$'");
-        host.Logger.Log.Should().Contain("print '$Var2$'");
-        host.Logger.Log.Should().Contain("print '$Var_3-1$'");
+        host.Logger.SummaryText().Should().Contain("print '$Var1$'");
+        host.Logger.SummaryText().Should().Contain("print '$Var2$'");
+        host.Logger.SummaryText().Should().Contain("print '$Var_3-1$'");
     }
 }

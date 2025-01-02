@@ -1,0 +1,2 @@
+﻿[I] Database upgrade is required.
+[I] You have 1 more scripts to execute.
