@@ -10,8 +10,9 @@
 *[x] use Verify for tests
 *[x] organize unit tests by command where possible
 *[x] convert to xunit or nunit
-*[ ] remove Option to simplify code
+*[x] remove Option to simplify code
 *[ ] convert to CommandDotNet to simplify command definitions 
+*[ ] structured logging for better debugging and monitoring in deployed environments
 
 ---
 
