@@ -1,7 +1,5 @@
-﻿using DbUp.Builder;
-using DbUp.Cli.Tests.TestInfrastructure;
+﻿using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Optional;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
@@ -19,16 +17,13 @@ public class NamingOptionsTests
 
         var namingOptions = NamingOptions.Default;
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -45,16 +40,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(useOnlyFileName: true, false, null);
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();;
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -71,16 +63,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(false, includeBaseFolderName: true, null);
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -97,16 +86,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(useOnlyFileName: true, includeBaseFolderName: true, null);
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -123,16 +109,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(false, false, "prefix_");
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -149,16 +132,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(false, false, " prefix_ ");
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 
@@ -175,16 +155,13 @@ public class NamingOptionsTests
 
         var namingOptions = new NamingOptions(false, includeBaseFolderName: true, "prefix_");
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 

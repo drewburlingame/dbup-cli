@@ -14,15 +14,15 @@ public static class Constants
 
     internal static class ConsoleMessages
     {
-
-        public static string FileAlreadyExists => "File already exists: {0}";
-        public static string FileNotFound => "File is not found: {0}";
-        public static string FolderNotFound => "Folder is not found: {0}";
-        public static string UnsupportedProvider => "Unsupported provider: {0}";
-        public static string InvalidTransaction => "Unsupported transaction value: {0}";
-        public static string ScriptShouldPresent => "At least one script should be present";
-        public static string ParsingError => "Configuration file error: {0}";
         public static string InvalidEncoding => "Invalid encoding for scripts' folder '{0}': {1}";
-        public static string NotSupportedConfigFileVersion => "The only supported version of a config file is '{0}'";
     }
+}
+
+public class MissingScriptException() : DbUpCliException("At least one script should be present")
+{
+}
+
+public class InvalidEncodingException(string folder, Exception innerException) : 
+    DbUpCliException($"Invalid encoding for scripts' folder '{folder}'", innerException)
+{
 }

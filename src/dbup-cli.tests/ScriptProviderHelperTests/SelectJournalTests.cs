@@ -1,7 +1,5 @@
-﻿using DbUp.Builder;
-using DbUp.Cli.Tests.TestInfrastructure;
+﻿using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
-using Optional;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
@@ -20,16 +18,13 @@ public class SelectJournalTests
             new (ScriptProviderHelper.GetFolder(GetBasePath(), "SubFolder2"), false, false, 0, Constants.Default.Encoding)
         };
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
+            .LogTo(host.Logger)
             .SelectScripts(scripts, NamingOptions.Default);
 
-        upgradeEngineBuilder.MatchSome(x =>
-        {
-            x.Build().PerformUpgrade();
-        });
+        builder.Build().PerformUpgrade();
 
         var excutedScripts = host.Logger.GetExecutedScripts();
 
@@ -44,13 +39,13 @@ public class SelectJournalTests
     {
         var scripts = new List<ScriptBatch>();
 
-        var upgradeEngineBuilder = DeployChanges.To
+        var builder = DeployChanges.To
             .SqlDatabase("testconn")
             .OverrideConnectionFactory(host.TestConnectionFactory)
-            .LogTo(host.Logger).Some<UpgradeEngineBuilder, Error>()
-            .SelectScripts(scripts, NamingOptions.Default);
+            .LogTo(host.Logger);
+            
+         var ex = Assert.Throws<MissingScriptException>(() => builder.SelectScripts(scripts, NamingOptions.Default));
 
-        upgradeEngineBuilder.HasValue.Should().BeFalse();
-        upgradeEngineBuilder.GetErrorOrThrow().Should().Be("At least one script should be present");
+        ex.Message.Should().Be("At least one script should be present");
     }
 }

@@ -51,7 +51,6 @@
 		<PackageReference Include="Microsoft.Azure.KeyVault" />
 		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" />
 		<PackageReference Include="Npgsql" />
-		<PackageReference Include="Optional" />
 		<PackageReference Include="System.Text.Encoding.CodePages" />
 		<PackageReference Include="YamlDotNet" />
 	</ItemGroup>

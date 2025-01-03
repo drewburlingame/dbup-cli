@@ -4,7 +4,6 @@ using DbUp.Cli.CommandLineOptions;
 using DbUp.Engine;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
-using Optional;
 
 namespace DbUp.Cli;
 
@@ -12,7 +11,7 @@ public class ToolEngine
 {
     private IEnvironment Environment { get; }
     private IUpgradeLog Logger { get; }
-    private Option<IConnectionFactory> ConnectionFactory { get; }
+    private IConnectionFactory ConnectionFactory { get; }
 
     private readonly Parser ArgsParser = new(cfg =>
     {
@@ -22,7 +21,7 @@ public class ToolEngine
         cfg.HelpWriter = Console.Out;
     });
 
-    public ToolEngine(IEnvironment environment, IUpgradeLog logger, Option<IConnectionFactory> connectionFactory)
+    public ToolEngine(IEnvironment environment, IUpgradeLog logger,IConnectionFactory connectionFactory)
     {
         // ConnectionFactory to override the default. Mostly used for mocking
         ConnectionFactory = connectionFactory;
@@ -31,12 +30,13 @@ public class ToolEngine
     }
 
     public ToolEngine(IEnvironment environment, IUpgradeLog logger)
-        : this(environment, logger, Option.None<IConnectionFactory>())
+        : this(environment, logger, null)
     {
     }
 
-    public RunResult Run(params string[] args) =>
-        ArgsParser
+    public RunResult Run(params string[] args)
+    {
+        return ArgsParser
             .ParseArguments<InitOptions, UpgradeOptions, MarkAsExecutedOptions, DropOptions, StatusOptions>(args)
             .MapResult(
                 (InitOptions opts) => WrapException(() => RunInitCommand(opts)),
@@ -44,12 +44,10 @@ public class ToolEngine
                 (MarkAsExecutedOptions opts) => WrapException(() => RunMarkAsExecutedCommand(opts)),
                 (DropOptions opts) => WrapException(() => RunDropCommand(opts)),
                 (StatusOptions opts) => WrapException(() => RunStatusCommand(opts)),
-                parseErrors => WrapException(() => ParseErrors(parseErrors)))
-            .Match(
-                some: x => new RunResult(x, null),
-                none: error => { Console.WriteLine(error.Message); return new RunResult(1, error.Message); });
+                parseErrors => WrapException(() => ParseErrors(parseErrors)));
+    }
 
-    private Option<int, Error> ParseErrors(IEnumerable<CommandLine.Error> parseErrors)
+    private int ParseErrors(IEnumerable<CommandLine.Error> parseErrors)
     {
         foreach (var err in parseErrors)
         {
@@ -61,65 +59,62 @@ public class ToolEngine
                     case ErrorType.VersionRequestedError:
                     case ErrorType.HelpRequestedError:
                     case ErrorType.HelpVerbRequestedError:
-                        return Option.Some<int, Error>(0);
+                        return 0;
                 }
             }
         }
-        return Option.None<int, Error>(Error.Create(""));
+
+        return 1;
     }
 
-    private Option<int, Error> RunStatusCommand(StatusOptions opts) =>
-        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
-            .Match(
-                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
-                    .Match(
-                        some: x =>
-                            Providers
-                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
-                                .SelectJournal(x.Provider, x.JournalTo)
-                                .SelectTransaction(x.Transaction)
-                                .SelectLogOptions(Logger, VerbosityLevel.Min)
-                                .SelectScripts(x.Scripts, x.Naming)
-                                .AddVariables(x.Vars, x.DisableVars)
-                                .OverrideConnectionFactory(ConnectionFactory)
-                                .Match(
-                                    some: builder =>
-                                    {
-                                        var engine = builder.Build();
-                                        if (!engine.TryConnect(out var message))
-                                        {
-                                            return Option.None<int, Error>(Error.Create(message));
-                                        }
+    private int RunStatusCommand(StatusOptions opts)
+    {
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles);
+        var configFilePath = Environment.GetFilePath(opts.File, fileShouldExist: true);
+        var x = ConfigLoader.LoadMigration(configFilePath, Environment);
+        var builder = Providers
+            .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+            .SelectJournal(x.Provider, x.JournalTo)
+            .SelectTransaction(x.Transaction)
+            .SelectLogOptions(Logger, VerbosityLevel.Min)
+            .SelectScripts(x.Scripts, x.Naming)
+            .AddVariables(x.Vars, x.DisableVars)
+            .OverrideConnectionFactory(ConnectionFactory);
+        
+        var engine = builder.Build();
+        if (!engine.TryConnect(out var message))
+        {
+            throw new FailedToConnectException(message);
+        }
 
-                                        int result = 0;
-                                        if (engine.IsUpgradeRequired())
-                                        {
-                                            result = -1; // Indicates that the upgrade is required
-                                            var scriptsToExecute = engine.GetScriptsToExecute().Select(s => s.Name).ToList();
-                                            PrintGeneralUpgradeInformation(scriptsToExecute);
+        int result = 0;
+        if (engine.IsUpgradeRequired())
+        {
+            result = -1; // Indicates that the upgrade is required
+            var scriptsToExecute = engine.GetScriptsToExecute().Select(s => s.Name)
+                .ToList();
+            PrintGeneralUpgradeInformation(scriptsToExecute);
 
-                                            if (opts.NotExecuted)
-                                            {
-                                                Logger.LogInformation("");
-                                                PrintScriptsToExecute(scriptsToExecute);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Logger.LogInformation("Database is up-to-date. Upgrade is not required.");
-                                        }
+            if (opts.NotExecuted)
+            {
+                Logger.LogInformation("");
+                PrintScriptsToExecute(scriptsToExecute);
+            }
+        }
+        else
+        {
+            Logger.LogInformation(
+                "Database is up-to-date. Upgrade is not required.");
+        }
 
-                                        if (opts.Executed)
-                                        {
-                                            Logger.LogInformation("");
-                                            PrintExecutedScripts(engine);
-                                        }
+        if (opts.Executed)
+        {
+            Logger.LogInformation("");
+            PrintExecutedScripts(engine);
+        }
 
-                                        return result.Some<int, Error>();
-                                    },
-                                    none: Option.None<int, Error>),
-                        none: Option.None<int, Error>),
-                none: Option.None<int, Error>);
+        return result;
+    }
 
     private void PrintGeneralUpgradeInformation(List<string> scripts)
     {
@@ -130,7 +125,6 @@ public class ToolEngine
     private void PrintScriptsToExecute(List<string> scripts)
     {
         Logger.LogInformation("These scripts will be executed:");
-
         scripts.ForEach(s => Logger.LogInformation($"    {s}"));
     }
 
@@ -149,136 +143,76 @@ public class ToolEngine
         }
     }
 
-    private Option<int, Error> RunUpgradeCommand(UpgradeOptions opts) =>
-        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
-            .Match(
-                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
-                    .Match(
-                        some: x =>
-                            Providers
-                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
-                                .SelectJournal(x.Provider, x.JournalTo)
-                                .SelectTransaction(x.Transaction)
-                                .SelectLogOptions(Logger, opts.Verbosity)
-                                .SelectScripts(x.Scripts, x.Naming)
-                                .AddVariables(x.Vars, x.DisableVars)
-                                .OverrideConnectionFactory(ConnectionFactory)
-                                .Match(
-                                    some: builder =>
-                                    {
-                                        var engine = builder.Build();
-                                        if (opts.Ensure)
-                                        {
-                                            var res = Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
-                                            if (!res.HasValue)
-                                            {
-                                                Error err = null;
-                                                res.MatchNone(error => err = error);
-                                                return Option.None<int, Error>(err);
-                                            }
-                                        }
-
-                                        var result = engine.PerformUpgrade();
-
-                                        return new ResultBuilder().FromUpgradeResult(result);
-                                    },
-                                    none: Option.None<int, Error>),
-                        none: Option.None<int, Error>),
-                none: Option.None<int, Error>);
-
-    private Option<int, Error> RunMarkAsExecutedCommand(MarkAsExecutedOptions opts) =>
-        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
-            .Match(
-                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
-                    .Match(
-                        some: x =>
-                            Providers
-                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
-                                .SelectJournal(x.Provider, x.JournalTo)
-                                .SelectTransaction(x.Transaction)
-                                .SelectLogOptions(Logger, opts.Verbosity)
-                                .SelectScripts(x.Scripts, x.Naming)
-                                .AddVariables(x.Vars, x.DisableVars)
-                                .OverrideConnectionFactory(ConnectionFactory)
-                                .Match(
-                                    some: builder =>
-                                    {
-                                        var engine = builder.Build();
-                                        if (opts.Ensure)
-                                        {
-                                            var res = Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
-                                            if (!res.HasValue)
-                                            {
-                                                Error err = null;
-                                                res.MatchNone(error => err = error);
-                                                return Option.None<int, Error>(err);
-                                            }
-                                        }
-
-                                        if (!engine.TryConnect(out var message))
-                                        {
-                                            return Option.None<int, Error>(Error.Create(message));
-                                        }
-
-                                        var result = engine.MarkAsExecuted();
-
-                                        if (result.Successful)
-                                        {
-                                            return Option.Some<int, Error>(0);
-                                        }
-
-                                        return Option.None<int, Error>(Error.Create(result.Error.Message));
-                                    },
-                                    none: Option.None<int, Error>),
-                        none: Option.None<int, Error>),
-                none: Option.None<int, Error>);
-
-    private Option<int, Error> RunDropCommand(DropOptions opts) =>
-        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles)
-            .Match(
-                some: _ => ConfigLoader.LoadMigration(Environment.GetFilePath(opts.File, fileShouldExist: true), Environment)
-                    .Match(
-                        some: x =>
-                            Providers
-                                .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
-                                .SelectLogOptions(Logger, opts.Verbosity)
-                                .OverrideConnectionFactory(ConnectionFactory)
-                                .Match(
-                                    some: builder =>
-                                    {
-                                        var res = Providers.DropDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
-                                        if (!res.HasValue)
-                                        {
-                                            Error err = null;
-                                            res.MatchNone(error => err = error);
-                                            return Option.None<int, Error>(err);
-                                        }
-
-                                        return Option.Some<int, Error>(0);
-                                    },
-                                    none: Option.None<int, Error>),
-                        none: Option.None<int, Error>),
-                none: Option.None<int, Error>);
-
-    private Option<int, Error> WrapException(Func<Option<int, Error>> f)
+    private int RunUpgradeCommand(UpgradeOptions opts)
     {
-        try
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles);
+        var configFilePath = Environment.GetFilePath(opts.File, fileShouldExist: true);
+        var x = ConfigLoader.LoadMigration(configFilePath, Environment);
+        var builder = Providers
+            .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+            .SelectJournal(x.Provider, x.JournalTo)
+            .SelectTransaction(x.Transaction)
+            .SelectLogOptions(Logger, opts.Verbosity)
+            .SelectScripts(x.Scripts, x.Naming)
+            .AddVariables(x.Vars, x.DisableVars)
+            .OverrideConnectionFactory(ConnectionFactory);
+        
+        var engine = builder.Build();
+        if (opts.Ensure)
         {
-            return f();
+            Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
         }
-        catch (Exception ex)
-        {
-            return Option.None<int, Error>(Error.Create(ex.Message));
-        }
+
+        var result = engine.PerformUpgrade();
+
+        AssertSuccess(result, "perform upgrade");
+
+        return 0;
     }
 
-    private Option<int, Error> RunInitCommand(InitOptions opts)
-        => Environment.GetFilePath(opts.File, fileShouldExist: false)
-            .Match(
-                some: path => Environment.WriteFile(path, GetDefaultConfigFile()).Match(
-                        some: x => 0.Some<int, Error>(),
-                        none: Option.None<int, Error>),
-                none: Option.None<int, Error>);
+    private int RunMarkAsExecutedCommand(MarkAsExecutedOptions opts)
+    {
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles);
+        var configFilePath = Environment.GetFilePath(opts.File, fileShouldExist: true);
+        var x = ConfigLoader.LoadMigration(configFilePath, Environment);
+        var builder = Providers
+            .CreateUpgradeEngineBuilder(x.Provider, x.ConnectionString, x.ConnectionTimeoutSec)
+            .SelectJournal(x.Provider, x.JournalTo)
+            .SelectTransaction(x.Transaction)
+            .SelectLogOptions(Logger, opts.Verbosity)
+            .SelectScripts(x.Scripts, x.Naming)
+            .AddVariables(x.Vars, x.DisableVars)
+            .OverrideConnectionFactory(ConnectionFactory);
+        
+            var engine = builder.Build();
+            if (opts.Ensure)
+            {
+                Providers.EnsureDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
+            }
+
+            if (!engine.TryConnect(out var message))
+            {
+                throw new FailedToConnectException(message);
+            }
+            
+            return AssertSuccess("mark as executed", engine.MarkAsExecuted);
+    }
+
+    private int RunDropCommand(DropOptions opts)
+    {
+        Environment.LoadEnvironmentVariables(opts.File, opts.EnvFiles);
+        var configFilePath = Environment.GetFilePath(opts.File, fileShouldExist: true);
+        var x = ConfigLoader.LoadMigration(configFilePath, Environment);
+        Providers.DropDb(Logger, x.Provider, x.ConnectionString, x.ConnectionTimeoutSec);
+        return 0;
+    }
+
+    private int RunInitCommand(InitOptions opts)
+    {
+        var filePath = Environment.GetFilePath(opts.File, fileShouldExist: false);
+        Environment.WriteFile(filePath, GetDefaultConfigFile());
+        return 0;
+    }
 
     public static string GetDefaultConfigFile()
     {
@@ -288,5 +222,40 @@ public class ToolEngine
         
         using var reader = new StreamReader(resourceStream);
         return reader.ReadToEnd();
+    }
+    
+    private RunResult WrapException(Func<int> f)
+    {
+        try
+        {
+            var x = f();
+            return new RunResult(x, null);
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.FlattenErrorMessages();
+            Console.WriteLine(msg);
+            return new RunResult(1, msg);
+        }
+    }
+
+
+    private static int AssertSuccess(string description, Func<DatabaseUpgradeResult> action) => 
+        AssertSuccess(action(), description);
+
+    private static int AssertSuccess(DatabaseUpgradeResult result, string description)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        if (result.Successful) return 0;
+
+        var msg = $"Failed to {description}: {result.Error?.FlattenErrorMessages() ?? "Undefined error"}";
+
+        if (result.ErrorScript != null)
+        {
+            msg += $"{System.Environment.NewLine}    Script: {result.ErrorScript.Name}";
+        }
+
+        throw new CommandFailedException(msg);
     }
 }

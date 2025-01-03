@@ -1,11 +1,10 @@
 using DotNetEnv;
-using Optional;
 
 namespace DbUp.Cli;
 
 public static class EnvironmentExtensions
 {
-    public static Option<string, Error> GetFilePath(this IEnvironment environment, string configFilePath, bool? fileShouldExist = null)
+    public static string GetFilePath(this IEnvironment environment, string configFilePath, bool? fileShouldExist = null)
     {
         if (environment == null)
             throw new ArgumentNullException(nameof(environment));
@@ -17,17 +16,18 @@ public static class EnvironmentExtensions
             : Path.Combine(environment.GetCurrentDirectory(), configFilePath)
         ).FullName;
 
-        string error = fileShouldExist.HasValue && environment.FileExists(fullPath) != fileShouldExist.Value
-            ? fileShouldExist.Value
-                ? Constants.ConsoleMessages.FileNotFound
-                : Constants.ConsoleMessages.FileAlreadyExists
-            : null;
+        if (fileShouldExist.HasValue && environment.FileExists(fullPath) != fileShouldExist.Value)
+        {
+            if (fileShouldExist.Value)
+                throw new FileNotFoundException(fullPath);
+            throw new FileAlreadyExistsException(fullPath);
+        }
         
         // consider returning the fullPath. Is there a reason not to?
-        return fullPath.SomeWhen(x => error == null, () => Error.Create(error, configFilePath));
+        return fullPath;
     }
     
-    public static Option<bool, Error> LoadEnvironmentVariables(this IEnvironment environment, string configFilePath, IEnumerable<string> envFiles)
+    public static void LoadEnvironmentVariables(this IEnvironment environment, string configFilePath, IEnumerable<string> envFiles)
     {
         if (environment == null)
             throw new ArgumentNullException(nameof(environment));
@@ -50,20 +50,9 @@ public static class EnvironmentExtensions
         {
             foreach (var file in envFiles)
             {
-                Error error = null;
-                environment.GetFilePath(file, fileShouldExist: true)
-                    .Match(
-                        some: path => Env.Load(path),
-                        none: err => error = err);
-
-                if (error != null)
-                {
-                    return Option.None<bool, Error>(error);
-                }
+                Env.Load(environment.GetFilePath(file, fileShouldExist: true));
             }
         }
-
-        return true.Some<bool, Error>();
     }
 
     private static void Load(this IEnvironment environment, string folder, string file)
