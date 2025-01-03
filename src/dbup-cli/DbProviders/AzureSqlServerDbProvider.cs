@@ -1,7 +1,6 @@
 using DbUp.Builder;
 using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine.Output;
-using Optional;
 
 namespace DbUp.Cli.DbProviders;
 
@@ -9,18 +8,16 @@ public class AzureSqlServerDbProvider : DbProvider
 {
     public override Provider Provider => Provider.SqlServer;
 
-    public override Option<UpgradeEngineBuilder, Error> CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
+    public override UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         UseAzureSqlIntegratedSecurity(connectionInfo.ConnectionString)
             ? DeployChanges.To
                 .AzureSqlDatabaseWithIntegratedSecurity(connectionInfo.ConnectionString)
                 .WithExecutionTimeout(connectionInfo.Timeout)
-                .Some<UpgradeEngineBuilder, Error>()
             : DeployChanges.To
                 .SqlDatabase(connectionInfo.ConnectionString)
-                .WithExecutionTimeout(connectionInfo.Timeout)
-                .Some<UpgradeEngineBuilder, Error>();
+                .WithExecutionTimeout(connectionInfo.Timeout);
 
-    public override Option<bool, Error> EnsureDb(IUpgradeLog logger, ConnectionInfo connectionInfo)
+    public override void EnsureDb(IUpgradeLog logger, ConnectionInfo connectionInfo)
     {
         if (UseAzureSqlIntegratedSecurity(connectionInfo.ConnectionString))
         {
@@ -30,10 +27,9 @@ public class AzureSqlServerDbProvider : DbProvider
         {
             EnsureDatabase.For.SqlDatabase(connectionInfo.ConnectionString, logger, connectionInfo.ConnectionTimeoutSec);
         }
-        return true.Some<bool, Error>();
     }
 
-    public override Option<bool, Error> DropDb(IUpgradeLog logger, ConnectionInfo connectionInfo)
+    public override void DropDb(IUpgradeLog logger, ConnectionInfo connectionInfo)
     {
         if (UseAzureSqlIntegratedSecurity(connectionInfo.ConnectionString))
         {
@@ -43,7 +39,6 @@ public class AzureSqlServerDbProvider : DbProvider
         {
             DropDatabase.For.SqlDatabase(connectionInfo.ConnectionString, logger, connectionInfo.ConnectionTimeoutSec);
         }
-        return true.Some<bool, Error>();
     }
     
     private static bool UseAzureSqlIntegratedSecurity(string connectionString) =>

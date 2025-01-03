@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using DbUp.Builder;
 using DbUp.Engine;
 using DbUp.Support;
-using Optional;
 
 namespace DbUp.Cli;
 
@@ -25,10 +24,9 @@ public static class ScriptProviderHelper
             RunGroupOrder = batch.Order
         };
 
-    public static Option<CustomFileSystemScriptOptions, Error> GetFileSystemScriptOptions(ScriptBatch batch, NamingOptions naming)
+    public static CustomFileSystemScriptOptions GetFileSystemScriptOptions(ScriptBatch batch, NamingOptions naming)
     {
-        if (batch == null)
-            throw new ArgumentNullException(nameof(batch));
+        ArgumentNullException.ThrowIfNull(batch);
         if (batch.Encoding == null)
             throw new ArgumentNullException(nameof(batch.Encoding), "Encoding can't be null");
 
@@ -49,7 +47,7 @@ public static class ScriptProviderHelper
             }
             catch (ArgumentException ex)
             {
-                return Option.None<CustomFileSystemScriptOptions, Error>(Error.Create(Constants.ConsoleMessages.InvalidEncoding, batch.Folder, ex.Message));
+                throw new InvalidEncodingException(batch.Folder, ex);
             }
         }
 
@@ -61,7 +59,7 @@ public static class ScriptProviderHelper
             UseOnlyFilenameForScriptName = naming.UseOnlyFileName,
             PrefixScriptNameWithBaseFolderName = naming.IncludeBaseFolderName,
             Prefix = naming.Prefix
-        }.Some<CustomFileSystemScriptOptions, Error>();
+        };
     }
 
     public static Func<string, bool> CreateFilter(string filterString, bool matchFullPath = false)
@@ -111,45 +109,38 @@ public static class ScriptProviderHelper
         return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
     }
 
-    public static Option<UpgradeEngineBuilder, Error> SelectScripts(this Option<UpgradeEngineBuilder, Error> builderOrNone, IList<ScriptBatch> scripts, NamingOptions naming)
+    public static UpgradeEngineBuilder SelectScripts(this UpgradeEngineBuilder builder, IList<ScriptBatch> scripts, NamingOptions naming)
     {
-        if (scripts == null)
-            throw new ArgumentNullException(nameof(scripts));
+        ArgumentNullException.ThrowIfNull(scripts);
 
         if (scripts.Count == 0)
         {
-            return Option.None<UpgradeEngineBuilder, Error>(Error.Create(Constants.ConsoleMessages.ScriptShouldPresent));
+            throw new MissingScriptException();
         }
 
         foreach (var script in scripts)
         {
             if (!Directory.Exists(script.Folder))
             {
-                return Option.None<UpgradeEngineBuilder, Error>(Error.Create(Constants.ConsoleMessages.FolderNotFound, script.Folder));
+                throw new FolderNotFoundException(script.Folder);
             }
         }
 
         foreach (var script in scripts)
         {
-            builderOrNone = builderOrNone.AddScripts(script, naming ?? NamingOptions.Default);
+            builder = builder.AddScripts(script, naming ?? NamingOptions.Default);
         }
 
-        return builderOrNone;
+        return builder;
     }
 
-    private static Option<UpgradeEngineBuilder, Error> AddScripts(this Option<UpgradeEngineBuilder, Error> builderOrNone, ScriptBatch script, NamingOptions naming) =>
-        builderOrNone.Match(
-            some: builder =>
-                GetFileSystemScriptOptions(script, naming).Match(
-                    some: options =>
-                    {
-                        builder.WithScripts(
-                            new CustomFileSystemScriptProvider(
-                                script.Folder,
-                                options,
-                                GetSqlScriptOptions(script)));
-                        return builder.Some<UpgradeEngineBuilder, Error>();
-                    },
-                    none: Option.None<UpgradeEngineBuilder, Error>),
-            none: Option.None<UpgradeEngineBuilder, Error>);
+    private static UpgradeEngineBuilder AddScripts(this UpgradeEngineBuilder builder, ScriptBatch script, NamingOptions naming)
+    {
+        var options = GetFileSystemScriptOptions(script, naming);
+        return builder.WithScripts(
+            new CustomFileSystemScriptProvider(
+                script.Folder,
+                options,
+                GetSqlScriptOptions(script)));
+    }
 }

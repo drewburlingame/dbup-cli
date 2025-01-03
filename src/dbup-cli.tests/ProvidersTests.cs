@@ -1,9 +1,8 @@
-using DbUp.Builder;
+using DbUp.Cli.DbProviders;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
 using DbUp.SqlServer;
 using FluentAssertions;
-using Optional;
 
 namespace DbUp.Cli.Tests;
 
@@ -17,20 +16,21 @@ public class ProvidersTests
     ];
 
     [Fact]
-    public void SelectDbProvider_ShouldReturnNone_IfAProviderIsNotSupported()
+    public void SelectDbProvider_ShouldThrow_IfAProviderIsNotSupported()
     {
-        var builder = Providers.CreateUpgradeEngineBuilder(Provider.UnsupportedProvider, 
-            @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True", 60);
-        builder.HasValue.Should().BeFalse();
-        builder.GetErrorOrThrow().Should().Be("Unsupported provider: UnsupportedProvider");
+        var ex = Assert.Throws<UnsupportedProviderException>(() => Providers.CreateUpgradeEngineBuilder(
+            Provider.UnsupportedProvider,
+            @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True",
+            60));
+
+        ex.Message.Should().Be("Unsupported provider: UnsupportedProvider");
     }
 
     [Fact]
     public void SelectDbProvider_ShouldReturnReturnAValidProvider_ForSqlServer()
     {
-        var option = Providers.CreateUpgradeEngineBuilder(Provider.SqlServer, 
+        var builder = Providers.CreateUpgradeEngineBuilder(Provider.SqlServer, 
             @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True", 60);
-        var builder = option.GetValueOrThrow();
         
         builder.Configure(c => c.ConnectionManager.Should().BeOfType(typeof(SqlConnectionManager)));
         builder.WithScripts(new TestScriptProvider(scripts));

@@ -1,6 +1,4 @@
-﻿using DbUp.Cli.Tests.TestInfrastructure;
-using FluentAssertions;
-using Optional;
+﻿using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ConfigLoaderTests;
 
@@ -31,7 +29,7 @@ public class LoadMigrationTests
             dbUp:
               version: 2
             """));
-        error.Should().Be("The only supported version of a config file is '1'");
+        error.Should().Be("Unsupported version of a config file: '2'. Expected `1`");
     }
 
     [Fact]
@@ -120,7 +118,7 @@ public class LoadMigrationTests
                                                        connectionString: %ERR%
                                                      """);
 
-        error.Should().Be("Configuration file error: While scanning for the next token, found character that cannot start any token.");
+        error.Should().Be("Configuration file error > While scanning for the next token, found character that cannot start any token.");
     }
 
     [Fact]
@@ -194,7 +192,7 @@ public class LoadMigrationTests
                                                  provider: postgre1
                                                """);
 
-        error.Should().Be("Configuration file error: Requested value 'postgre1' was not found. Exception during deserialization");
+        error.Should().Be("Configuration file error > Exception during deserialization > Requested value 'postgre1' was not found.");
     }
 
     [Fact]
@@ -205,7 +203,7 @@ public class LoadMigrationTests
                                                   transaction: WrongTransaction
                                                 """);
 
-        error.Should().Be("Configuration file error: Requested value 'WrongTransaction' was not found. Exception during deserialization");
+        error.Should().Be("Configuration file error > Exception during deserialization > Requested value 'WrongTransaction' was not found.");
     }
 
     private Migration LoadMigrationFromYaml(string yaml) => 
@@ -214,29 +212,9 @@ public class LoadMigrationTests
     private string LoadMigrationErrorFromYaml(string yaml) => 
         LoadMigrationError(host.Environment.WriteFileInMem(yaml));
 
-    private Migration LoadMigration(string path)
-    {
-        var migrationOption = ConfigLoader.LoadMigration(path.Some<string, Error>(), host.Environment);
-        if (migrationOption.HasValue)
-        {
-            return migrationOption.ValueOr(() => null);
-        }
-        
-        migrationOption.MatchNone(err =>
-        {
-            Assert.Fail(err.Message);
-        });
-        return null;
-    }
-    
-    private string LoadMigrationError(string path)
-    {
-        var migrationOption = ConfigLoader.LoadMigration(path.Some<string, Error>(), host.Environment);
-        if (migrationOption.HasValue)
-        {
-            Assert.Fail("expected LoadMigration to fail");
-        }
+    private Migration LoadMigration(string path) => ConfigLoader.LoadMigration(path, host.Environment);
 
-        return migrationOption.GetErrorOrThrow();
-    }
+    private string LoadMigrationError(string path) => Assert
+        .ThrowsAny<Exception>(() => ConfigLoader.LoadMigration(path, host.Environment))
+        .FlattenErrorMessages();
 }

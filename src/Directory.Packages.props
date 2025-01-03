@@ -10,7 +10,6 @@
     <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-  
   <ItemGroup>
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="dbup-core" Version="6.0.4" />
@@ -21,11 +20,9 @@
     <PackageVersion Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
     <PackageVersion Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
     <PackageVersion Include="Npgsql" Version="9.0.2" />
-    <PackageVersion Include="Optional" Version="4.0.0" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.0" />
     <PackageVersion Include="YamlDotNet" Version="16.2.1" />
   </ItemGroup>
-  
   <ItemGroup Label="test packages">
     <PackageVersion Include="FakeItEasy" Version="8.3.0" />
     <PackageVersion Include="FluentAssertions" Version="7.0.0" />

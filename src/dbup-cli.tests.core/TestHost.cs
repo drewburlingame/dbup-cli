@@ -1,6 +1,5 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
-using Optional;
 
 namespace DbUp.Cli.Tests;
 
@@ -16,7 +15,7 @@ public class TestHost
         Environment = new TestEnvironment();
         var recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
         TestConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-        ToolEngine = new ToolEngine(Environment, Logger, ((IConnectionFactory) TestConnectionFactory).Some()); 
+        ToolEngine = new ToolEngine(Environment, Logger, TestConnectionFactory); 
     }
     
     public string EnsureTempDbUpYmlFileExists()

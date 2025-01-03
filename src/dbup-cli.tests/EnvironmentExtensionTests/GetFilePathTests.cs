@@ -27,9 +27,7 @@ public class GetFilePathTests
     [MemberData(nameof(FilePaths))]
     public void ShouldReturnAValidFileName_When_(string _, string path, string expected)
     {
-        var configPath = host.Environment.GetFilePath(path);
-        configPath.HasValue.Should().BeTrue();
-        configPath.GetValueOrThrow().Should().Be(expected);
+        host.Environment.GetFilePath(path).Should().Be(expected);
     }
 
     public static TheoryData<string, bool> FilesByExistence => new()
@@ -42,12 +40,19 @@ public class GetFilePathTests
     [MemberData(nameof(FilesByExistence))]
     public void ShouldReturnNone_When_ExistingOrNonExistingDoesNotMatchExpectation(string filename, bool exists)
     {
-        var configPath = host.Environment.GetFilePath(filename, fileShouldExist: !exists);
-        configPath.HasValue.Should().BeFalse();
-        configPath.GetErrorOrThrow().Should()
-            .Be(exists 
-                ? $"File already exists: {filename}" 
-                : $"File is not found: {filename}");
+        var ex = Assert.ThrowsAny<DbUpCliException>(() => host.Environment.GetFilePath(filename, fileShouldExist: !exists));
+        if (exists)
+        {
+            ex.Should().BeOfType<FileAlreadyExistsException>();
+            ex.Message.Should().StartWith("File already exists:");
+            ex.Message.Should().EndWith(filename);
+        }
+        else
+        {
+            ex.Should().BeOfType<FileNotFoundException>();
+            ex.Message.Should().StartWith("File is not found:");
+            ex.Message.Should().EndWith(filename);
+        }
     }
     
     [Theory]
@@ -55,6 +60,6 @@ public class GetFilePathTests
     public void ShouldReturnFilePath_When_ExistingOrNonExistingMatchesExpectation(string filename, bool exists)
     {
         var configPath = host.Environment.GetFilePath(filename, fileShouldExist: exists);
-        configPath.HasValue.Should().BeTrue();
+        configPath.Should().NotBeNull();
     }
 }

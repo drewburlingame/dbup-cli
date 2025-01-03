@@ -1,5 +1,4 @@
-﻿using DbUp.Cli.Tests.TestInfrastructure;
-using FluentAssertions;
+﻿using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
@@ -46,6 +45,6 @@ public class GetFileSystemScriptOptionsTests
     private static CustomFileSystemScriptOptions GetFileSystemScriptOptions(NamingOptions namingOptions, bool subFolders = true)
     {
         var batch = new ScriptBatch("", true, subFolders: subFolders, 5, Constants.Default.Encoding);
-        return ScriptProviderHelper.GetFileSystemScriptOptions(batch, namingOptions).GetValueOrThrow();
+        return ScriptProviderHelper.GetFileSystemScriptOptions(batch, namingOptions);
     }
 }

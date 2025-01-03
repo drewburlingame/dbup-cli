@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using Optional;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -11,81 +10,62 @@ public static class ConfigLoader
 {
     // TODO: environment should eventually be required. Using optional param for now as incremental step to keep tests passing during refactor.
     // will require using IEnvironment to get environment variables, with a bonus that we can isolate changes within tests
-    public static Option<Migration, Error> LoadMigration(Option<string, Error> configFilePath, IEnvironment environment = null) =>
-        configFilePath.Match(
-            some: path =>
-            {
-                var yml = environment is null
-                    ? File.ReadAllText(path, Encoding.UTF8)
-                    : environment.ReadFile(path);
-                
-                if(yml is null)
-                    return Option.None<Migration, Error>(Error.Create("config not found at {0}", configFilePath));
+     public static Migration LoadMigration(string configFilePath, IEnvironment environment = null)
+     {
+         var path = configFilePath;
+         var yml = environment is null
+             ? File.ReadAllText(path, Encoding.UTF8)
+             : environment.ReadFile(path);
 
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .Build();
+         if (yml is null)
+             throw new ConfigFileNotFoundException(configFilePath);
+         
+         var deserializer = new DeserializerBuilder()
+             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+             .Build();
+         
+         Migration migration;
+         try
+         {
+             migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
+         }
+         catch (YamlException e)
+         {
+             throw new ConfigParsingException(e.Message, e);
+         }
 
-                Migration migration = null;
+         if (migration.Version != "1")
+         {
+             throw new UnsupportedConfigFileVersionException(migration.Version);
+         }
 
-                try
-                {
-                    migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
-                }
-                catch (YamlException ex)
-                {
-                    var msg =  (ex.InnerException != null ? ex.InnerException.Message + " " : "") + ex.Message;
-                    return Option.None<Migration, Error>(Error.Create(Constants.ConsoleMessages.ParsingError, msg));
-                }   
+         migration.Scripts ??= new List<ScriptBatch>();
 
-                if( migration.Version != "1" )
-                {
-                    return Option.None<Migration, Error>(Error.Create(Constants.ConsoleMessages.NotSupportedConfigFileVersion, "1"));
-                }
+         if (migration.Scripts.Count == 0)
+         {
+             migration.Scripts.Add(ScriptBatch.Default);
+         }
 
-                migration.Scripts ??= new List<ScriptBatch>();
+         migration.Vars ??= new Dictionary<string, string>();
 
-                if (migration.Scripts.Count == 0)
-                {
-                    migration.Scripts.Add(ScriptBatch.Default);
-                }
+         ValidateVarNames(migration.Vars);
 
-                migration.Vars ??= new Dictionary<string, string>();
+         migration.ExpandVariables();
 
-                if (!ValidateVarNames(migration.Vars, out var errMessage))
-                {
-                    return Option.None<Migration, Error>(Error.Create(errMessage));
-                }
+         NormalizeScriptFolders(path, migration.Scripts);
 
-                migration.ExpandVariables();
+         return migration;
+     }
 
-                NormalizeScriptFolders(path, migration.Scripts);
 
-                return migration.Some<Migration, Error>();
-            },
-            none: error => Option.None<Migration, Error>(error));
-
-    private static bool ValidateVarNames(Dictionary<string, string> vars, out string errMessage)
+     private static void ValidateVarNames(Dictionary<string, string> vars)
     {
-        errMessage = null;
-
         Regex exp = new("^[a-z0-9_-]+$", RegexOptions.IgnoreCase);
-
-        foreach (var n in vars.Keys)
+        var invalidNames = vars.Keys.Where(n => !exp.IsMatch(n)).ToList();
+        if (invalidNames.Count > 0)
         {
-            if (!exp.IsMatch(n))
-            {
-                if (errMessage == null)
-                {
-                    errMessage = "Found one or more variables with an invalid name. Variable name should contain only letters, digits, - and _.";
-                    errMessage += Environment.NewLine;
-                    errMessage += "Check these names:";
-                }
-                errMessage += "    " + n;
-            }
+            throw new InvalidVarNamesException(invalidNames);
         }
-
-        return errMessage == null;
     }
 
     private static void NormalizeScriptFolders(string configFilePath, IList<ScriptBatch> scripts)

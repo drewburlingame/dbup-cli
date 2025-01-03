@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Optional;
 
 namespace DbUp.Cli;
 
@@ -14,27 +13,16 @@ public class CliEnvironment: IEnvironment
     
     public virtual string ReadFile(string path) => File.ReadAllText(path, Encoding.UTF8);
     
-    public virtual Option<bool, Error> WriteFile(string path, string content)
+    public virtual void WriteFile(string path, string content)
     {
-        if (path == null)
-            throw new ArgumentNullException(nameof(path));
-        if (content == null)
-            throw new ArgumentNullException(nameof(content));
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentException.ThrowIfNullOrWhiteSpace(content);
 
         if (File.Exists(path))
         {
-            return Option.None<bool, Error>(Error.Create(Constants.ConsoleMessages.FileAlreadyExists, path));
+            throw new FileAlreadyExistsException(path);
         }
 
-        try
-        {
-            Encoding utf8WithoutBom = new UTF8Encoding(false);
-            File.WriteAllText(path, content, utf8WithoutBom);
-            return true.Some<bool, Error>();
-        }
-        catch (Exception ex)
-        {
-            return Option.None<bool, Error>(Error.Create(ex.Message));
-        }
+        File.WriteAllText(path, content, new UTF8Encoding(false));
     }
 }

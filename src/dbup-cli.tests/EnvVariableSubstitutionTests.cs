@@ -1,7 +1,6 @@
 using DbUp.Cli.Tests.TestInfrastructure;
 using FakeItEasy;
 using FluentAssertions;
-using Optional;
 
 namespace DbUp.Cli.Tests;
 
@@ -16,14 +15,8 @@ public class EnvVariableSubstitutionTests
         const string connstr = "connection string";
         Environment.SetEnvironmentVariable(nameof(connstr), connstr);
 
-        var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
-
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.ConnectionString.Should().Be(connstr);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        migration.ConnectionString.Should().Be(connstr);
     }
 
     [Fact]
@@ -32,14 +25,8 @@ public class EnvVariableSubstitutionTests
         const string folder = "folder_name";
         Environment.SetEnvironmentVariable(nameof(folder), folder);
 
-        var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
-
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Scripts[0].Folder.Should().EndWith(folder);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        migration.Scripts[0].Folder.Should().EndWith(folder);
     }
 
     [Fact]
@@ -48,14 +35,8 @@ public class EnvVariableSubstitutionTests
         const string var1 = "variable_value";
         Environment.SetEnvironmentVariable(nameof(var1), var1);
 
-        var migrationOrNone = ConfigLoader.LoadMigration(EnvVarsYmlPath.Some<string, Error>());
-
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Vars["Var1"].Should().Be(var1);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        migration.Vars["Var1"].Should().Be(var1);
     }
 
     [Fact]
@@ -68,18 +49,11 @@ public class EnvVariableSubstitutionTests
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
             
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-            
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>())
-            .MatchNone(error => Assert.Fail(error.Message));
 
-        var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>());
 
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Vars["VarA"].Should().Be(varA);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        migration.Vars["VarA"].Should().Be(varA);
     }
 
     [Fact]
@@ -92,18 +66,11 @@ public class EnvVariableSubstitutionTests
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-            
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>())
-            .MatchNone(error => Assert.Fail(error.Message));
 
-        var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
+        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>());
 
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Vars["VarB"].Should().Be(varB);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        migration.Vars["VarB"].Should().Be(varB);
     }
 
     [Fact]
@@ -117,23 +84,16 @@ public class EnvVariableSubstitutionTests
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-            
+
         env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>
-            {
-                Path.Combine("..", "varC.env"),   // relative path
-                ProjectPaths.GetConfigPath("varD.env")   // absolute path
-            })
-            .MatchNone(error => Assert.Fail(error.Message));
+        {
+            Path.Combine("..", "varC.env"), // relative path
+            ProjectPaths.GetConfigPath("varD.env") // absolute path
+        });
 
-        var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
-
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Vars["VarC"].Should().Be(varC);
-                migration.Vars["VarD"].Should().Be(varD);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        migration.Vars["VarC"].Should().Be(varC);
+        migration.Vars["VarD"].Should().Be(varD);
     }
 
     [Fact]
@@ -181,19 +141,12 @@ public class EnvVariableSubstitutionTests
             {
                 Path.Combine("..", "file3.env"),
                 Path.Combine("..", "file4.env")
-            })
-            .MatchNone(error => Assert.Fail(error.Message));
+            });
 
-        var migrationOrNone = ConfigLoader.LoadMigration(dotEnvVarsPath.Some<string, Error>());
-
-        migrationOrNone.Match(
-            some: migration =>
-            {
-                migration.Vars["VarA"].Should().Be(varA);
-                migration.Vars["VarB"].Should().Be(varB);
-                migration.Vars["VarC"].Should().Be(varC);
-                migration.Vars["VarD"].Should().Be(varD);
-            },
-            none: err => Assert.Fail(err.Message));
+        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        migration.Vars["VarA"].Should().Be(varA);
+        migration.Vars["VarB"].Should().Be(varB);
+        migration.Vars["VarC"].Should().Be(varC);
+        migration.Vars["VarD"].Should().Be(varD);
     }
 }
