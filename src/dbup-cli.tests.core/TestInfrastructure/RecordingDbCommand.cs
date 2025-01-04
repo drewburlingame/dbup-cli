@@ -51,9 +51,9 @@ public class RecordingDbCommand: IDbCommand
         if (CommandText == "error")
             ThrowError();
 
-        if (nonQueryResults.ContainsKey(CommandText))
-            return nonQueryResults[CommandText]();
-        return 0;
+        return nonQueryResults.TryGetValue(CommandText, out var result) 
+            ? result() 
+            : 0;
     }
 
     private void ThrowError()
@@ -97,12 +97,9 @@ public class RecordingDbCommand: IDbCommand
             return 0;
         }
 
-        if (scalarResults.ContainsKey(CommandText))
-        {
-            return scalarResults[CommandText]();
-        }
-
-        return null;
+        return scalarResults.TryGetValue(CommandText, out var result) 
+            ? result() 
+            : null;
     }
 
     public IDbConnection Connection { get; set; }

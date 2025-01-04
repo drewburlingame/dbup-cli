@@ -1,0 +1,49 @@
+﻿[I] Master ConnectionString => Host=127.0.0.1;Port=port_num;Database=postgres;Username=postgres;Password=******
+[I] Created database DbUp_UpgradeCommand_ShouldFailOnCommandTimeout
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script '001.sql'
+[I] Checking whether journal table exists
+[I] Creating the "schemaversions" table
+[I] The "schemaversions" table has been created
+[I] DB exception has occurred in script: '001.sql'
+[E] Script block number: 0; Message: Exception while reading from stream
+[E] Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.TimeoutException: Timeout during reading attempt
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery()
+   at DbUp.Support.ScriptExecutor.ExecuteNonQuery(IDbCommand command) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 201
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_1.<Execute>b__2() in /_/src/dbup-core/Support/ScriptExecutor.cs:line 153
+   at DbUp.Postgresql.PostgresqlScriptExecutor.ExecuteCommandsWithinExceptionHandler(Int32 index, SqlScript script, Action executeCommand) in /_/src/dbup-postgresql/PostgresqlScriptExecutor.cs:line 37
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_0.<Execute>b__0(Func`1 dbCommandFactory) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 151
+   at DbUp.Engine.Transactions.NoTransactionStrategy.Execute(Action`1 action) in /_/src/dbup-core/Engine/Transactions/NoTransactionStrategy.cs:line 15
+   at DbUp.Engine.Transactions.DatabaseConnectionManager.ExecuteCommandsWithManagedConnection(Action`1 action) in /_/src/dbup-core/Engine/Transactions/DatabaseConnectionManager.cs:line 131
+   at DbUp.Support.ScriptExecutor.Execute(SqlScript script, IDictionary`2 variables) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 126
+[E] Upgrade failed due to an unexpected exception: Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.TimeoutException: Timeout during reading attempt
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery()
+   at DbUp.Support.ScriptExecutor.ExecuteNonQuery(IDbCommand command) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 201
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_1.<Execute>b__2() in /_/src/dbup-core/Support/ScriptExecutor.cs:line 153
+   at DbUp.Postgresql.PostgresqlScriptExecutor.ExecuteCommandsWithinExceptionHandler(Int32 index, SqlScript script, Action executeCommand) in /_/src/dbup-postgresql/PostgresqlScriptExecutor.cs:line 37
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_0.<Execute>b__0(Func`1 dbCommandFactory) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 151
+   at DbUp.Engine.Transactions.NoTransactionStrategy.Execute(Action`1 action) in /_/src/dbup-core/Engine/Transactions/NoTransactionStrategy.cs:line 15
+   at DbUp.Engine.Transactions.DatabaseConnectionManager.ExecuteCommandsWithManagedConnection(Action`1 action) in /_/src/dbup-core/Engine/Transactions/DatabaseConnectionManager.cs:line 131
+   at DbUp.Support.ScriptExecutor.Execute(SqlScript script, IDictionary`2 variables) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 126
+   at DbUp.Engine.UpgradeEngine.PerformUpgrade() in /_/src/dbup-core/Engine/UpgradeEngine.cs:line 84
+Failed to perform upgrade: Exception while reading from stream > Timeout during reading attempt @ Script: 001.sql

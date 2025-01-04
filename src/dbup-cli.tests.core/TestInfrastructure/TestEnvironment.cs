@@ -1,11 +1,10 @@
 namespace DbUp.Cli.Tests.TestInfrastructure;
 
-public class TestEnvironment(string currentDirectory = null) : CliEnvironment
+public class TestEnvironment(string currentDirectory = null) : 
+    CliEnvironment(currentDirectory ?? ProjectPaths.TempDir)
 {
     private const string inMemFilePrefix = "/in-mem/";
     private Dictionary<string, string> fileByPath = new();
-    
-    public override string GetCurrentDirectory() => currentDirectory ?? ProjectPaths.TempDir;
 
     /// <summary>Save the file in memory and return a path prefixed with inMem root</summary>
     public string WriteFileInMem(string content, string path = null)

@@ -6,14 +6,12 @@ public static class EnvironmentExtensions
 {
     public static string GetFilePath(this IEnvironment environment, string configFilePath, bool? fileShouldExist = null)
     {
-        if (environment == null)
-            throw new ArgumentNullException(nameof(environment));
-        if (string.IsNullOrWhiteSpace(configFilePath))
-            throw new ArgumentException("Parameter can't be null or white space", nameof(configFilePath));
+        ArgumentNullException.ThrowIfNull(environment);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configFilePath);
 
         var fullPath = new FileInfo(Path.IsPathRooted(configFilePath)
             ? configFilePath
-            : Path.Combine(environment.GetCurrentDirectory(), configFilePath)
+            : Path.Combine(environment.CurrentDirectory, configFilePath)
         ).FullName;
 
         if (fileShouldExist.HasValue && environment.FileExists(fullPath) != fileShouldExist.Value)
@@ -29,15 +27,13 @@ public static class EnvironmentExtensions
     
     public static void LoadEnvironmentVariables(this IEnvironment environment, string configFilePath, IEnumerable<string> envFiles)
     {
-        if (environment == null)
-            throw new ArgumentNullException(nameof(environment));
-        if (configFilePath == null)
-            throw new ArgumentNullException(nameof(configFilePath));
+        ArgumentNullException.ThrowIfNull(environment);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configFilePath);
         
         // .env file  in a current folder
-        environment.Load(environment.GetCurrentDirectory(), Constants.Default.DotEnvFileName);
+        environment.Load(environment.CurrentDirectory, Constants.Default.DotEnvFileName);
         // .env.local file  in a current folder
-        environment.Load(environment.GetCurrentDirectory(), Constants.Default.DotEnvLocalFileName);
+        environment.Load(environment.CurrentDirectory, Constants.Default.DotEnvLocalFileName);
 
         var configFileDirectoryName = new FileInfo(configFilePath).DirectoryName!;
         

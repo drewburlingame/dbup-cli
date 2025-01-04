@@ -1,5 +1,8 @@
+using CommandDotNet;
+using CommandDotNet.TestTools;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
+using TestEnvironment = DbUp.Cli.Tests.TestInfrastructure.TestEnvironment;
 
 namespace DbUp.Cli.Tests;
 
@@ -8,15 +11,24 @@ public class TestHost
     public CaptureLogsLogger Logger { get; } = new();
     public TestEnvironment Environment { get; }
     public DelegateConnectionFactory TestConnectionFactory { get; }
-    public ToolEngine ToolEngine { get; private set; }
+    public AppRunner AppRunner { get; }
 
     public TestHost()
     {
         Environment = new TestEnvironment();
         var recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
         TestConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
-        ToolEngine = new ToolEngine(Environment, Logger, TestConnectionFactory); 
+        AppRunner = Program.NewAppRunner(
+            Environment,
+            console => new CaptureLogsLogger(console),
+            TestConnectionFactory);
     }
+
+    public AppRunnerResult Run(string args) => 
+        AppRunner.RunInMem(args, Ambient.WriteLine, config: CommandDotNetTestConfigs.Default);
+    
+    public AppRunnerResult Run(params string[] args) => 
+        AppRunner.RunInMem(args, Ambient.WriteLine, config: CommandDotNetTestConfigs.Default);
     
     public string EnsureTempDbUpYmlFileExists()
     {
@@ -24,7 +36,7 @@ public class TestHost
         if (!File.Exists(dbupYmlPath))
         {
             EnsureDirectoryExists(ProjectPaths.TempDir);
-            File.WriteAllText(dbupYmlPath, ToolEngine.GetDefaultConfigFile());
+            File.WriteAllText(dbupYmlPath, ConfigLoader.GetDefaultConfigFile());
         }
         return dbupYmlPath;
     }

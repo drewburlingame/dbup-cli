@@ -1,0 +1,9 @@
+﻿[I] Created database DbUp_UpgradeCommand_ShouldUseASpecifiedJournal
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script '001.sql'
+[I] Checking whether journal table exists
+[I] Creating the `journal` table
+[I] The `journal` table has been created
+[I] Upgrade successful

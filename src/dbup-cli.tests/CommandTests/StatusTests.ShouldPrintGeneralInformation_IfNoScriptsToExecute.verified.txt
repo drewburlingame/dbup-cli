@@ -1,1 +1,3 @@
-﻿[I] Database is up-to-date. Upgrade is not required.
+﻿[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Database is up-to-date. Upgrade is not required.

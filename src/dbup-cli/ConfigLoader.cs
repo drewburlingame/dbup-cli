@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -78,5 +79,15 @@ public static class ConfigLoader
 
             script.Folder = folder;
         }
+    }
+    
+    public static string GetDefaultConfigFile()
+    {
+        using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.Default.ConfigFileResourceName);
+        if (resourceStream is null) 
+            throw new Exception($"Missing default embedded resource: {Constants.Default.ConfigFileResourceName}");
+        
+        using var reader = new StreamReader(resourceStream);
+        return reader.ReadToEnd();
     }
 }

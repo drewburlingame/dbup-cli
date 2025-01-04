@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DbUp.Cli.DbUpCustomization;
+using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 

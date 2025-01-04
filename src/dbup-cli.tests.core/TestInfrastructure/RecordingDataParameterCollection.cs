@@ -6,10 +6,10 @@ namespace DbUp.Cli.Tests.TestInfrastructure;
 
 public class RecordingDataParameterCollection: IDataParameterCollection
 {
-    private readonly IUpgradeLog logger;
+    private readonly CaptureLogsLogger logger;
     private readonly List<object> backingList;
 
-    public RecordingDataParameterCollection(IUpgradeLog logger)
+    public RecordingDataParameterCollection(CaptureLogsLogger logger)
     {
         this.logger = logger;
         backingList = new List<object>();
@@ -28,9 +28,10 @@ public class RecordingDataParameterCollection: IDataParameterCollection
     public int Count { get; private set; }
     public object SyncRoot { get; private set; }
     public bool IsSynchronized { get; private set; }
+    
     public int Add(object value)
     {
-        logger.LogInformation(string.Format("DB Operation: Add parameter to command: {0}", value));
+        logger.LogDbOperation($"DB Operation: Add parameter to command: {value}");
         backingList.Add(value);
         return backingList.Count - 1;
     }

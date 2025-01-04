@@ -1,0 +1,10 @@
+﻿[I] Master ConnectionString => Data Source=127.0.0.1,port_num;Initial Catalog=master;User ID=sa;Password=******;Trust Server Certificate=True
+[I] Created database DbUp_UpgradeCommand_ShouldUseASpecifiedJournal
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script '001.sql'
+[I] Checking whether journal table exists
+[I] Creating the [dbo].[testTable] table
+[I] The [dbo].[testTable] table has been created
+[I] Upgrade successful

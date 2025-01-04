@@ -2,7 +2,7 @@
 using DbUp.Engine.Transactions;
 using DbUp.ScriptProviders;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.DbUpCustomization;
 
 public class CustomFileSystemScriptProvider : IScriptProvider
 {

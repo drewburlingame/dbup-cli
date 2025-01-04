@@ -1,0 +1,15 @@
+﻿[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script 'c001.sql'
+[I] Checking whether journal table exists
+[I] Creating the [SchemaVersions] table
+[I] The [SchemaVersions] table has been created
+[I] Executing Database Server script 'c0a1.sql'
+[I] Executing Database Server script 'c0b1.sql'
+[I] Executing Database Server script 'd0a1.sql'
+[I] Executing Database Server script 'd0aa1.sql'
+[I] Executing Database Server script 'e001.sql'
+[I] Executing Database Server script 'e0a1.sql'
+[I] Executing Database Server script 'e0b1.sql'
+[I] Upgrade successful

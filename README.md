@@ -1,6 +1,6 @@
 # DbUp Command Line Interface
 
-[![NuGet](https://img.shields.io/nuget/v/DbUp-CLI.svg)](https://www.nuget.org/packages/dbup-cli)
+[![NuGet](https://img.shields.io/nuget/v/DbUp-CLI-2.svg)](https://www.nuget.org/packages/dbup-cli-2)
 
 This project is inspired and based on [DbUp](dbup.github.io) project... and forked from [drwatson1/dbup-cli](https://github.com/drwatson1/dbup-cli) after Sergey was no longer able to maintain it.
 
@@ -75,7 +75,7 @@ The tool is available now anywhere in your system. You can check this by typing:
 
 ## Release Notes
 
-See [GitHub Releases](https://github.com/drewburlingame/dbup-cli/releases) for release notes starting from 2.0.0
+> release notes have moved to [GitHub Releases](https://github.com/drewburlingame/dbup-cli/releases) starting from 2.0.0
 
 |Date| Version |Description|
 |-|---------|-|

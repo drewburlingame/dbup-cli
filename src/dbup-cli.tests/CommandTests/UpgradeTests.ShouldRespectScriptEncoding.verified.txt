@@ -1,29 +1,8 @@
-﻿[O] Open connection
-[I] Beginning database upgrade
+﻿[I] Beginning database upgrade
 [I] Checking whether journal table exists
-[O] Execute scalar command: select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'SchemaVersions'
-[O] Dispose command
 [I] Journal table does not exist
 [I] Executing Database Server script 'c001.sql'
 [I] Checking whether journal table exists
-[O] Execute scalar command: select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'SchemaVersions'
-[O] Dispose command
 [I] Creating the [SchemaVersions] table
-[O] Execute non query command: create table [SchemaVersions] (
-    [Id] int identity(1,1) not null constraint [PK_SchemaVersions_Id] primary key,
-    [ScriptName] nvarchar(255) not null,
-    [Applied] datetime not null
-)
-[O] Dispose command
 [I] The [SchemaVersions] table has been created
-[O] Execute non query command: -- Should have encoding windows-1251
-print 'Превед, медвед'
-[O] Dispose command
-[O] Create parameter
-[I] DB Operation: Add parameter to command: scriptName=c001.sql
-[O] Create parameter
-[I] DB Operation: Add parameter to command: applied=DateTime_1
-[O] Execute non query command: insert into [SchemaVersions] (ScriptName, Applied) values (@scriptName, @applied)
-[O] Dispose command
 [I] Upgrade successful
-[O] Dispose connection

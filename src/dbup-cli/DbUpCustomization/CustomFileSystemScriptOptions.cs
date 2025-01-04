@@ -1,6 +1,6 @@
 ﻿using DbUp.ScriptProviders;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.DbUpCustomization;
 
 public class CustomFileSystemScriptOptions: FileSystemScriptOptions
 {

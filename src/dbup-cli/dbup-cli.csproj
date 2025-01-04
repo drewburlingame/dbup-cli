@@ -42,7 +42,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommandLineParser" />
+		<PackageReference Include="CommandDotNet" />
+		<PackageReference Include="CommandDotNet.DataAnnotations" />
+		<PackageReference Include="CommandDotNet.NameCasing" />
 		<PackageReference Include="dbup-core" />
 		<PackageReference Include="dbup-mysql" />
 		<PackageReference Include="dbup-postgresql" />

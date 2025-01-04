@@ -1,0 +1,8 @@
+﻿Create a new config file
+
+Usage: dbup init [<file>]
+
+Arguments:
+
+  file  <TEXT>  [dbup.yml]
+  Path to a configuration file. The path can be absolute or relative against a current directory

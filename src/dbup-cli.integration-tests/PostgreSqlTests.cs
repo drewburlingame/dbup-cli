@@ -30,7 +30,5 @@ public class PostgreSqlTests()
         "select count(*) from journal where scriptname = '001.sql'";
 
     [Fact(Skip = "Not supported")]
-    public override void Drop_DropADb()
-    {
-    }
+    public override Task Drop_DropADb() => Task.CompletedTask;
 }

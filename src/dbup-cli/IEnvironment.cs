@@ -5,7 +5,7 @@
 /// </summary>
 public interface IEnvironment
 {
-    string GetCurrentDirectory();
+    string CurrentDirectory { get; }
     bool FileExists(string path);
     bool DirectoryExists(string path);
     string ReadFile(string path);

@@ -1,5 +1,5 @@
 ﻿using DbUp.Builder;
-using DbUp.Cli.CommandLineOptions;
+using DbUp.Cli.Cmd;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
 using DbUp.Helpers;
@@ -26,10 +26,10 @@ public static class UpgradeEngineBuilderExtensions
 
     internal static UpgradeEngineBuilder SelectLogOptions(this UpgradeEngineBuilder builder, IUpgradeLog logger, VerbosityLevel verbosity)
     {
-        builder = verbosity != VerbosityLevel.Min
+        builder = verbosity != VerbosityLevel.min
             ? builder.LogTo(logger)
             : builder.LogToNowhere();
-        if(verbosity == VerbosityLevel.Detail)
+        if(verbosity == VerbosityLevel.detail)
             builder.LogScriptOutput();
         return builder;
     }

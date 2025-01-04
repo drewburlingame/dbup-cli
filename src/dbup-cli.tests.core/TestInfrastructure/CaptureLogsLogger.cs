@@ -1,10 +1,12 @@
+using CommandDotNet;
+using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine.Output;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;
 
-public class CaptureLogsLogger: IUpgradeLog
+public class CaptureLogsLogger(IConsole console = null): IUpgradeLog
 {
-    private readonly ConsoleLogger inner = new();
+    private readonly ConsoleLogger inner = new(console);
 
     public enum Level
     {
@@ -44,7 +46,6 @@ public class CaptureLogsLogger: IUpgradeLog
     public void LogInformation(string format, params object[] args)
     {
         inner.LogInformation(format, args);
-        var formattedMsg = string.Format(format, args);
         Capture(Level.Info, format, args);
     }
 
