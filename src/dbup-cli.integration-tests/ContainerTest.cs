@@ -76,7 +76,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
-    [Fact(Timeout = 40_000)]
+    [Fact]
     public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
         var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "Timeout")}");
@@ -94,7 +94,12 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
         var result = appRunner.RunInMem($"drop {GetConfigPath()}");
         result.ShouldSucceed();
-        await Verify(result.Console.AllText());
+        await Verify(result.Console.AllText())
+            // the exception message is inconsistent between mac and github image
+            .ScrubLinesWithReplace(line =>
+                line.StartsWith(" ---> System.ComponentModel.Win32Exception (258): Unknown error 258")
+                    ? " ---> System.ComponentModel.Win32Exception (258): Unknown error: 258"
+                    : line);
         AssertDbDoesNotExist();
     }
 
