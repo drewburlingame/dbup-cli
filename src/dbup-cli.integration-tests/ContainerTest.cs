@@ -80,7 +80,12 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "Timeout")}");
         result.ShouldFail();
         var output = result.Console.AllText();
-        await Verify(output);
+        await Verify(output)
+            // the exception message is inconsistent between mac and github's ubuntu-latest
+            .ScrubLinesWithReplace(line =>
+                line.EndsWith("Unknown error 258")
+                    ? " ---> System.ComponentModel.Win32Exception (258): Unknown error: 258"
+                    : line);
         var failureExplanation = output!.Split(Environment.NewLine).FirstOrDefault(l => l.StartsWith("Failed to perform upgrade:"));
         failureExplanation.Should().NotBeNull().And.Contain("Timeout");
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
@@ -92,12 +97,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
         var result = appRunner.RunInMem($"drop {GetConfigPath()}");
         result.ShouldSucceed();
-        await Verify(result.Console.AllText())
-            // the exception message is inconsistent between mac and github's ubuntu-latest
-            .ScrubLinesWithReplace(line =>
-                line.EndsWith("Unknown error 258")
-                    ? " ---> System.ComponentModel.Win32Exception (258): Unknown error: 258"
-                    : line);
+        await Verify(result.Console.AllText());
         AssertDbDoesNotExist();
     }
 
