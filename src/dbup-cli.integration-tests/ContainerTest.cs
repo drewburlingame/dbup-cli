@@ -76,7 +76,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
-    [Fact]
+    [Fact(Timeout = 40_000)]
     public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
         var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "Timeout")}");
