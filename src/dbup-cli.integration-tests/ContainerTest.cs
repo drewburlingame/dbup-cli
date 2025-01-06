@@ -82,10 +82,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         var output = result.Console.AllText();
         await Verify(output)
             // the exception message is inconsistent between mac and github's ubuntu-latest
-            .ScrubLinesWithReplace(line =>
-                line.EndsWith("Unknown error 258")
-                    ? " ---> System.ComponentModel.Win32Exception (258): Unknown error: 258"
-                    : line);
+            .ScrubLinesWithReplace(line => line.Replace("Unknown error 258", "Unknown error: 258"));
         var failureExplanation = output!.Split(Environment.NewLine).FirstOrDefault(l => l.StartsWith("Failed to perform upgrade:"));
         failureExplanation.Should().NotBeNull().And.Contain("Timeout");
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
