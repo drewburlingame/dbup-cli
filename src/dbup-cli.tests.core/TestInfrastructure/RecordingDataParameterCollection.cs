@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Data;
-using DbUp.Engine.Output;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;
 

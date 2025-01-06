@@ -1,4 +1,3 @@
-using CommandDotNet;
 using CommandDotNet.Execution;
 using CommandDotNet.TestTools;
 

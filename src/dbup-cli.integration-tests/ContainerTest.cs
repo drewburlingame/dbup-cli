@@ -1,12 +1,10 @@
 using System.Data;
-using System.Text.RegularExpressions;
 using CommandDotNet;
 using CommandDotNet.TestTools;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
-using DotNetEnv;
 using FluentAssertions;
 
 namespace DbUp.Cli.IntegrationTests;
@@ -95,9 +93,9 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         var result = appRunner.RunInMem($"drop {GetConfigPath()}");
         result.ShouldSucceed();
         await Verify(result.Console.AllText())
-            // the exception message is inconsistent between mac and github image
+            // the exception message is inconsistent between mac and github's ubuntu-latest
             .ScrubLinesWithReplace(line =>
-                line.StartsWith(" ---> System.ComponentModel.Win32Exception (258): Unknown error 258")
+                line.EndsWith("Unknown error 258")
                     ? " ---> System.ComponentModel.Win32Exception (258): Unknown error: 258"
                     : line);
         AssertDbDoesNotExist();
