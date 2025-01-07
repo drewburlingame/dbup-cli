@@ -11,21 +11,21 @@ namespace DbUp.Cli;
 public static class Program
 {
     private static int Main(string[] args) =>
-        NewAppRunner(new CliEnvironment(), c => new ConsoleLogger(c))
-            .Run(args);
+        NewAppRunner(new CliEnvironment(), c => new ConsoleLogger(c)).Run(args);
 
-    public static AppRunner NewAppRunner(IEnvironment environment, 
-        Func<IConsole, IUpgradeLog> getLogger, 
+    public static AppRunner NewAppRunner(IEnvironment environment,
+        Func<IConsole, IUpgradeLog> getLogger,
         IConnectionFactory connectionFactory = null) =>
         new AppRunner<Commands>()
-            .UseDefaultMiddleware()
+            .UseDefaultMiddleware(
+                excludeDebugDirective: true // security risk
+            )
             .UseNameCasing(Case.KebabCase)
-            .UseDataAnnotationValidations()
             .Configure(b =>
             {
                 b.UseParameterResolver(c => c.Services.GetOrAdd(() => environment));
                 b.UseParameterResolver(c => c.Services.GetOrAdd(() => getLogger(c.Console)));
-                if(connectionFactory is null)
+                if (connectionFactory is null)
                     b.UseParameterResolver(c => c.Services.GetOrDefault<IConnectionFactory>());
                 else
                     b.UseParameterResolver(c => c.Services.GetOrAdd(() => connectionFactory));
