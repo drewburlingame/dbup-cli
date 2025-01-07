@@ -1,5 +1,7 @@
-﻿using DbUp.Cli.Tests.TestInfrastructure;
+﻿using DbUp.Cli.Configuration;
+using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
+using FileNotFoundException = DbUp.Cli.Configuration.FileNotFoundException;
 
 namespace DbUp.Cli.Tests.EnvironmentExtensionTests;
 

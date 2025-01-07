@@ -1,3 +1,4 @@
+using DbUp.Cli.Configuration;
 using DbUp.Cli.Tests.TestInfrastructure;
 using FakeItEasy;
 using FluentAssertions;

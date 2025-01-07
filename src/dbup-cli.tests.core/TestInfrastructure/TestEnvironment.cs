@@ -3,16 +3,16 @@ namespace DbUp.Cli.Tests.TestInfrastructure;
 public class TestEnvironment(string currentDirectory = null) : 
     CliEnvironment(currentDirectory ?? ProjectPaths.TempDir)
 {
-    private const string inMemFilePrefix = "/in-mem/";
-    private Dictionary<string, string> fileByPath = new();
+    private const string InMemFilePrefix = "/in-mem/";
+    private readonly Dictionary<string, string> fileByPath = new();
 
     /// <summary>Save the file in memory and return a path prefixed with inMem root</summary>
     public string WriteFileInMem(string content, string path = null)
     {
         if(path is null)
-            path = $"{inMemFilePrefix}{fileByPath.Count + 1}";
+            path = $"{InMemFilePrefix}{fileByPath.Count + 1}";
         else if (!path.StartsWith("inMem"))
-            path = $"{inMemFilePrefix}{path}";
+            path = $"{InMemFilePrefix}{path}";
 
         fileByPath[path] = content;
 
@@ -21,14 +21,14 @@ public class TestEnvironment(string currentDirectory = null) :
 
     public override bool FileExists(string path)
     {
-        return path.StartsWith(inMemFilePrefix) 
+        return path.StartsWith(InMemFilePrefix) 
             ? fileByPath.ContainsKey(path)
             : base.FileExists(path);
     }
 
     public override string ReadFile(string path)
     {
-        return path.StartsWith(inMemFilePrefix) 
+        return path.StartsWith(InMemFilePrefix) 
             ? fileByPath[path] 
             : base.ReadFile(path);
     }

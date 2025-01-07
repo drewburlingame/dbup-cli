@@ -1,9 +1,14 @@
-﻿namespace DbUp.Cli;
+﻿using JetBrains.Annotations;
 
+namespace DbUp.Cli.Configuration;
+
+[UsedImplicitly]
 public class Migration
 {
+    // ReSharper disable UnusedAutoPropertyAccessor.Local
     public string Version { get; private set; }
     public Provider Provider { get; private set; }
+    // ReSharper enable UnusedAutoPropertyAccessor.Local
     public string ConnectionString { get; private set; }
     public int ConnectionTimeoutSec { get; private set; } = 30;
     public bool DisableVars { get; private set; } = false;

@@ -50,6 +50,7 @@
 		<PackageReference Include="dbup-postgresql" />
 		<PackageReference Include="dbup-sqlserver" />
 		<PackageReference Include="DotNetEnv" />
+		<PackageReference Include="JetBrains.Annotations" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" />
 		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" />
 		<PackageReference Include="Npgsql" />

@@ -1,10 +1,11 @@
 using DbUp.Builder;
+using DbUp.Cli.Configuration;
 using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine.Output;
 
 namespace DbUp.Cli.DbProviders;
 
-public class AzureSqlServerDbProvider : DbProvider
+internal class AzureSqlServerDbProvider : DbProvider
 {
     public override Provider Provider => Provider.SqlServer;
 

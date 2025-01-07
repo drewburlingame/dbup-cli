@@ -1,7 +1,9 @@
 using CommandDotNet;
+using JetBrains.Annotations;
 
 namespace DbUp.Cli.Cmd;
 
+[UsedImplicitly]
 public class MigrationArgs : IArgumentModel
 {
     [OrderByPositionInClass]

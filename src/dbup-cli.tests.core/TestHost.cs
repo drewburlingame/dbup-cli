@@ -1,5 +1,6 @@
 using CommandDotNet;
 using CommandDotNet.TestTools;
+using DbUp.Cli.Configuration;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine.Transactions;
 using TestEnvironment = DbUp.Cli.Tests.TestInfrastructure.TestEnvironment;

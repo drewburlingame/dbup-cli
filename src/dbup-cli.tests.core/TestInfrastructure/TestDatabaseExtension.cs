@@ -10,7 +10,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure;
 public static class TestDatabaseExtension
 {
     public static UpgradeEngineBuilder OverrideConnectionFactory(this UpgradeEngineBuilder engineBuilder, IDbConnection connection) => 
-        engineBuilder.OverrideConnectionFactory(new DelegateConnectionFactory(l => connection));
+        engineBuilder.OverrideConnectionFactory(new DelegateConnectionFactory(_ => connection));
 
     public static UpgradeEngineBuilder OverrideConnectionFactory(this UpgradeEngineBuilder engineBuilder, IConnectionFactory connectionFactory)
     {

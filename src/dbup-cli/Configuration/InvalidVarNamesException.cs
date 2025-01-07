@@ -1,4 +1,4 @@
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
 public class InvalidVarNamesException(List<string> names)
     : DbUpCliException("Found one or more variables with an invalid name. " +

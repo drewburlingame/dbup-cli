@@ -1,4 +1,4 @@
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
 public class FolderNotFoundException(string path)
     : DbUpCliException($"Folder is not found: {path}")

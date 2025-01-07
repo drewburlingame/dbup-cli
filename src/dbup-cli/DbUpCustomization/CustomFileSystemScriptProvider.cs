@@ -4,26 +4,11 @@ using DbUp.ScriptProviders;
 
 namespace DbUp.Cli.DbUpCustomization;
 
-public class CustomFileSystemScriptProvider : IScriptProvider
+internal class CustomFileSystemScriptProvider : IScriptProvider
 {
     private readonly string directoryPath;
     private readonly CustomFileSystemScriptOptions options;
     private readonly FileSystemScriptProvider scriptProvider;
-
-    ///<summary>
-    ///</summary>
-    ///<param name="directoryPath">Path to SQL upgrade scripts</param>
-    public CustomFileSystemScriptProvider(string directoryPath) : this(directoryPath, new CustomFileSystemScriptOptions(), new SqlScriptOptions())
-    {
-    }
-
-    ///<summary>
-    ///</summary>
-    ///<param name="directoryPath">Path to SQL upgrade scripts</param>
-    ///<param name="options">Different options for the file system script provider</param>
-    public CustomFileSystemScriptProvider(string directoryPath, CustomFileSystemScriptOptions options) : this(directoryPath, options, new SqlScriptOptions())
-    {
-    }
 
     /// <summary>
     /// </summary>

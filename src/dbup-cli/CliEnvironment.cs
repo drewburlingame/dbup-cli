@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using DbUp.Cli.Configuration;
 
 namespace DbUp.Cli;
 

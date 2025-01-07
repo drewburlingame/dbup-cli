@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using CommandDotNet;
 using CommandDotNet.TestTools;
 using DbUp.Cli.Tests.TestInfrastructure;
@@ -19,7 +20,10 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     private readonly AppRunner appRunner = Program.NewAppRunner(new CliEnvironment(), 
         console => new CaptureLogsLogger(console));
 
-    private static readonly Dictionary<Type, IDatabaseContainer> ContainerMap = new();
+    [SuppressMessage("ReSharper", "StaticMemberInGenericType", Justification = "Expected to not be shared across concrete types")] 
+    // ReSharper disable once InconsistentNaming
+    private static IDatabaseContainer Container;
+    [SuppressMessage("ReSharper", "StaticMemberInGenericType", Justification = "Expected to not be shared across concrete types")]
     private static readonly SemaphoreSlim Semaphore = new(1);
 
     private IDatabaseContainer container;
@@ -116,29 +120,25 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
 
     private static async Task<IDatabaseContainer> GetContainer(Func<TBuilderEntity> builder)
     {
-        if (ContainerMap.TryGetValue(typeof(TContainerEntity), out var container))
+        if (Container is not null)
         {
-            return container;
+            return Container;
         }
 
         await Semaphore.WaitAsync();
         try
         {
-            if (ContainerMap.TryGetValue(typeof(TContainerEntity), out container))
+            if (Container is null)
             {
-                return container;
-            }
-            else
-            {
-                container = builder()
+                Container = builder()
                     .WithCleanUp(true) // in case test run crashes or stopped while debugging
                     .WithAutoRemove(true) // for faster removal in prep for next test
                     .Build();
 
-                await container.StartAsync();
-                ContainerMap.Add(typeof(TContainerEntity), container);
-                return container;
+                await Container.StartAsync();
             }
+            
+            return Container;
         }
         finally
         {

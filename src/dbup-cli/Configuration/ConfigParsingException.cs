@@ -1,8 +1,8 @@
 using YamlDotNet.Core;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
-public class ConfigParsingException(string path, YamlException innerException)
+internal class ConfigParsingException(string path, YamlException innerException)
     : DbUpCliException("Configuration file error", innerException)
 {
     public string Path { get; } = path;

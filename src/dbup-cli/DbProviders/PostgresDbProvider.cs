@@ -1,9 +1,10 @@
 using DbUp.Builder;
+using DbUp.Cli.Configuration;
 using DbUp.Engine.Output;
 
 namespace DbUp.Cli.DbProviders;
 
-public class PostgresDbProvider : DbProvider
+internal class PostgresDbProvider : DbProvider
 {
     public override Provider Provider => Provider.PostgreSQL;
     

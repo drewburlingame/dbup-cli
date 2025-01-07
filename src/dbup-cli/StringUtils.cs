@@ -2,8 +2,9 @@
 
 namespace DbUp.Cli;
 
-public static class StringUtils
+internal static class StringUtils
 {
+    // ReSharper disable once CognitiveComplexity
     public static string ExpandEnvironmentVariables(string name)
     {
         // Implementation grabbed fromn here: https://github.com/mono/mono/blob/master/mcs/class/corlib/System/Environment.cs

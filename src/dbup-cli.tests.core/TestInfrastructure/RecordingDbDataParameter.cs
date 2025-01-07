@@ -2,13 +2,14 @@ using System.Data;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;
 
-public class RecordingDbDataParameter: IDbDataParameter
+internal class RecordingDbDataParameter: IDbDataParameter
 {
     public DbType DbType { get; set; }
     public ParameterDirection Direction { get; set; }
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     public bool IsNullable { get; private set; }
-    public string ParameterName { get; set; }
-    public string SourceColumn { get; set; }
+    public string ParameterName { get; set; } = null!;
+    public string SourceColumn { get; set; } = null!;
     public DataRowVersion SourceVersion { get; set; }
     public object Value { get; set; }
     public byte Precision { get; set; }
