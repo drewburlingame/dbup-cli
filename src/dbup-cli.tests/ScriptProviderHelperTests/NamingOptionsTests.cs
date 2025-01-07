@@ -1,4 +1,5 @@
-﻿using DbUp.Cli.Tests.TestInfrastructure;
+﻿using DbUp.Cli.Configuration;
+using DbUp.Cli.Tests.TestInfrastructure;
 using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
@@ -46,7 +47,7 @@ public class NamingOptionsTests
             .LogTo(host.Logger)
             .SelectScripts(scripts, namingOptions);
 
-        builder.Build().PerformUpgrade();;
+        builder.Build().PerformUpgrade();
 
         var executedScripts = host.Logger.GetExecutedScripts();
 

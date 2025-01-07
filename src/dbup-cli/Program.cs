@@ -1,5 +1,4 @@
 ﻿using CommandDotNet;
-using CommandDotNet.DataAnnotations;
 using CommandDotNet.NameCasing;
 using DbUp.Cli.Cmd;
 using DbUp.Cli.DbUpCustomization;

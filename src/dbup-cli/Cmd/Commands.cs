@@ -1,10 +1,14 @@
 using CommandDotNet;
+using DbUp.Cli.Configuration;
+using DbUp.Cli.DbProviders;
 using DbUp.Engine;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
+using JetBrains.Annotations;
 
 namespace DbUp.Cli.Cmd;
 
+[UsedImplicitly]
 public class Commands
 {
     [Command(Description = "Create a new config file")]

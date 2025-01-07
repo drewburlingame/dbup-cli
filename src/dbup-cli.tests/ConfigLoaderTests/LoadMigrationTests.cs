@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DbUp.Cli.Configuration;
+using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ConfigLoaderTests;
 

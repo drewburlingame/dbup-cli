@@ -1,4 +1,5 @@
 using DbUp.Builder;
+using DbUp.Cli.Configuration;
 using DbUp.Engine.Output;
 
 namespace DbUp.Cli.DbProviders;

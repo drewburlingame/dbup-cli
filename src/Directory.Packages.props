@@ -20,6 +20,7 @@
     <PackageVersion Include="dbup-postgresql" Version="6.0.0-beta.44" />
     <PackageVersion Include="dbup-sqlserver" Version="6.0.0" />
     <PackageVersion Include="DotNetEnv" Version="3.1.1" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2024.3.0" />
     <PackageVersion Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
     <PackageVersion Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
     <PackageVersion Include="Npgsql" Version="9.0.2" />

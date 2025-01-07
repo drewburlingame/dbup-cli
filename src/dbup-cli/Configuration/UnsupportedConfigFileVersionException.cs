@@ -1,4 +1,4 @@
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
 public class UnsupportedConfigFileVersionException(string version)
     : DbUpCliException($"Unsupported version of a config file: '{version}'. Expected `1`")

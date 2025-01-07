@@ -1,6 +1,6 @@
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
-public class ConfigFileNotFoundException(string path)
+internal class ConfigFileNotFoundException(string path)
     : DbUpCliException($"Config file is not found: {path}")
 {
     public string Path { get; } = path;

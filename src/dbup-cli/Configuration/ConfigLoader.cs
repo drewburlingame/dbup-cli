@@ -5,7 +5,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
 public static class ConfigLoader
 {

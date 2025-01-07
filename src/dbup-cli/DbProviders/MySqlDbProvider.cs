@@ -1,10 +1,11 @@
 using DbUp.Builder;
+using DbUp.Cli.Configuration;
 using DbUp.Engine.Output;
 using DbUp.MySql;
 
 namespace DbUp.Cli.DbProviders;
 
-public class MySqlDbProvider : DbProvider
+internal class MySqlDbProvider : DbProvider
 {
     public override Provider Provider => Provider.MySQL;
     

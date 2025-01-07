@@ -2,30 +2,14 @@ using System.Data;
 
 namespace DbUp.Cli.Tests.TestInfrastructure;
 
-public class RecordingDbTransaction: IDbTransaction
+internal class RecordingDbTransaction(CaptureLogsLogger logger) : IDbTransaction
 {
-    private readonly CaptureLogsLogger logger;
+    public void Dispose() => logger.LogDbOperation("Dispose transaction");
+    public void Commit() => logger.LogDbOperation("Commit transaction");
 
-    public RecordingDbTransaction(CaptureLogsLogger logger)
-    {
-        this.logger = logger;
-    }
-
-    public void Dispose()
-    {
-        logger.LogDbOperation("Dispose transaction");
-    }
-
-    public void Commit()
-    {
-        logger.LogDbOperation("Commit transaction");
-    }
-
-    public void Rollback()
-    {
-        throw new NotImplementedException();
-    }
-
+    // ReSharper disable UnusedAutoPropertyAccessor.Local
     public IDbConnection Connection { get; private set; }
     public IsolationLevel IsolationLevel { get; private set; }
+
+    public void Rollback() => throw new NotImplementedException();
 }
