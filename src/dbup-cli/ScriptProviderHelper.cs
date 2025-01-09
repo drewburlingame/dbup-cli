@@ -43,7 +43,7 @@ public static class ScriptProviderHelper
         };
     }
 
-    private static Encoding GetEncodingOrThrow(ScriptBatch batch)
+    private static Encoding? GetEncodingOrThrow(ScriptBatch batch)
     {
         var encoding = GetEncodingSafe(batch.Encoding);
         if (encoding != null) return encoding;
@@ -58,7 +58,7 @@ public static class ScriptProviderHelper
         }
     }
 
-    private static Encoding GetEncodingSafe(string encoding)
+    private static Encoding? GetEncodingSafe(string encoding)
     {
         try
         {
@@ -70,16 +70,16 @@ public static class ScriptProviderHelper
         }
     }
 
-    public static Func<string, bool> CreateFilter(string filterString, bool matchFullPath = false)
+    public static Func<string, bool>? CreateFilter(string? filterString, bool matchFullPath = false)
     {
-        if( string.IsNullOrWhiteSpace(filterString))
+        if (string.IsNullOrWhiteSpace(filterString))
         {
             return null;
         }
 
         filterString = filterString.Trim();
 
-        if (filterString.StartsWith("/", StringComparison.Ordinal) && filterString.EndsWith("/", StringComparison.Ordinal) && filterString.Length >= 2)
+        if (filterString.StartsWith('/') && filterString.EndsWith('/') && filterString.Length >= 2)
         {
             // This is a regular expression
 
@@ -112,10 +112,8 @@ public static class ScriptProviderHelper
         };
     }
 
-    private static string WildCardToRegular(string value)
-    {
-        return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
-    }
+    private static string WildCardToRegular(string value) => 
+        "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
 
     public static UpgradeEngineBuilder SelectScripts(this UpgradeEngineBuilder builder, IList<ScriptBatch> scripts, NamingOptions naming)
     {
@@ -133,8 +131,6 @@ public static class ScriptProviderHelper
                 throw new FolderNotFoundException(script.Folder);
             }
         }
-
-        naming ??= NamingOptions.Default;
 
         return scripts.Aggregate(builder, (current, script) => current.AddScripts(script, naming));
     }

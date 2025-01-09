@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DbUp.Cli.Configuration;
 
@@ -6,14 +7,15 @@ public class ScriptBatch
 {
     internal static ScriptBatch Default => new();
 
-    public string Folder { get; set; }
+    [Required]
+    public string Folder { get; set; } = null!;
     public bool RunAlways { get; private set; }
     public bool SubFolders { get; private set; }
     public int Order { get; private set; } = Constants.Default.Order;   // Default value in DbUp
     public string Encoding { get; set; } = Constants.Default.Encoding;
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
-    public string Filter { get; private set; }
+    public string? Filter { get; private set; }
     public bool MatchFullPath { get; private set; }
     // ReSharper enable UnusedAutoPropertyAccessor.Local
     

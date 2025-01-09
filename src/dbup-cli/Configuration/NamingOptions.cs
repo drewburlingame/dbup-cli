@@ -8,7 +8,7 @@ public class NamingOptions
     
     public bool UseOnlyFileName { get; private set; }
     public bool IncludeBaseFolderName { get; private set; }
-    public string Prefix { get; private set; }
+    public string? Prefix { get; private set; }
 
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global", Justification = "Yaml Serializer")]
     public NamingOptions()

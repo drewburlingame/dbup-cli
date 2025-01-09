@@ -30,7 +30,7 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         IUpgradeLog logger,
         int timeout = -1,
         AzureDatabaseEdition azureDatabaseEdition = AzureDatabaseEdition.None,
-        string collation = null)
+        string? collation = null)
     {
         GetMasterConnectionStringBuilder(connectionString, logger, out var masterConnectionString, out var databaseName);
 
@@ -179,11 +179,10 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         }
     }
 
-    private static string GetAccessToken(string resource = "https://database.windows.net/", string tenantId = null, string azureAdInstance = "https://login.microsoftonline.com/")
-    {
-        return new AzureServiceTokenProvider(azureAdInstance: azureAdInstance).GetAccessTokenAsync(resource, tenantId)
+    private static string GetAccessToken(string resource = "https://database.windows.net/", string? tenantId = null, string azureAdInstance = "https://login.microsoftonline.com/") =>
+        new AzureServiceTokenProvider(azureAdInstance: azureAdInstance)
+            .GetAccessTokenAsync(resource, tenantId)
             .ConfigureAwait(false)
             .GetAwaiter()
             .GetResult();
-    }
 }
