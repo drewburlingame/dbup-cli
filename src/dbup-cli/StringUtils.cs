@@ -27,8 +27,8 @@ internal static class StringUtils
         result.Append(name, 0, off1);
         do
         {
-            string var = name.Substring(off1 + 1, off2 - off1 - 1);
-            string value = Environment.GetEnvironmentVariable(var);
+            var var = name.Substring(off1 + 1, off2 - off1 - 1);
+            var value = Environment.GetEnvironmentVariable(var);
 
             // If value not found, add $FOO to stream,
             //  and use the closing $ for the next iteration.
