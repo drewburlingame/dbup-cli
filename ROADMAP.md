@@ -3,6 +3,8 @@
 *[x] TestContainers
 *[x] DRY up the tests
 *[x] assert failure reason when checking for exit code != 0
+*[ ] is https://github.com/drewburlingame/dbup-cli/issues/8 still a problem?
+  * if not, what is the result of status for runAlways scripts? what about for a new runAlways script?
 *[ ] integration tests, assert a table is or is not created, not just the journal entry. 
   *[ ] reenable MySql timeout test to see if table is not created on timeout but journal is updated 
 *[ ] inline config files so they're easy to view with the tests instead of forcing to navigate to a separate folder
@@ -11,13 +13,9 @@
 *[x] organize unit tests by command where possible
 *[x] convert to xunit or nunit
 *[x] remove Option to simplify code
-*[ ] convert to CommandDotNet to simplify command definitions 
-  *[ ] xunit logging to console
-  *[ ] DropDb snapshot 
-  * Breaking Changes
-    * `version` command is now `--version` option
-    * `--env` must now be repeated for each file. `--env file1.env file2.env` is now `--env file1.env --env file2.env`
-    * case-sensitive enums. verbosity must be lowercase - `-v detail`
+*[x] convert to CommandDotNet to simplify command definitions 
+  *[x] xunit logging to console
+  *[x] DropDb snapshot
 *[ ] structured logging for better debugging and monitoring in deployed environments
 
 ---
