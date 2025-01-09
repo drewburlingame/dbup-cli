@@ -1,17 +1,18 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.Configuration;
 
 public static class ConfigLoader
 {
     // TODO: environment should eventually be required. Using optional param for now as incremental step to keep tests passing during refactor.
     // will require using IEnvironment to get environment variables, with a bonus that we can isolate changes within tests
-     public static Migration LoadMigration(string configFilePath, IEnvironment environment = null)
+     public static Migration LoadMigration(string configFilePath, IEnvironment? environment = null)
      {
          var path = configFilePath;
          var yml = environment is null
@@ -34,6 +35,8 @@ public static class ConfigLoader
          {
              throw new ConfigParsingException(e.Message, e);
          }
+         
+         Validator.ValidateObject(migration, new ValidationContext(migration));
 
          if (migration.Version != "1")
          {
@@ -74,10 +77,7 @@ public static class ConfigLoader
         foreach (var script in scripts)
         {
             var folder = ScriptProviderHelper.GetFolder(Path.Combine(configFilePath, ".."), script.Folder);
-            var dir = new DirectoryInfo(folder);
-            folder = dir.FullName;
-
-            script.Folder = folder;
+            script.Folder = new DirectoryInfo(folder).FullName;
         }
     }
     

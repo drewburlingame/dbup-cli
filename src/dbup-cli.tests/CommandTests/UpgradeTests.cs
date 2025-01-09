@@ -62,6 +62,6 @@ public class UpgradeTests
         var result = host.Run("upgrade", "-v", verbosity, ProjectPaths.GetConfigPath("filter.yml"))
             .ShouldSucceed();
 
-        var output = await Verify(result.Console.AllText());
+        await Verify(result.Console.AllText());
     }
 }

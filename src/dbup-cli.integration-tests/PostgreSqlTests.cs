@@ -19,6 +19,7 @@ public class PostgreSqlTests()
     protected override void AssertDbDoesNotExist(string connectionString, string dbName)
     {
         using var connection = GetConnection(connectionString);
+        // ReSharper disable once AccessToDisposedClosure
         Action a = () => connection.Open();
         a.Should().Throw<PostgresException>($"Database {dbName} should not exist");
     }

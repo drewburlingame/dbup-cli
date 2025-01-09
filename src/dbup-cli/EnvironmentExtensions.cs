@@ -1,4 +1,6 @@
+using DbUp.Cli.Configuration;
 using DotNetEnv;
+using FileNotFoundException = DbUp.Cli.Configuration.FileNotFoundException;
 
 namespace DbUp.Cli;
 

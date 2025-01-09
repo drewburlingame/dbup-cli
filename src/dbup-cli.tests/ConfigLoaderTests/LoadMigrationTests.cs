@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DbUp.Cli.Configuration;
+using FluentAssertions;
 
 namespace DbUp.Cli.Tests.ConfigLoaderTests;
 
@@ -28,6 +29,8 @@ public class LoadMigrationTests
             """
             dbUp:
               version: 2
+              provider: sqlserver
+              connectionString: (localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True
             """));
         error.Should().Be("Unsupported version of a config file: '2'. Expected `1`");
     }

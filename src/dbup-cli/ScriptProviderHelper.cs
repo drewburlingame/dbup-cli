@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using DbUp.Builder;
+using DbUp.Cli.Configuration;
 using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine;
 using DbUp.Support;
@@ -31,31 +32,10 @@ public static class ScriptProviderHelper
         if (batch.Encoding == null)
             throw new ArgumentNullException(nameof(batch.Encoding), "Encoding can't be null");
 
-        Encoding encoding = null;
-        try
-        {
-            encoding = Encoding.GetEncoding(batch.Encoding);
-        }
-        catch
-        {
-        }
-        
-        if(encoding == null)
-        {
-            try
-            {
-                encoding = CodePagesEncodingProvider.Instance.GetEncoding(batch.Encoding);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new InvalidEncodingException(batch.Folder, ex);
-            }
-        }
-
         return new CustomFileSystemScriptOptions
         {
             IncludeSubDirectories = batch.SubFolders,
-            Encoding = encoding,
+            Encoding = GetEncodingOrThrow(batch),
             Filter = CreateFilter(batch.Filter, batch.MatchFullPath),
             UseOnlyFilenameForScriptName = naming.UseOnlyFileName,
             PrefixScriptNameWithBaseFolderName = naming.IncludeBaseFolderName,
@@ -63,23 +43,50 @@ public static class ScriptProviderHelper
         };
     }
 
-    public static Func<string, bool> CreateFilter(string filterString, bool matchFullPath = false)
+    private static Encoding? GetEncodingOrThrow(ScriptBatch batch)
     {
-        if( string.IsNullOrWhiteSpace(filterString))
+        var encoding = GetEncodingSafe(batch.Encoding);
+        if (encoding != null) return encoding;
+        
+        try
+        {
+            return CodePagesEncodingProvider.Instance.GetEncoding(batch.Encoding);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidEncodingException(batch.Folder, ex);
+        }
+    }
+
+    private static Encoding? GetEncodingSafe(string encoding)
+    {
+        try
+        {
+            return Encoding.GetEncoding(encoding);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static Func<string, bool>? CreateFilter(string? filterString, bool matchFullPath = false)
+    {
+        if (string.IsNullOrWhiteSpace(filterString))
         {
             return null;
         }
 
         filterString = filterString.Trim();
 
-        if (filterString.StartsWith("/", StringComparison.Ordinal) && filterString.EndsWith("/", StringComparison.Ordinal) && filterString.Length >= 2)
+        if (filterString.StartsWith('/') && filterString.EndsWith('/') && filterString.Length >= 2)
         {
             // This is a regular expression
 
             if(filterString.Length == 2)
             {
                 // equals to empty filter
-                return s => true;
+                return _ => true;
             }
 
             // We cannot use Trim('/') because we need to trim only one symbol on either side, but preserve all other symbols. 
@@ -105,10 +112,8 @@ public static class ScriptProviderHelper
         };
     }
 
-    private static string WildCardToRegular(string value)
-    {
-        return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
-    }
+    private static string WildCardToRegular(string value) => 
+        "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
 
     public static UpgradeEngineBuilder SelectScripts(this UpgradeEngineBuilder builder, IList<ScriptBatch> scripts, NamingOptions naming)
     {
@@ -127,12 +132,7 @@ public static class ScriptProviderHelper
             }
         }
 
-        foreach (var script in scripts)
-        {
-            builder = builder.AddScripts(script, naming ?? NamingOptions.Default);
-        }
-
-        return builder;
+        return scripts.Aggregate(builder, (current, script) => current.AddScripts(script, naming));
     }
 
     private static UpgradeEngineBuilder AddScripts(this UpgradeEngineBuilder builder, ScriptBatch script, NamingOptions naming)

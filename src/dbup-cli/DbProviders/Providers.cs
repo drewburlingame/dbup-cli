@@ -1,8 +1,8 @@
 using DbUp.Builder;
-using DbUp.Cli.DbProviders;
+using DbUp.Cli.Configuration;
 using DbUp.Engine.Output;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.DbProviders;
 
 public static class Providers
 {

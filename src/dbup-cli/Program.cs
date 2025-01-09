@@ -1,5 +1,4 @@
 ﻿using CommandDotNet;
-using CommandDotNet.DataAnnotations;
 using CommandDotNet.NameCasing;
 using DbUp.Cli.Cmd;
 using DbUp.Cli.DbUpCustomization;
@@ -15,7 +14,7 @@ public static class Program
 
     public static AppRunner NewAppRunner(IEnvironment environment,
         Func<IConsole, IUpgradeLog> getLogger,
-        IConnectionFactory connectionFactory = null) =>
+        IConnectionFactory? connectionFactory = null) =>
         new AppRunner<Commands>()
             .UseDefaultMiddleware(
                 excludeDebugDirective: true // security risk
@@ -23,17 +22,14 @@ public static class Program
             .UseNameCasing(Case.KebabCase)
             .Configure(b =>
             {
-                b.UseParameterResolver(c => c.Services.GetOrAdd(() => environment));
+                b.UseParameterResolver(_ => environment);
                 b.UseParameterResolver(c => c.Services.GetOrAdd(() => getLogger(c.Console)));
-                if (connectionFactory is null)
-                    b.UseParameterResolver(c => c.Services.GetOrDefault<IConnectionFactory>());
-                else
-                    b.UseParameterResolver(c => c.Services.GetOrAdd(() => connectionFactory));
+                b.UseParameterResolver(_ => connectionFactory);
             })
             .UseErrorHandler((ctx, ex) =>
             {
                 // TODO: log via structured logging.
                 ctx!.Console.WriteLine(ex.FlattenErrorMessages());
-                return ExitCodes.Error.Result;
+                return ExitCodes.Error;
             });
 }

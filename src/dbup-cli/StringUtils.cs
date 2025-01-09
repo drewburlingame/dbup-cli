@@ -2,8 +2,9 @@
 
 namespace DbUp.Cli;
 
-public static class StringUtils
+internal static class StringUtils
 {
+    // ReSharper disable once CognitiveComplexity
     public static string ExpandEnvironmentVariables(string name)
     {
         // Implementation grabbed fromn here: https://github.com/mono/mono/blob/master/mcs/class/corlib/System/Environment.cs
@@ -26,8 +27,8 @@ public static class StringUtils
         result.Append(name, 0, off1);
         do
         {
-            string var = name.Substring(off1 + 1, off2 - off1 - 1);
-            string value = Environment.GetEnvironmentVariable(var);
+            var var = name.Substring(off1 + 1, off2 - off1 - 1);
+            var value = Environment.GetEnvironmentVariable(var);
 
             // If value not found, add $FOO to stream,
             //  and use the closing $ for the next iteration.

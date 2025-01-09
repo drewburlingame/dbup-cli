@@ -30,7 +30,7 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         IUpgradeLog logger,
         int timeout = -1,
         AzureDatabaseEdition azureDatabaseEdition = AzureDatabaseEdition.None,
-        string collation = null)
+        string? collation = null)
     {
         GetMasterConnectionStringBuilder(connectionString, logger, out var masterConnectionString, out var databaseName);
 
@@ -72,11 +72,9 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         }
 
         // Create the database...
-        using (var command = new SqlCommand(sqlCommandText, connection)
-               {
-                   CommandType = CommandType.Text
-               })
+        using (var command = new SqlCommand(sqlCommandText, connection))
         {
+            command.CommandType = CommandType.Text;
             if (timeout >= 0)
             {
                 command.CommandTimeout = timeout;
@@ -94,7 +92,6 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
     /// <param name="supported">Fluent helper type.</param>
     /// <param name="connectionString">The connection string.</param>
     /// <param name="logger">The <see cref="DbUp.Engine.Output.IUpgradeLog"/> used to record actions.</param>
-    /// <param name="timeout">Use this to set the command time out for dropping a database in case you're encountering a time out in this operation.</param>
     /// <returns></returns>
     public static void AzureSqlDatabase(this SupportedDatabasesForDropDatabase supported, string connectionString, IUpgradeLog logger)
     {
@@ -158,15 +155,11 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         );
 
         // check to see if the database already exists..
-        using var command = new SqlCommand(sqlCommandText, connection)
-        {
-            CommandType = CommandType.Text
-        };
+        using var command = new SqlCommand(sqlCommandText, connection);
+        command.CommandType = CommandType.Text;
         var results = (int?)command.ExecuteScalar();
 
-        if (results.HasValue && results.Value == 1)
-            return true;
-        return false;
+        return results is 1;
     }
 
     private static bool DatabaseExistsIfConnectedToDirectly(IUpgradeLog logger, string connectionString, string databaseName)
@@ -186,11 +179,10 @@ internal static class AzureSqlDatabaseWithIntegratedSecurity
         }
     }
 
-    private static string GetAccessToken(string resource = "https://database.windows.net/", string tenantId = null, string azureAdInstance = "https://login.microsoftonline.com/")
-    {
-        return new AzureServiceTokenProvider(azureAdInstance: azureAdInstance).GetAccessTokenAsync(resource, tenantId)
+    private static string GetAccessToken(string resource = "https://database.windows.net/", string? tenantId = null, string azureAdInstance = "https://login.microsoftonline.com/") =>
+        new AzureServiceTokenProvider(azureAdInstance: azureAdInstance)
+            .GetAccessTokenAsync(resource, tenantId)
             .ConfigureAwait(false)
             .GetAwaiter()
             .GetResult();
-    }
 }

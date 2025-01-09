@@ -1,5 +1,7 @@
 ﻿using DbUp.Builder;
 using DbUp.Cli.Cmd;
+using DbUp.Cli.Configuration;
+using DbUp.Cli.DbProviders;
 using DbUp.Engine.Output;
 using DbUp.Engine.Transactions;
 using DbUp.Helpers;

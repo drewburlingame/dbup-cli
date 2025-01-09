@@ -1,4 +1,4 @@
-﻿namespace DbUp.Cli;
+﻿namespace DbUp.Cli.Configuration;
 
 public enum Transaction
 {

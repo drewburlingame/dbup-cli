@@ -1,3 +1,4 @@
+using DbUp.Cli.Configuration;
 using DbUp.Support;
 using FluentAssertions;
 

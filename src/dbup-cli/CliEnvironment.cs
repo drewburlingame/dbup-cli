@@ -1,11 +1,12 @@
 ﻿using System.Text;
+using DbUp.Cli.Configuration;
 
 namespace DbUp.Cli;
 
 /// <summary>
 /// Environment implementation to use in cli tool
 /// </summary>
-public class CliEnvironment(string currentDirectory = null): IEnvironment
+public class CliEnvironment(string? currentDirectory = null): IEnvironment
 {
     public virtual bool DirectoryExists(string path) => Directory.Exists(path);
     public virtual bool FileExists(string path) => File.Exists(path);
