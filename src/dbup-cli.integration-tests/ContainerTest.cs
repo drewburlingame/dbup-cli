@@ -2,7 +2,7 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using CommandDotNet;
 using CommandDotNet.TestTools;
-using DbUp.Cli.Tests.TestInfrastructure;
+using DbUp.Cli.Tests;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;

@@ -1,4 +1,4 @@
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests;
 
 public class TestEnvironment(string currentDirectory = null) : 
     CliEnvironment(currentDirectory ?? ProjectPaths.TempDir)

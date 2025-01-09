@@ -1,12 +1,11 @@
 using CommandDotNet.Builders;
 using CommandDotNet.TestTools;
-using DbUp.Cli.Tests.TestInfrastructure;
 
 namespace DbUp.Cli.Tests;
 
 public static class CommandDotNetTestConfigs
 {
-    public static TestConfig Default = new TestConfig
+    public static readonly TestConfig Default = new()
     {
         AppInfoOverride = new AppInfo(
             true, true, false, 

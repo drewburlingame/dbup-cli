@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Data;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests.RecordingDb;
 
 public class RecordingDataParameterCollection(CaptureLogsLogger logger) : IDataParameterCollection
 {

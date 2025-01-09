@@ -1,6 +1,5 @@
 using DbUp.Builder;
 using DbUp.Cli.Configuration;
-using DbUp.Cli.Tests.TestInfrastructure;
 using DbUp.Engine;
 using FluentAssertions;
 

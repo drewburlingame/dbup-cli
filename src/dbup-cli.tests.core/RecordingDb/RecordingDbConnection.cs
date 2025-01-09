@@ -1,7 +1,7 @@
 using System.Data;
 using DbUp.Engine;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests.RecordingDb;
 
 internal class RecordingDbConnection(CaptureLogsLogger logger, string schemaTableName) : IDbConnection
 {

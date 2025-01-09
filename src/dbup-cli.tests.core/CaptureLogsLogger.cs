@@ -2,7 +2,7 @@ using CommandDotNet;
 using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine.Output;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests;
 
 public class CaptureLogsLogger(IConsole console = null): IUpgradeLog
 {

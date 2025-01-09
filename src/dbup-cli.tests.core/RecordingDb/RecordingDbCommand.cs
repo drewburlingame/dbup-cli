@@ -2,7 +2,7 @@ using System.Data;
 using System.Data.Common;
 using DbUp.Engine;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests.RecordingDb;
 
 internal class RecordingDbCommand(
     CaptureLogsLogger logger,

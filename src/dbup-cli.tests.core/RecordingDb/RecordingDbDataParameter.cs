@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests.RecordingDb;
 
 internal class RecordingDbDataParameter: IDbDataParameter
 {

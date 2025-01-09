@@ -1,7 +1,7 @@
 using CommandDotNet.TestTools;
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests;
 
 public static class RunResponseAssertions
 {

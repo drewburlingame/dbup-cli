@@ -2,7 +2,7 @@ using System.Data;
 using DbUp.Builder;
 using DbUp.Engine.Transactions;
 
-namespace DbUp.Cli.Tests.TestInfrastructure;
+namespace DbUp.Cli.Tests;
 
 /// <summary>
 /// Configures DbUp to use SqlServer with a fake connection
