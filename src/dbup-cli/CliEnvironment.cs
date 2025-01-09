@@ -5,11 +5,11 @@ namespace DbUp.Cli;
 /// <summary>
 /// Environment implementation to use in cli tool
 /// </summary>
-public class CliEnvironment: IEnvironment
+public class CliEnvironment(string currentDirectory = null): IEnvironment
 {
     public virtual bool DirectoryExists(string path) => Directory.Exists(path);
     public virtual bool FileExists(string path) => File.Exists(path);
-    public virtual string GetCurrentDirectory() => Directory.GetCurrentDirectory();
+    public string CurrentDirectory { get; } = currentDirectory ?? Directory.GetCurrentDirectory();
     
     public virtual string ReadFile(string path) => File.ReadAllText(path, Encoding.UTF8);
     

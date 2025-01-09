@@ -17,7 +17,7 @@ public class LoadMigrationTests
     [Fact]
     public void DefaultConfigFile_ShouldLoadItWithoutErrors()
     {
-        var configFilePath = host.Environment.WriteFileInMem(ToolEngine.GetDefaultConfigFile()); 
+        var configFilePath = host.Environment.WriteFileInMem(ConfigLoader.GetDefaultConfigFile()); 
         LoadMigration(configFilePath);
     }
 

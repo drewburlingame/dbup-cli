@@ -19,6 +19,7 @@
             </PropertyGroup>
 
             <ItemGroup>
+                <PackageReference Include="CommandDotNet.TestTools" />
                 <PackageReference Include="FakeItEasy" />
                 <PackageReference Include="FluentAssertions" />
                 <PackageReference Include="Microsoft.NET.Test.Sdk" />

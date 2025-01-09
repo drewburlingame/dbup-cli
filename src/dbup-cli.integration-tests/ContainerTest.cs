@@ -1,4 +1,6 @@
 using System.Data;
+using CommandDotNet;
+using CommandDotNet.TestTools;
 using DbUp.Cli.Tests.TestInfrastructure;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
@@ -14,7 +16,8 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     where TConfigurationEntity : IContainerConfiguration
 {
     private readonly string dbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, provider);
-    private readonly ToolEngine engine = new(new CliEnvironment(), new CaptureLogsLogger());
+    private readonly AppRunner appRunner = Program.NewAppRunner(new CliEnvironment(), 
+        console => new CaptureLogsLogger(console));
 
     private static readonly Dictionary<Type, IDatabaseContainer> ContainerMap = new();
     private static readonly SemaphoreSlim Semaphore = new(1);
@@ -54,44 +57,51 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     public void DatabaseShouldNotExistBeforeTestRun() => AssertDbDoesNotExist();
 
     [Fact]
-    public void Ensure_CreateANewDb()
+    public async Task Ensure_CreateANewDb()
     {
-        var result = engine.Run("upgrade", "--ensure", GetConfigPath());
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
         result.ShouldSucceed();
+        await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
 
     [Fact]
-    public void UpgradeCommand_ShouldUseASpecifiedJournal()
+    public async Task UpgradeCommand_ShouldUseASpecifiedJournal()
     {
-        var result = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "JournalTableScript"));
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "JournalTableScript")}");
         result.ShouldSucceed();
+        await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
     [Fact]
-    public virtual void UpgradeCommand_ShouldFailOnCommandTimeout()
+    public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
-        var r = engine.Run("upgrade", "--ensure", GetConfigPath("dbup.yml", "Timeout"));
-        r.ShouldFail(assert: error => error.Should().StartWith("Failed to perform upgrade:").And.Contain("Timeout"));
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "Timeout")}");
+        result.ShouldFail();
+        var output = result.Console.AllText();
+        await Verify(output)
+            // the exception message is inconsistent between mac and github's ubuntu-latest
+            .ScrubLinesWithReplace(line => line.Replace("Unknown error 258", "Unknown error: 258"));
+        var failureExplanation = output!.Split(Environment.NewLine).FirstOrDefault(l => l.StartsWith("Failed to perform upgrade:"));
+        failureExplanation.Should().NotBeNull().And.Contain("Timeout");
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
     }
     
     [Fact]
-    public virtual void Drop_DropADb()
+    public virtual async Task Drop_DropADb()
     {
-        engine.Run("upgrade", "--ensure", GetConfigPath());
-        var result = engine.Run("drop", GetConfigPath());
+        appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
+        var result = appRunner.RunInMem($"drop {GetConfigPath()}");
         result.ShouldSucceed();
+        await Verify(result.Console.AllText());
         AssertDbDoesNotExist();
     }
 
     private void AssertDbDoesNotExist() => AssertDbDoesNotExist(dbConnString, dbName);
 
-    private void ConfirmUpgradeViaJournal(string query)
-    {
+    private void ConfirmUpgradeViaJournal(string query) => 
         GetCountOfScript(query).Should().Be(1);
-    }
 
     private object GetCountOfScript(string query)
     {

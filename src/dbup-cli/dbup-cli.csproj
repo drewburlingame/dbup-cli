@@ -20,7 +20,7 @@
 		<Company />
 		<Copyright>Copyright (c) 2024 Drew Burlingame</Copyright>
 		<PackageTags>dbup database migration sqlserver postgresql mysql</PackageTags>
-		<PackageReleaseNotes>https://github.com/drewburlingame/dbup-cli#release-notes</PackageReleaseNotes>
+		<PackageReleaseNotes>https://github.com/drewburlingame/dbup-cli/releases</PackageReleaseNotes>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
@@ -42,7 +42,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommandLineParser" />
+		<PackageReference Include="CommandDotNet" />
+		<PackageReference Include="CommandDotNet.DataAnnotations" />
+		<PackageReference Include="CommandDotNet.NameCasing" />
 		<PackageReference Include="dbup-core" />
 		<PackageReference Include="dbup-mysql" />
 		<PackageReference Include="dbup-postgresql" />

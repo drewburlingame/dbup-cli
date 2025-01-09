@@ -4,6 +4,7 @@ namespace DbUp.Cli.Tests.TestInfrastructure;
 
 public static class ProjectPaths
 {
+    // Directory = src/dbup-cli.tests/bin/Debug/net9.0, RootDir becomes src/dbup-cli.tests/bin/
     public static string RootDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory!.Parent!.Parent!.FullName;
     public static string ScriptsDir = Path.Combine(RootDir, "..", "Scripts");
     public static string ConfigDir = Path.Combine(ScriptsDir, "Config");

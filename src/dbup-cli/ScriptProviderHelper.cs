@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using DbUp.Builder;
+using DbUp.Cli.DbUpCustomization;
 using DbUp.Engine;
 using DbUp.Support;
 

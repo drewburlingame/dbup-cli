@@ -1,0 +1,23 @@
+﻿Show upgrade status
+
+Usage: dbup status [options] [<file>]
+
+Arguments:
+
+  file  <TEXT>  [dbup.yml]
+  Path to a configuration file. The path can be absolute or relative against a current directory
+
+Options:
+
+  -v | --verbosity          <VERBOSITYLEVEL>  [normal]
+  Verbosity level. Can be one of: detail, normal or min
+  Allowed values: detail, normal, min
+
+  -e | --env (Multiple)     <TEXT>            []
+  Path to an environment file. Can be more than one file specified. The path can be absolute or relative against a current directory
+
+  -x | --show-executed
+  Print names of executed scripts
+
+  -n | --show-not-executed
+  Print names of scripts to be execute

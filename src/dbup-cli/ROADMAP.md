@@ -12,6 +12,12 @@
 *[x] convert to xunit or nunit
 *[x] remove Option to simplify code
 *[ ] convert to CommandDotNet to simplify command definitions 
+  *[ ] xunit logging to console
+  *[ ] DropDb snapshot 
+  * Breaking Changes
+    * `version` command is now `--version` option
+    * `--env` must now be repeated for each file. `--env file1.env file2.env` is now `--env file1.env --env file2.env`
+    * case-sensitive enums. verbosity must be lowercase - `-v detail`
 *[ ] structured logging for better debugging and monitoring in deployed environments
 
 ---

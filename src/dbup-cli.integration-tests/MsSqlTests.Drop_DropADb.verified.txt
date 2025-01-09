@@ -1,0 +1,13 @@
+﻿[I] Master ConnectionString => Data Source=127.0.0.1,port_num;Initial Catalog=master;User ID=sa;Password=******;Trust Server Certificate=True
+[I] Created database DbUp_Drop_DropADb
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script '001.sql'
+[I] Checking whether journal table exists
+[I] Creating the [SchemaVersions] table
+[I] The [SchemaVersions] table has been created
+[I] Upgrade successful
+[I] Master ConnectionString => Data Source=127.0.0.1,port_num;Initial Catalog=master;User ID=sa;Password=******;Trust Server Certificate=True
+[I] Dropped database DbUp_Drop_DropADb
+[I] SqlServer database dropped

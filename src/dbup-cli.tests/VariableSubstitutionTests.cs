@@ -5,6 +5,8 @@ namespace DbUp.Cli.Tests;
 
 public class VariableSubstitutionTests
 {
+    public VariableSubstitutionTests(ITestOutputHelper output) => Ambient.Output = output;
+
     private readonly TestHost host = new();
 
     private string GetConfigPath(string name) => ProjectPaths.GetConfigPath(name);
@@ -40,8 +42,7 @@ public class VariableSubstitutionTests
     [Fact]
     public void LoadMigration_ShouldSubstituteVariablesToScript()
     {
-        host.ToolEngine
-            .Run("upgrade", GetConfigPath("vars.yml"))
+        host.Run("upgrade", GetConfigPath("vars.yml"))
             .ShouldSucceed();
 
         host.Logger.SummaryText().Should().Contain("print 'Var1Value'");
@@ -52,8 +53,7 @@ public class VariableSubstitutionTests
     [Fact]
     public void LoadMigration_ShouldNotSubstituteVariablesToScript()
     {
-        host.ToolEngine
-            .Run("upgrade", GetConfigPath("disable-vars.yml"))
+        host.Run("upgrade", GetConfigPath("disable-vars.yml"))
             .ShouldSucceed();
 
         host.Logger.SummaryText().Should().Contain("print '$Var1$'");

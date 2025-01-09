@@ -1,2 +1,6 @@
-﻿[I] Database upgrade is required.
-[I] You have 1 more scripts to execute.
+﻿[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Database upgrade is required.
+[I] 1 scripts to execute.

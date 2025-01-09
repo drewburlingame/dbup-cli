@@ -1,0 +1,13 @@
+﻿Drops database if exists. SqlServer and AzureSql providers only.
+
+Usage: dbup drop [options] [<file>]
+
+Arguments:
+
+  file  <TEXT>  [dbup.yml]
+  Path to a configuration file. The path can be absolute or relative against a current directory
+
+Options:
+
+  -e | --env (Multiple)  <TEXT>  []
+  Path to an environment file. Can be more than one file specified. The path can be absolute or relative against a current directory

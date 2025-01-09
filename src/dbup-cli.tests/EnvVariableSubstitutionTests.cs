@@ -45,7 +45,7 @@ public class EnvVariableSubstitutionTests
         const string varA = "va1";
 
         var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
             
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
@@ -62,7 +62,7 @@ public class EnvVariableSubstitutionTests
         const string varB = "vb2";
 
         var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
@@ -80,7 +80,7 @@ public class EnvVariableSubstitutionTests
         const string varD = "vd3";
 
         var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(DotEnvCurrentFolder);
+        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
 
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
@@ -132,7 +132,7 @@ public class EnvVariableSubstitutionTests
         const string varD = "vd4";
 
         var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.GetCurrentDirectory()).Returns(ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "CurrentFolder"));
+        A.CallTo(() => env.CurrentDirectory).Returns(ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "CurrentFolder"));
         A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
             
         var dotEnvVarsPath = ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "ConfigFolder", "dotenv-vars.yml");

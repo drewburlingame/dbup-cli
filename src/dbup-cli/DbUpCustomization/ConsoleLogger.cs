@@ -1,8 +1,9 @@
-﻿using DbUp.Engine.Output;
+﻿using CommandDotNet;
+using DbUp.Engine.Output;
 
-namespace DbUp.Cli;
+namespace DbUp.Cli.DbUpCustomization;
 
-public class ConsoleLogger: IUpgradeLog
+public class ConsoleLogger(IConsole console) : IUpgradeLog
 {
     public void LogTrace(string format, params object[] args) => Write("T", string.Format(format, args));
 
@@ -19,7 +20,7 @@ public class ConsoleLogger: IUpgradeLog
     public void LogError(Exception ex, string format, params object[] args) => 
         WriteWithColor("E", ConsoleColor.Red, $"{string.Format(format, args)}{Environment.NewLine}{ex}");
 
-    private static void WriteWithColor(string level, ConsoleColor color, string log)
+    private void WriteWithColor(string level, ConsoleColor color, string log)
     {
         Console.ForegroundColor = color;
         try
@@ -32,5 +33,5 @@ public class ConsoleLogger: IUpgradeLog
         }
     }
 
-    private static void Write(string level, string log) => Console.WriteLine($"[{level}] {log}");
+    private void Write(string level, string log) => console?.Out.WriteLine($"[{level}] {log}");
 }

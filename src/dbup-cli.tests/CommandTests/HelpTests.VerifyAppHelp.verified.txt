@@ -1,0 +1,16 @@
+﻿Usage: dbup [command] [options]
+
+Options:
+
+  -v | --version
+  Show version information
+
+Commands:
+
+  drop              Drops database if exists. SqlServer and AzureSql providers only.
+  init              Create a new config file
+  mark-as-executed  Mark all scripts as executed
+  status            Show upgrade status
+  upgrade           Upgrade database
+
+Use "dbup [command] --help" for more information about a command.

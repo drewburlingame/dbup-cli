@@ -1,0 +1,71 @@
+﻿[I] Master ConnectionString => Data Source=127.0.0.1,port_num;Initial Catalog=master;User ID=sa;Password=******;Trust Server Certificate=True
+[I] Created database DbUp_UpgradeCommand_ShouldFailOnCommandTimeout
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script '001.sql'
+[I] Checking whether journal table exists
+[I] Creating the [SchemaVersions] table
+[I] The [SchemaVersions] table has been created
+[I] SQL exception has occurred in script: '001.sql'
+[E] Script block number: 0; Block line 0; Procedure ; Number -2; Message: Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user.
+[E] Microsoft.Data.SqlClient.SqlException (0x80131904): Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user.
+ ---> System.ComponentModel.Win32Exception (258): Unknown error: 258
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteNonQueryTds(String methodName, Boolean isAsync, Int32 timeout, Boolean asyncWrite)
+   at Microsoft.Data.SqlClient.SqlCommand.InternalExecuteNonQuery(TaskCompletionSource`1 completion, Boolean sendToPipe, Int32 timeout, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String methodName)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteNonQuery()
+   at DbUp.Support.ScriptExecutor.ExecuteNonQuery(IDbCommand command) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 201
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_1.<Execute>b__2() in /_/src/dbup-core/Support/ScriptExecutor.cs:line 153
+   at DbUp.SqlServer.SqlScriptExecutor.ExecuteCommandsWithinExceptionHandler(Int32 index, SqlScript script, Action executeCommand) in /_/src/dbup-sqlserver/SqlScriptExecutor.cs:line 40
+ClientConnectionId:Guid_1
+Error Number:-2,State:0,Class:11
+[I] DB exception has occurred in script: '001.sql'
+[E] Script block number: 0; Message: Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user.
+[E] Microsoft.Data.SqlClient.SqlException (0x80131904): Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user.
+ ---> System.ComponentModel.Win32Exception (258): Unknown error: 258
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteNonQueryTds(String methodName, Boolean isAsync, Int32 timeout, Boolean asyncWrite)
+   at Microsoft.Data.SqlClient.SqlCommand.InternalExecuteNonQuery(TaskCompletionSource`1 completion, Boolean sendToPipe, Int32 timeout, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String methodName)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteNonQuery()
+   at DbUp.Support.ScriptExecutor.ExecuteNonQuery(IDbCommand command) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 201
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_1.<Execute>b__2() in /_/src/dbup-core/Support/ScriptExecutor.cs:line 153
+   at DbUp.SqlServer.SqlScriptExecutor.ExecuteCommandsWithinExceptionHandler(Int32 index, SqlScript script, Action executeCommand) in /_/src/dbup-sqlserver/SqlScriptExecutor.cs:line 40
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_0.<Execute>b__0(Func`1 dbCommandFactory) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 151
+   at DbUp.Engine.Transactions.NoTransactionStrategy.Execute(Action`1 action) in /_/src/dbup-core/Engine/Transactions/NoTransactionStrategy.cs:line 15
+   at DbUp.Engine.Transactions.DatabaseConnectionManager.ExecuteCommandsWithManagedConnection(Action`1 action) in /_/src/dbup-core/Engine/Transactions/DatabaseConnectionManager.cs:line 131
+   at DbUp.Support.ScriptExecutor.Execute(SqlScript script, IDictionary`2 variables) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 126
+ClientConnectionId:Guid_1
+Error Number:-2,State:0,Class:11
+[E] Upgrade failed due to an unexpected exception: Microsoft.Data.SqlClient.SqlException (0x80131904): Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user.
+ ---> System.ComponentModel.Win32Exception (258): Unknown error: 258
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteNonQueryTds(String methodName, Boolean isAsync, Int32 timeout, Boolean asyncWrite)
+   at Microsoft.Data.SqlClient.SqlCommand.InternalExecuteNonQuery(TaskCompletionSource`1 completion, Boolean sendToPipe, Int32 timeout, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String methodName)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteNonQuery()
+   at DbUp.Support.ScriptExecutor.ExecuteNonQuery(IDbCommand command) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 201
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_1.<Execute>b__2() in /_/src/dbup-core/Support/ScriptExecutor.cs:line 153
+   at DbUp.SqlServer.SqlScriptExecutor.ExecuteCommandsWithinExceptionHandler(Int32 index, SqlScript script, Action executeCommand) in /_/src/dbup-sqlserver/SqlScriptExecutor.cs:line 40
+   at DbUp.Support.ScriptExecutor.<>c__DisplayClass20_0.<Execute>b__0(Func`1 dbCommandFactory) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 151
+   at DbUp.Engine.Transactions.NoTransactionStrategy.Execute(Action`1 action) in /_/src/dbup-core/Engine/Transactions/NoTransactionStrategy.cs:line 15
+   at DbUp.Engine.Transactions.DatabaseConnectionManager.ExecuteCommandsWithManagedConnection(Action`1 action) in /_/src/dbup-core/Engine/Transactions/DatabaseConnectionManager.cs:line 131
+   at DbUp.Support.ScriptExecutor.Execute(SqlScript script, IDictionary`2 variables) in /_/src/dbup-core/Support/ScriptExecutor.cs:line 126
+   at DbUp.Engine.UpgradeEngine.PerformUpgrade() in /_/src/dbup-core/Engine/UpgradeEngine.cs:line 84
+ClientConnectionId:Guid_1
+Error Number:-2,State:0,Class:11
+Failed to perform upgrade: Execution Timeout Expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.
+Operation cancelled by user. > Unknown error: 258 @ Script: 001.sql

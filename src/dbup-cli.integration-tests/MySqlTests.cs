@@ -34,12 +34,8 @@ public class MySqlTests()
         "select count(*) from journal where scriptname = '001.sql'";
 
     [Fact(Skip = "MySql provider does not throw on timeout. Find another way to confirm.")]
-    public override void UpgradeCommand_ShouldFailOnCommandTimeout()
-    {
-    }
+    public override Task UpgradeCommand_ShouldFailOnCommandTimeout() => Task.CompletedTask;
 
     [Fact(Skip = "Not supported")]
-    public override void Drop_DropADb()
-    {
-    }
+    public override Task Drop_DropADb() => Task.CompletedTask;
 }

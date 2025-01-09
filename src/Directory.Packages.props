@@ -11,7 +11,10 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="CommandLineParser" Version="2.9.1" />
+    <PackageVersion Include="CommandDotNet" Version="7.0.5" />
+    <PackageVersion Include="CommandDotNet.DataAnnotations" Version="3.0.2" />
+    <PackageVersion Include="CommandDotNet.NameCasing" Version="4.0.2" />
+    <PackageVersion Include="CommandDotNet.TestTools" Version="6.0.4" />
     <PackageVersion Include="dbup-core" Version="6.0.4" />
     <PackageVersion Include="dbup-mysql" Version="6.0.4" />
     <PackageVersion Include="dbup-postgresql" Version="6.0.0-beta.44" />
