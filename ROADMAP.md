@@ -1,21 +1,7 @@
 ﻿## Improved testing
 
-*[x] TestContainers
-*[x] DRY up the tests
-*[x] assert failure reason when checking for exit code != 0
-*[ ] is https://github.com/drewburlingame/dbup-cli/issues/8 still a problem?
-  * if not, what is the result of status for runAlways scripts? what about for a new runAlways script?
 *[ ] integration tests, assert a table is or is not created, not just the journal entry. 
-  *[ ] reenable MySql timeout test to see if table is not created on timeout but journal is updated 
-*[ ] inline config files so they're easy to view with the tests instead of forcing to navigate to a separate folder
-*[ ] move configs that aren't inlined into folders with the tests so it's more obvious how they are used.
-*[x] use Verify for tests
-*[x] organize unit tests by command where possible
-*[x] convert to xunit or nunit
-*[x] remove Option to simplify code
-*[x] convert to CommandDotNet to simplify command definitions 
-  *[x] xunit logging to console
-  *[x] DropDb snapshot
+  *[ ] reenable MySql timeout test to see if table is not created on timeout but journal is updated
 *[ ] structured logging for better debugging and monitoring in deployed environments
 
 ---
