@@ -5,8 +5,8 @@ using Testcontainers.PostgreSql;
 
 namespace DbUp.Cli.IntegrationTests;
 
-public class PostgreSqlTests()
-    : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("PostgreSql")
+public class PostgreSqlTests(ITestOutputHelper output)
+    : ContainerTest<PostgreSqlBuilder, PostgreSqlContainer, PostgreSqlConfiguration>("PostgreSql", output)
 {
     protected override PostgreSqlBuilder NewBuilder => new();
 

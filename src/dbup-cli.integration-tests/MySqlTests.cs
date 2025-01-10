@@ -6,8 +6,8 @@ using MySqlConfiguration = Testcontainers.MySql.MySqlConfiguration;
 
 namespace DbUp.Cli.IntegrationTests;
 
-public class MySqlTests()
-    : ContainerTest<MySqlBuilder, MySqlContainer, MySqlConfiguration>("MySql")
+public class MySqlTests(ITestOutputHelper output)
+    : ContainerTest<MySqlBuilder, MySqlContainer, MySqlConfiguration>("MySql", output)
 {
     protected override MySqlBuilder NewBuilder => new MySqlBuilder()
         .WithUsername("root"); // root has perms for mysql for connecting to create the dbup db

@@ -10,13 +10,12 @@ using FluentAssertions;
 
 namespace DbUp.Cli.IntegrationTests;
 
-public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigurationEntity>(string provider)
-: IAsyncLifetime
+public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigurationEntity> : IAsyncLifetime
     where TBuilderEntity : ContainerBuilder<TBuilderEntity, TContainerEntity, TConfigurationEntity>
     where TContainerEntity : IDatabaseContainer
     where TConfigurationEntity : IContainerConfiguration
 {
-    private readonly string dbScriptsDir = Path.Combine(ProjectPaths.ScriptsDir, provider);
+    private readonly string dbScriptsDir;
     private readonly AppRunner appRunner = Program.NewAppRunner(new CliEnvironment(), 
         console => new CaptureLogsLogger(console));
 
@@ -31,6 +30,12 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     private string dbConnString;
     private string dbName;
 
+    protected ContainerTest(string provider, ITestOutputHelper output)
+    {
+        dbScriptsDir = Path.Combine(Caller.Directory(), "Scripts", provider);
+        Ambient.Output = output;
+    }
+
     protected abstract TBuilderEntity NewBuilder { get; }
     protected virtual int DbNameLengthLimit => 60;
 
@@ -43,6 +48,8 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     
     private string GetConfigPath(string subPath = "EmptyScript") =>
         new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, "dbup.yml")).FullName;
+
+    private AppRunnerResult Run(string args) => appRunner.RunInMem(args, Ambient.WriteLine);
 
     public async ValueTask InitializeAsync()
     {
@@ -63,7 +70,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public async Task Ensure_CreateANewDb()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}").ShouldSucceed();
+        var result = Run($"upgrade --ensure {GetConfigPath()}").ShouldSucceed();
         await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
@@ -71,7 +78,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public async Task UpgradeCommand_ShouldUseASpecifiedJournal()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("JournalTableScript")}").ShouldSucceed();
+        var result = Run($"upgrade --ensure {GetConfigPath("JournalTableScript")}").ShouldSucceed();
         await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
@@ -79,7 +86,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("Timeout")}").ShouldFail();
+        var result = Run($"upgrade --ensure {GetConfigPath("Timeout")}").ShouldFail();
         var output = result.Console.AllText();
         await Verify(output)
             // the exception message is inconsistent between mac and github's ubuntu-latest
@@ -96,7 +103,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         appRunner.RunInMem($"upgrade --ensure {configPath}");
         
         // It shouldn't actually fail if the script has already been applied.
-        var result = appRunner.RunInMem($"status {configPath}").ShouldFail(-1);
+        var result = Run($"status {configPath}").ShouldFail(-1);
         var output = result.Console.AllText();
         await Verify(output);
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
@@ -106,7 +113,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     public virtual async Task Drop_DropADb()
     {
         appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
-        var result = appRunner.RunInMem($"drop {GetConfigPath()}").ShouldSucceed();
+        var result = Run($"drop {GetConfigPath()}").ShouldSucceed();
         await Verify(result.Console.AllText());
         AssertDbDoesNotExist();
     }
