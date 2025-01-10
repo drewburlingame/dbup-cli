@@ -1,0 +1,17 @@
+﻿[I] Master ConnectionString => Host=127.0.0.1;Port=port_num;Database=postgres;Username=postgres;Password=******
+[I] Created database DbUp_Status_Issue8_Fails_RunAlways_scripts_return_error
+[I] Beginning database upgrade
+[I] Checking whether journal table exists
+[I] Journal table does not exist
+[I] Executing Database Server script 'o001.sql'
+[I] Checking whether journal table exists
+[I] Creating the "schemaversions" table
+[I] The "schemaversions" table has been created
+[I] Executing Database Server script 'a001.sql'
+[I] Upgrade successful
+[I] Checking whether journal table exists
+[I] Fetching list of already executed scripts.
+[I] Checking whether journal table exists
+[I] Fetching list of already executed scripts.
+[I] Database upgrade is required.
+[I] 1 scripts to execute.

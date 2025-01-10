@@ -41,8 +41,8 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     protected abstract string QueryCountOfScript001 { get; }
     protected abstract string QueryCountOfScript001FromCustomJournal { get; }
     
-    private string GetConfigPath(string name = "dbup.yml", string subPath = "EmptyScript") =>
-        new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, name)).FullName;
+    private string GetConfigPath(string subPath = "EmptyScript") =>
+        new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, "dbup.yml")).FullName;
 
     public async ValueTask InitializeAsync()
     {
@@ -63,8 +63,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public async Task Ensure_CreateANewDb()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
-        result.ShouldSucceed();
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}").ShouldSucceed();
         await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
@@ -72,8 +71,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public async Task UpgradeCommand_ShouldUseASpecifiedJournal()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "JournalTableScript")}");
-        result.ShouldSucceed();
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("JournalTableScript")}").ShouldSucceed();
         await Verify(result.Console.AllText());
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
@@ -81,8 +79,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
-        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("dbup.yml", "Timeout")}");
-        result.ShouldFail();
+        var result = appRunner.RunInMem($"upgrade --ensure {GetConfigPath("Timeout")}").ShouldFail();
         var output = result.Console.AllText();
         await Verify(output)
             // the exception message is inconsistent between mac and github's ubuntu-latest
@@ -91,13 +88,25 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         failureExplanation.Should().NotBeNull().And.Contain("Timeout");
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
     }
+
+    [Fact]
+    public virtual async Task Status_Issue8_Fails_RunAlways_scripts_return_error()
+    {
+        var configPath = GetConfigPath("Status");
+        appRunner.RunInMem($"upgrade --ensure {configPath}");
+        
+        // It shouldn't actually fail if the script has already been applied.
+        var result = appRunner.RunInMem($"status {configPath}").ShouldFail(-1);
+        var output = result.Console.AllText();
+        await Verify(output);
+        GetCountOfScript(QueryCountOfScript001).Should().Be(0);
+    }
     
     [Fact]
     public virtual async Task Drop_DropADb()
     {
         appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
-        var result = appRunner.RunInMem($"drop {GetConfigPath()}");
-        result.ShouldSucceed();
+        var result = appRunner.RunInMem($"drop {GetConfigPath()}").ShouldSucceed();
         await Verify(result.Console.AllText());
         AssertDbDoesNotExist();
     }
