@@ -1,7 +1,7 @@
 using CommandDotNet.Execution;
 using CommandDotNet.TestTools;
 
-namespace DbUp.Cli.Tests.CommandTests;
+namespace DbUp.Cli.Tests.CommandTests.HelpTests;
 
 public class HelpTests
 {
@@ -9,7 +9,7 @@ public class HelpTests
 
     private readonly TestHost host = new();
 
-    public static TheoryData<string> GetCommands => new TheoryData<string>(
+    public static TheoryData<string> GetCommands => new(
         new TestHost().AppRunner
             .GetFromContext(["-h"], ctx => ctx.RootCommand, middlewareStage: MiddlewareStages.ParseInput)!
             .Subcommands

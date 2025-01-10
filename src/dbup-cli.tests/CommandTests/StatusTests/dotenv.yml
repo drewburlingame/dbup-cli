@@ -3,4 +3,4 @@ dbUp:
   provider: sqlserver
   connectionString: (localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True
   scripts:
-    -   folder: MarkAsExecuted
+    -   folder: $file1$$file2$

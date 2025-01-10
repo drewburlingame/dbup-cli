@@ -5,14 +5,14 @@ namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
 public class NamingOptionsTests
 {
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
 
     [Fact]
     public void ScriptNamingScheme_WithDefaultNamingSettings_ShouldUseDefaultNamingScheme()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = NamingOptions.Default;
@@ -31,11 +31,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_UseOnlyFileName_Set_ShoudUseValidScriptName()
+    public void ScriptNamingScheme_With_UseOnlyFileName_Set_ShouldUseValidScriptName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(useOnlyFileName: true, false, null);
@@ -54,11 +54,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_IncludeBaseFolderName_Set_ShoudUseValidScriptName()
+    public void ScriptNamingScheme_With_IncludeBaseFolderName_Set_ShouldUseValidScriptName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(false, includeBaseFolderName: true, null);
@@ -77,11 +77,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_IncludeBaseFolderName_And_UseOnlyFileName_Set_ShoudUseValidScriptName()
+    public void ScriptNamingScheme_With_IncludeBaseFolderName_And_UseOnlyFileName_Set_ShouldUseValidScriptName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(useOnlyFileName: true, includeBaseFolderName: true, null);
@@ -100,11 +100,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_Prefix_Set_ShoudUseValidScriptName()
+    public void ScriptNamingScheme_With_Prefix_Set_ShouldUseValidScriptName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(false, false, "prefix_");
@@ -123,11 +123,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_Prefix_Set_ShoudTrimPrefixAndUseValidScriptName()
+    public void ScriptNamingScheme_With_Prefix_Set_ShouldTrimPrefixAndUseValidScriptName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new (ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(false, false, " prefix_ ");
@@ -146,11 +146,11 @@ public class NamingOptionsTests
     }
 
     [Fact]
-    public void ScriptNamingScheme_With_IncludeBaseFolderName_And_Prefix_Set_ShoudUsePrefixBeforeFolderName()
+    public void ScriptNamingScheme_With_IncludeBaseFolderName_And_Prefix_Set_ShouldUsePrefixBeforeFolderName()
     {
         var scripts = new List<ScriptBatch>
         {
-            new ScriptBatch(ScriptProviderHelper.GetFolder(ProjectPaths.ConfigDir, "Naming"), false, true, 0, Constants.Default.Encoding)
+            new(ScriptProviderHelper.GetFolder(Caller.Directory(), "Naming"), false, true, 0, Constants.Default.Encoding)
         };
 
         var namingOptions = new NamingOptions(false, includeBaseFolderName: true, "prefix_");

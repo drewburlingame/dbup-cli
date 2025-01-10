@@ -2,12 +2,12 @@ using DbUp.Cli.Configuration;
 using FakeItEasy;
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests;
+namespace DbUp.Cli.Tests.EnvVarTests.DotEnvSubstitutionTests;
 
-public class EnvVariableSubstitutionTests
+public class Tests
 {
-    private static readonly string EnvVarsYmlPath = ProjectPaths.GetConfigPath("env-vars.yml");
-    private static readonly string DotEnvCurrentFolder = ProjectPaths.GetConfigPath("DotEnv-CurrentFolder");
+    private static readonly string EnvVarsYmlPath = Caller.ConfigFile("env-vars.yml");
+    private static readonly string DotEnvCurrentFolder = Caller.ConfigFile("DotEnv-CurrentFolder");
 
     [Fact]
     public void LoadMigration_ShouldSubstituteEnvVars_ToConnectionString()
@@ -42,58 +42,37 @@ public class EnvVariableSubstitutionTests
     [Fact]
     public void LoadEnvironmentVariables_ShouldLoadDotEnv_FromCurrentFolder()
     {
-        const string varA = "va1";
-
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-            
-        var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>());
+        var dotEnvVarsPath = Caller.ConfigFile("dotenv-vars.yml");
+        LoadEnvironmentVariables(DotEnvCurrentFolder, dotEnvVarsPath, []);
 
         var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
-        migration.Vars["VarA"].Should().Be(varA);
+        migration.Vars["VarA"].Should().Be("va1");
     }
 
     [Fact]
     public void LoadEnvironmentVariables_ShouldLoadDotEnv_FromConfigFileFolder()
     {
-        const string varB = "vb2";
-
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-
-        var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>());
+        var dotEnvVarsPath = Caller.ConfigFile("dotenv-vars.yml");
+        LoadEnvironmentVariables(DotEnvCurrentFolder, dotEnvVarsPath, []);
 
         var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
-        migration.Vars["VarB"].Should().Be(varB);
+        migration.Vars["VarB"].Should().Be("vb2");
     }
 
     [Fact]
     public void LoadEnvironmentVariables_ShouldLoadVars_FromSpecifiedFiles()
     {
-        const string varC = "vc3";
-        const string varD = "vd3";
-
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.CurrentDirectory).Returns(DotEnvCurrentFolder);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-
-        var dotEnvVarsPath = ProjectPaths.GetConfigPath("dotenv-vars.yml");
-
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>
-        {
-            Path.Combine("..", "varC.env"), // relative path
-            ProjectPaths.GetConfigPath("varD.env") // absolute path
-        });
+        var dotEnvVarsPath = Caller.ConfigFile("dotenv-vars.yml");
+        LoadEnvironmentVariables(DotEnvCurrentFolder,
+            dotEnvVarsPath,
+            [
+                Path.Combine("..", "varC.env"), // relative path
+                Caller.ConfigFile("varD.env")
+            ]);
 
         var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
-        migration.Vars["VarC"].Should().Be(varC);
-        migration.Vars["VarD"].Should().Be(varD);
+        migration.Vars["VarC"].Should().Be("vc3");
+        migration.Vars["VarD"].Should().Be("vd3");
     }
 
     [Fact]
@@ -126,27 +105,29 @@ public class EnvVariableSubstitutionTests
          *  The last column contains the right values of the variables after the overriding if it was correctly performed.
          */
 
-        const string varA = "va1";
-        const string varB = "vb2";
-        const string varC = "vc3";
-        const string varD = "vd4";
+        var currentDirectory = Caller.ConfigFile(["DotEnv-VarsOverride", "CurrentFolder"]);
 
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.CurrentDirectory).Returns(ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "CurrentFolder"));
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-            
-        var dotEnvVarsPath = ProjectPaths.GetConfigPath("DotEnv-VarsOverride", "ConfigFolder", "dotenv-vars.yml");
-        
-        env.LoadEnvironmentVariables(dotEnvVarsPath, new List<string>
-            {
+        var dotEnvVarsPath = Caller.ConfigFile(["DotEnv-VarsOverride", "ConfigFolder", "dotenv-vars.yml"]);
+        LoadEnvironmentVariables(currentDirectory,
+            dotEnvVarsPath,
+            [
                 Path.Combine("..", "file3.env"),
                 Path.Combine("..", "file4.env")
-            });
+            ]);
 
         var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
-        migration.Vars["VarA"].Should().Be(varA);
-        migration.Vars["VarB"].Should().Be(varB);
-        migration.Vars["VarC"].Should().Be(varC);
-        migration.Vars["VarD"].Should().Be(varD);
+        migration.Vars["VarA"].Should().Be("va1");
+        migration.Vars["VarB"].Should().Be("vb2");
+        migration.Vars["VarC"].Should().Be("vc3");
+        migration.Vars["VarD"].Should().Be("vd4");
+    }
+
+    private static void LoadEnvironmentVariables(string currentDirectory, string dotEnvVarsPath,
+        List<string> envFiles)
+    {
+        var env = A.Fake<IEnvironment>();
+        A.CallTo(() => env.CurrentDirectory).Returns(currentDirectory);
+        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
+        env.LoadEnvironmentVariables(dotEnvVarsPath, envFiles);
     }
 }

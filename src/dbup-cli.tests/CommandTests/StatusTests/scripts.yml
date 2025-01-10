@@ -2,5 +2,5 @@ dbUp:
   version: 1
   provider: sqlserver
   connectionString: (localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True
-  logScriptOutput: yes
-  logToConsole: no
+  scripts:
+    -   folder: Scripts

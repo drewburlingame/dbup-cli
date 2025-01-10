@@ -1,19 +1,17 @@
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests.CommandTests;
+namespace DbUp.Cli.Tests.CommandTests.UpgradeTests;
 
 public class UpgradeTests
 {
     public UpgradeTests(ITestOutputHelper output) => Ambient.Output = output;
 
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
     
     [Fact]
     public void ShouldRespectScriptEncoding()
     {
-        host.Run("upgrade", ProjectPaths.GetConfigPath("encoding.yml"))
-            .ShouldSucceed();
-
+        host.Run("upgrade encoding.yml").ShouldSucceed();
         host.Logger.SummaryText(CaptureLogsLogger.Level.Operation).Should().Contain("print 'Превед, медвед'");
     }
     
@@ -28,9 +26,7 @@ public class UpgradeTests
     [Theory]
     public async Task ShouldRespectScriptFiltersAndMatchFiles(string filename)
     {
-        var result = host.Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
-            .ShouldSucceed();
-        
+        var result = host.Run("upgrade filter.yml").ShouldSucceed();
         var output = await Verify(result.Console.AllText());
         output.Text.Should().Contain(filename);
     }
@@ -45,9 +41,7 @@ public class UpgradeTests
     [Theory]
     public async Task ShouldRespectScriptFiltersAndNotMatchFiles(string filename)
     {
-        var result = host.Run("upgrade", ProjectPaths.GetConfigPath("filter.yml"))
-            .ShouldSucceed();
-
+        var result = host.Run("upgrade filter.yml").ShouldSucceed();
         var output = await Verify(result.Console.AllText());
         output.Text.Should().NotContain(filename);
     }
@@ -58,9 +52,7 @@ public class UpgradeTests
     [Theory]
     public async Task Should_respect_verbosity(string verbosity)
     {
-        var result = host.Run("upgrade", "-v", verbosity, ProjectPaths.GetConfigPath("filter.yml"))
-            .ShouldSucceed();
-
+        var result = host.Run($"upgrade filter.yml -v {verbosity}").ShouldSucceed();
         await Verify(result.Console.AllText());
     }
 }

@@ -1,15 +1,15 @@
 using DbUp.Cli.Configuration;
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests;
+namespace DbUp.Cli.Tests.EnvVarTests.VariableSubstitutionTests;
 
-public class VariableSubstitutionTests
+public class Tests
 {
-    public VariableSubstitutionTests(ITestOutputHelper output) => Ambient.Output = output;
+    public Tests(ITestOutputHelper output) => Ambient.Output = output;
 
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
 
-    private string GetConfigPath(string name) => ProjectPaths.GetConfigPath(name);
+    private string GetConfigPath(string name) => host.GetConfigPath(name);
 
     [Fact]
     public void LoadMigration_ShouldLoadVariablesFromConfig()

@@ -1,0 +1,25 @@
+dbUp:
+  version: 1                    # should be 1
+  provider: sqlserver           # DB provider: sqlserver, postgresql, mysql, azuresql
+  connectionString: $CONNSTR$   # Connection string to DB. For example, "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=dbup;Integrated Security=True" for sqlserver
+  connectionTimeoutSec: 30      # Connection timeout in seconds
+  disableVars: no               # yes / no (default). If yes, then the variable substitution is disabled
+  transaction: None             # Single / PerScript / None (default)
+  scripts:
+    -   folder:                 # absolute or relative (to this file) path to a folder with *.sql files
+        subFolders: no          # yes / no (default)
+        order: 100              # script group order, default 100
+        runAlways: no           # yes / no (default)
+        encoding: utf-8         # scripts' encoding, default utf-8
+        filter:                 # Wildcard or regex filter. Regex should be surrounded by forward slashes - for example /\d2\.sql/. By default, all scripts are included
+        matchFullPath: no       # yes / no (default). If yes, then the filter is applied to a full file path
+  naming:
+    useOnlyFileName: no         # Use only file name as script name. No by default
+    includeBaseFolderName: no   # Start script name from base folder name. No by default
+    prefix:                     # Add prefix to the script name. Empty string by default
+  vars:                         # Variables substitution. You can use these variables in your scripts as $variable_name$
+    # Var1: Value1
+    # Var2: Value2
+#  journalTo:                   # Use 'journalTo: null' if you want to execute scripts every time when upgrade is run,
+#    schema: "schemaName"       # or specify a custom schema name
+#    table: "tableName"         # and a custom table name to store DB schema versions. By default, the table name is "SchemaVersions"

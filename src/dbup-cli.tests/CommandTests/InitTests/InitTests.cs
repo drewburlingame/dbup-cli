@@ -1,18 +1,18 @@
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests.CommandTests;
+namespace DbUp.Cli.Tests.CommandTests.InitTests;
 
 public class InitTests
 {
     public InitTests(ITestOutputHelper output) => Ambient.Output = output;
     
-    private readonly TestHost host = new();
-    private readonly string tempDbUpYmlPath = ProjectPaths.GetTempPath("dbup.yml");
+    private readonly TestHost host = new(Caller.Directory());
+    private readonly string tempDbUpYmlPath = Caller.ConfigFile();
     
     [Fact]
     public void ShouldCreateDefaultConfig_IfItIsNotPresent()
     {
-        host.EnsureDirectoryExists(ProjectPaths.TempDir);
+        host.EnsureDirectoryExists(Caller.Directory());
         host.EnsureFileDoesNotExist(tempDbUpYmlPath);
         host.Run("init").ShouldSucceed();
         host.Environment.FileExists(tempDbUpYmlPath).Should().BeTrue();

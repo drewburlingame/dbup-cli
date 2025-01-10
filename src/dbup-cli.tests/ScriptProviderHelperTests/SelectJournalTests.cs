@@ -5,9 +5,9 @@ namespace DbUp.Cli.Tests.ScriptProviderHelperTests;
 
 public class SelectJournalTests
 {
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
 
-    private string GetBasePath() => Path.Combine(ProjectPaths.ScriptsDir, "Default");
+    private string GetBasePath() => Path.Combine(host.Environment.CurrentDirectory, "Default");
 
     [Fact]
     public void ScriptProviderHelper_SelectJournal_ShouldAddAllTheScripts()
@@ -26,12 +26,12 @@ public class SelectJournalTests
 
         builder.Build().PerformUpgrade();
 
-        var excutedScripts = host.Logger.GetExecutedScripts();
+        var executedScripts = host.Logger.GetExecutedScripts();
 
-        excutedScripts.Should().HaveCount(3);
-        excutedScripts[0].Should().Be("003.sql");
-        excutedScripts[1].Should().Be("004.sql");
-        excutedScripts[2].Should().Be("005.sql");
+        executedScripts.Should().HaveCount(3);
+        executedScripts[0].Should().Be("003.sql");
+        executedScripts[1].Should().Be("004.sql");
+        executedScripts[2].Should().Be("005.sql");
     }
 
     [Fact]

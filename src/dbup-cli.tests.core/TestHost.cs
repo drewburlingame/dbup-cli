@@ -3,7 +3,7 @@ using CommandDotNet.TestTools;
 using DbUp.Cli.Configuration;
 using DbUp.Cli.Tests.RecordingDb;
 using DbUp.Engine.Transactions;
-using TestEnvironment = DbUp.Cli.Tests.TestEnvironment;
+using DotNetEnv;
 
 namespace DbUp.Cli.Tests;
 
@@ -14,9 +14,9 @@ public class TestHost
     public DelegateConnectionFactory TestConnectionFactory { get; }
     public AppRunner AppRunner { get; }
 
-    public TestHost()
+    public TestHost(string currentDirectory = null)
     {
-        Environment = new TestEnvironment();
+        Environment = new TestEnvironment(currentDirectory);
         var recordingConnection = new RecordingDbConnection(Logger, "SchemaVersions");
         TestConnectionFactory = new DelegateConnectionFactory(_ => recordingConnection);
         AppRunner = Program.NewAppRunner(
@@ -30,10 +30,12 @@ public class TestHost
     
     public AppRunnerResult Run(params string[] args) => 
         AppRunner.RunInMem(args, Ambient.WriteLine, config: CommandDotNetTestConfigs.Default);
+
+    public string GetConfigPath(string filename) => Path.Combine(Environment.CurrentDirectory, filename);
     
     public string EnsureTempDbUpYmlFileExists()
     {
-        var dbupYmlPath = ProjectPaths.GetTempPath("dbup.yml");
+        var dbupYmlPath = GetConfigPath("dbup.yml");
         if (!File.Exists(dbupYmlPath))
         {
             EnsureDirectoryExists(ProjectPaths.TempDir);

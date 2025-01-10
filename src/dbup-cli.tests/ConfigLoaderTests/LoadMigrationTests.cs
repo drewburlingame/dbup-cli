@@ -13,7 +13,7 @@ public class LoadMigrationTests
           connectionString: (localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True
         """;
 
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
 
     [Fact]
     public void DefaultConfigFile_ShouldLoadItWithoutErrors()

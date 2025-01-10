@@ -16,6 +16,9 @@ public static class InitializeVerify
         
         VerifierSettings.ScrubInlineDateTimes("MM/dd/yyyy HH:mm:ss");
         VerifierSettings.ScrubInlineGuids();
+        
+        VerifierSettings.AutoVerify();
+        
         VerifyDiffPlex.Initialize();
     }
 }

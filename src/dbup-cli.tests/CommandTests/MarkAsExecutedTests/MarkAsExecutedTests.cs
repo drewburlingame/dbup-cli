@@ -1,22 +1,18 @@
 using FluentAssertions;
 
-namespace DbUp.Cli.Tests.CommandTests;
+namespace DbUp.Cli.Tests.CommandTests.MarkAsExecutedTests;
 
 public class MarkAsExecutedTests
 {
     public MarkAsExecutedTests(ITestOutputHelper output) => Ambient.Output = output;
     
-    private readonly TestHost host = new();
+    private readonly TestHost host = new(Caller.Directory());
 
     [Fact]
     public async Task WhenCalled_ShouldNotMakeAnyChangesInDb()
     {
-        var result = host.Run("mark-as-executed", ProjectPaths.GetConfigPath("mark-as-executed.yml"))
-            .ShouldSucceed();
-
+        var result = host.Run("mark-as-executed").ShouldSucceed();
         host.Logger.SummaryText().Should().NotContain("print 'You should not see this message'");
-
-        // 02/01/2025 07:27:48
         await Verify(result.Console.AllText());
     }
 }
