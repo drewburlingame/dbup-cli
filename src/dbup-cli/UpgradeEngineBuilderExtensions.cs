@@ -10,7 +10,7 @@ namespace DbUp.Cli;
 
 public static class UpgradeEngineBuilderExtensions
 {
-    public static UpgradeEngineBuilder SelectJournal(this UpgradeEngineBuilder builder, Provider provider, Journal journal) =>
+    public static UpgradeEngineBuilder SelectJournal(this UpgradeEngineBuilder builder, string provider, Journal? journal) =>
         journal == null
             ? builder.JournalTo(new NullJournal())
             : journal.IsDefault
@@ -36,7 +36,7 @@ public static class UpgradeEngineBuilderExtensions
         return builder;
     }
 
-    internal static UpgradeEngineBuilder OverrideConnectionFactory(this UpgradeEngineBuilder builder, IConnectionFactory factory)
+    internal static UpgradeEngineBuilder OverrideConnectionFactory(this UpgradeEngineBuilder builder, IConnectionFactory? factory)
     {
         if(factory is not null)
         {
@@ -48,6 +48,10 @@ public static class UpgradeEngineBuilderExtensions
     }
 
     internal static UpgradeEngineBuilder AddVariables(this UpgradeEngineBuilder builder,
-        Dictionary<string, string> vars, bool disableVars) =>
-        disableVars ? builder.WithVariablesDisabled() : builder.WithVariables(vars);
+        Dictionary<string, string>? vars, bool disableVars) =>
+        disableVars
+            ? builder.WithVariablesDisabled()
+            : vars is null
+                ? builder
+                : builder.WithVariables(vars);
 }

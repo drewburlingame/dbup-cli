@@ -7,7 +7,7 @@ namespace DbUp.Cli.DbProviders;
 
 internal class AzureSqlServerDbProvider : DbProvider
 {
-    public override Provider Provider => Provider.SqlServer;
+    public override string Provider => "AzureSql";
 
     public override UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         UseAzureSqlIntegratedSecurity(connectionInfo.ConnectionString)

@@ -4,8 +4,8 @@ namespace DbUp.Cli.Configuration;
 
 public class Journal
 {
-    public string? Schema { get; private set; }
-    public string? Table { get; private set; }
+    public string? Schema { get; internal set; }
+    public string? Table { get; internal set; }
 
     public static Journal Default => new();
     public bool IsDefault => Schema == null && Table == null;

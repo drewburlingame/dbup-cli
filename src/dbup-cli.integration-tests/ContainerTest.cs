@@ -15,6 +15,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     where TContainerEntity : IDatabaseContainer
     where TConfigurationEntity : IContainerConfiguration
 {
+    private readonly string provider;
     private readonly string dbScriptsDir;
     private readonly AppRunner appRunner = Program.NewAppRunner(new CliEnvironment(), 
         console => new CaptureLogsLogger(console));
@@ -32,7 +33,8 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
 
     protected ContainerTest(string provider, ITestOutputHelper output)
     {
-        dbScriptsDir = Path.Combine(Caller.Directory(), "Scripts", provider);
+        this.provider = provider;
+        dbScriptsDir = Path.Combine(Caller.Directory(), "Scripts", "Relational");
         Ambient.Output = output;
     }
 
@@ -46,8 +48,13 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     protected abstract string QueryCountOfScript001 { get; }
     protected abstract string QueryCountOfScript001FromCustomJournal { get; }
     
-    private string GetConfigPath(string subPath = "EmptyScript") =>
-        new DirectoryInfo(Path.Combine(dbScriptsDir, subPath, "dbup.yml")).FullName;
+    private string GetConfigPath(string subPath = "Default")
+    {
+        var path = Path.Combine(dbScriptsDir, subPath, $"{provider}.yml");
+        if(!File.Exists(path))
+            path = Path.Combine(dbScriptsDir, subPath, "dbup.yml");
+        return path;
+    }
 
     private AppRunnerResult Run(string args) => appRunner.RunInMem(args, Ambient.WriteLine);
 
@@ -59,6 +66,7 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
         container = await GetContainer(() => NewBuilder);
         serverConnString = container.GetConnectionString();
         dbConnString = ReplaceDbInConnString(serverConnString, dbName);
+        Environment.SetEnvironmentVariable("PROVIDER", provider);
         Environment.SetEnvironmentVariable("CONNSTR", dbConnString);
     }
 
@@ -70,27 +78,31 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     [Fact]
     public async Task Ensure_CreateANewDb()
     {
-        var result = Run($"upgrade --ensure {GetConfigPath()}").ShouldSucceed();
+        var configPath = GetConfigPath();
+        var result = Run($"upgrade --ensure {configPath}");
         await Verify(result.Console.AllText());
+        result.ShouldSucceed();
         ConfirmUpgradeViaJournal(QueryCountOfScript001);
     }
 
     [Fact]
     public async Task UpgradeCommand_ShouldUseASpecifiedJournal()
     {
-        var result = Run($"upgrade --ensure {GetConfigPath("JournalTableScript")}").ShouldSucceed();
+        var result = Run($"upgrade --ensure {GetConfigPath("JournalTableScript")}");
         await Verify(result.Console.AllText());
+        result.ShouldSucceed();
         ConfirmUpgradeViaJournal(QueryCountOfScript001FromCustomJournal);
     }
 
     [Fact]
     public virtual async Task UpgradeCommand_ShouldFailOnCommandTimeout()
     {
-        var result = Run($"upgrade --ensure {GetConfigPath("Timeout")}").ShouldFail();
+        var result = Run($"upgrade --ensure {GetConfigPath("Timeout")}");
         var output = result.Console.AllText();
         await Verify(output)
             // the exception message is inconsistent between mac and github's ubuntu-latest
             .ScrubLinesWithReplace(line => line.Replace("Unknown error 258", "Unknown error: 258"));
+        result.ShouldFail();
         var failureExplanation = output!.Split(Environment.NewLine).FirstOrDefault(l => l.StartsWith("Failed to perform upgrade:"));
         failureExplanation.Should().NotBeNull().And.Contain("Timeout");
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
@@ -100,21 +112,23 @@ public abstract class ContainerTest<TBuilderEntity, TContainerEntity, TConfigura
     public virtual async Task Status_Issue8_Fails_RunAlways_scripts_return_error()
     {
         var configPath = GetConfigPath("Status");
-        appRunner.RunInMem($"upgrade --ensure {configPath}");
+        Run($"upgrade --ensure {configPath}");
         
         // It shouldn't actually fail if the script has already been applied.
-        var result = Run($"status {configPath}").ShouldFail(-1);
+        var result = Run($"status {configPath}");
         var output = result.Console.AllText();
         await Verify(output);
+        result.ShouldFail(-1);
         GetCountOfScript(QueryCountOfScript001).Should().Be(0);
     }
     
     [Fact]
     public virtual async Task Drop_DropADb()
     {
-        appRunner.RunInMem($"upgrade --ensure {GetConfigPath()}");
+        Run($"upgrade --ensure {GetConfigPath()}");
         var result = Run($"drop {GetConfigPath()}").ShouldSucceed();
         await Verify(result.Console.AllText());
+        result.ShouldSucceed();
         AssertDbDoesNotExist();
     }
 

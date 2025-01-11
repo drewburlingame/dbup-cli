@@ -6,31 +6,33 @@ namespace DbUp.Cli.DbProviders;
 
 public static class Providers
 {
-    internal static DbProvider ProviderFor(Provider provider) =>
-        provider switch
+    private static readonly Dictionary<string, DbProvider> ProvidersMap = new List<DbProvider>
         {
-            Provider.SqlServer => new SqlServerDbProvider(),
-            Provider.AzureSql => new AzureSqlServerDbProvider(),
-            Provider.PostgreSQL => new PostgresDbProvider(),
-            Provider.MySQL => new MySqlDbProvider(),
-            _ => throw new UnsupportedProviderException(provider)
-        };
+            new SqlServerDbProvider(),
+            new AzureSqlServerDbProvider(),
+            new PostgresDbProvider(),
+            new MySqlDbProvider()
+        }
+        .ToDictionary(p => p.Provider, StringComparer.OrdinalIgnoreCase);
 
+    internal static bool IsSupportedProvider(string provider) => ProvidersMap.ContainsKey(provider);
+
+    internal static DbProvider ProviderFor(string provider) =>
+        ProvidersMap.GetValueOrDefault(provider) ?? throw new UnsupportedProviderException(provider);
+
+    public static UpgradeEngineBuilder CreateUpgradeEngineBuilder(Migration migration) =>
+        CreateUpgradeEngineBuilder(migration.Provider, migration.ConnectionString, migration.ConnectionTimeoutSec);
+    
     public static UpgradeEngineBuilder CreateUpgradeEngineBuilder(
-        Provider provider, string connectionString, int connectionTimeoutSec) =>
-        ProviderFor(provider).CreateUpgradeEngineBuilder(new ConnectionInfo(connectionString, connectionTimeoutSec));
+        string provider, string connectionString, int connectionTimeoutSec) =>
+        ProviderFor(provider)
+            .CreateUpgradeEngineBuilder(new ConnectionInfo(connectionString, connectionTimeoutSec));
 
     public static void EnsureDb(IUpgradeLog logger, Migration migration) => 
-        EnsureDb(logger, migration.Provider, migration.ConnectionString, migration.ConnectionTimeoutSec);
-    
-    internal static void EnsureDb(
-        IUpgradeLog logger, Provider provider, string connectionString, int connectionTimeoutSec) => 
-        ProviderFor(provider).EnsureDb(logger, new ConnectionInfo(connectionString, connectionTimeoutSec));
+        ProviderFor(migration.Provider)
+            .EnsureDb(logger, new ConnectionInfo(migration.ConnectionString, migration.ConnectionTimeoutSec));
 
     public static void DropDb(IUpgradeLog logger, Migration migration) => 
-        DropDb(logger, migration.Provider, migration.ConnectionString, migration.ConnectionTimeoutSec);
-
-    internal static void DropDb(
-        IUpgradeLog logger, Provider provider, string connectionString, int connectionTimeoutSec) => 
-        ProviderFor(provider).DropDb(logger, new ConnectionInfo(connectionString, connectionTimeoutSec));
+        ProviderFor(migration.Provider)
+            .DropDb(logger, new ConnectionInfo(migration.ConnectionString, migration.ConnectionTimeoutSec));
 }

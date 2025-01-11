@@ -34,7 +34,7 @@ public class Commands
     [Command(Description = "Upgrade database")]
     public void Upgrade(UpgradeEngineArgs upgradeEngineArgs, EnsureDbArgs ensureDbArgs, 
         // the parameters below are injected from configuration
-        IEnvironment environment, IUpgradeLog logger, IConnectionFactory connectionFactory)
+        IEnvironment environment, IUpgradeLog logger, IConnectionFactory? connectionFactory)
     {
         var migration = LoadMigration(upgradeEngineArgs, environment);
         var engine = BuildEngine(logger, connectionFactory, migration, upgradeEngineArgs.Verbosity);
@@ -45,7 +45,7 @@ public class Commands
     [Command(Description = "Mark all scripts as executed")]
     public void MarkAsExecuted(UpgradeEngineArgs upgradeEngineArgs, EnsureDbArgs ensureDbArgs, 
         // the parameters below are injected from configuration
-        IEnvironment environment, IUpgradeLog logger, IConnectionFactory connectionFactory)
+        IEnvironment environment, IUpgradeLog logger, IConnectionFactory? connectionFactory)
     {
         var migration = LoadMigration(upgradeEngineArgs, environment);
         var engine = BuildEngine(logger, connectionFactory, migration, upgradeEngineArgs.Verbosity);
@@ -61,7 +61,7 @@ public class Commands
         [Option('n', Description = "Print names of scripts to be execute")]
         bool showNotExecuted, 
         // the parameters below are injected from configuration
-        IEnvironment environment, IUpgradeLog logger, IConnectionFactory connectionFactory, IConsole console)
+        IEnvironment environment, IUpgradeLog logger, IConnectionFactory? connectionFactory)
     {
         var migration = LoadMigration(upgradeEngineArgs, environment);
         var engine = BuildEngine(logger, connectionFactory, migration, upgradeEngineArgs.Verbosity);
@@ -108,15 +108,15 @@ public class Commands
 
     private static Migration LoadMigration(MigrationArgs migrationArgs, IEnvironment environment)
     {
-        environment.LoadEnvironmentVariables(migrationArgs.File, migrationArgs.EnvFiles);
+        environment.LoadDotEnvFiles(migrationArgs.File, migrationArgs.EnvFiles);
         var configFilePath = environment.GetFilePath(migrationArgs.File, fileShouldExist: true);
         return ConfigLoader.LoadMigration(configFilePath, environment);
     }
 
     private static UpgradeEngine BuildEngine(IUpgradeLog logger,
-        IConnectionFactory connectionFactory, Migration migration, VerbosityLevel verbosity) =>
+        IConnectionFactory? connectionFactory, Migration migration, VerbosityLevel verbosity) =>
         Providers
-            .CreateUpgradeEngineBuilder(migration.Provider, migration.ConnectionString, migration.ConnectionTimeoutSec)
+            .CreateUpgradeEngineBuilder(migration)
             .SelectJournal(migration.Provider, migration.JournalTo)
             .SelectTransaction(migration.Transaction)
             .SelectLogOptions(logger, verbosity)

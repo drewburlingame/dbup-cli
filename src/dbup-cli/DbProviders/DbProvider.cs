@@ -7,7 +7,7 @@ namespace DbUp.Cli.DbProviders;
 public abstract class DbProvider
 {
     // todo: convert to string at the end of the refactor
-    public abstract Provider Provider { get; }
+    public abstract string Provider { get; }
 
     public abstract UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo);
 

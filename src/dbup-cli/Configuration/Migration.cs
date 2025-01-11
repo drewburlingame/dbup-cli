@@ -1,15 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DbUp.Cli.DbProviders;
 using JetBrains.Annotations;
 
 namespace DbUp.Cli.Configuration;
 
 [UsedImplicitly]
-public class Migration
+public class Migration : IValidatableObject
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Local
     [Required]
     public string Version { get; private set; } = null!;
-    public Provider Provider { get; private set; }
+    public string Provider { get; private set; } = null!;
     // ReSharper enable UnusedAutoPropertyAccessor.Local
     [Required]
     public string ConnectionString { get; private set; } = null!;
@@ -20,19 +21,11 @@ public class Migration
     public NamingOptions Naming { get; private set; } = NamingOptions.Default;
     public List<ScriptBatch> Scripts { get; set; } = [];
 
-    public Dictionary<string, string> Vars { get; set; } = new();
-
-    internal void ExpandVariables()
+    public Dictionary<string, string>? Vars { get; set; }
+    
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        ConnectionString = StringUtils.ExpandEnvironmentVariables(ConnectionString ?? "");
-        Scripts.ForEach(x => x.Folder = StringUtils.ExpandEnvironmentVariables(x.Folder ?? ""));
-
-        var dic = new Dictionary<string, string>();
-        foreach (var item in Vars)
-        {
-            dic.Add(item.Key, StringUtils.ExpandEnvironmentVariables(item.Value ?? ""));
-        }
-
-        Vars = dic;
+        if (!Providers.IsSupportedProvider(Provider))
+            yield return new ValidationResult($"Unsupported provider: {Provider}");
     }
 }

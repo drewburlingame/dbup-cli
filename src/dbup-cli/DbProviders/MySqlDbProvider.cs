@@ -7,7 +7,7 @@ namespace DbUp.Cli.DbProviders;
 
 internal class MySqlDbProvider : DbProvider
 {
-    public override Provider Provider => Provider.MySQL;
+    public override string Provider => "MySQL";
     
     public override UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         DeployChanges.To

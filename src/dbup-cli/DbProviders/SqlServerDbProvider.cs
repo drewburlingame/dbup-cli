@@ -6,7 +6,7 @@ namespace DbUp.Cli.DbProviders;
 
 internal class SqlServerDbProvider : DbProvider
 {
-    public override Provider Provider => Provider.SqlServer;
+    public override string Provider => "SqlServer";
     
     public override UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         DeployChanges.To
