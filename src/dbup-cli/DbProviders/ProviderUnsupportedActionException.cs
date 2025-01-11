@@ -1,9 +1,7 @@
-using DbUp.Cli.Configuration;
-
 namespace DbUp.Cli.DbProviders;
 
-internal class ProviderUnsupportedActionException(Provider provider, string action)
+internal class ProviderUnsupportedActionException(string provider, string action)
     : DbUpCliException($"{provider} does not support {action}")
 {
-    public Provider Provider { get; } = provider;
+    public string Provider { get; } = provider;
 }

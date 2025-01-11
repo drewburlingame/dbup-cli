@@ -1,33 +1,33 @@
 ﻿using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DbUp.Cli;
 
 internal static class StringUtils
 {
     // ReSharper disable once CognitiveComplexity
-    public static string ExpandEnvironmentVariables(string name)
+    public static string ExpandEnvironmentVariables(string text)
     {
         // Implementation grabbed fromn here: https://github.com/mono/mono/blob/master/mcs/class/corlib/System/Environment.cs
 
-        if (name == null)
-            throw new ArgumentNullException(nameof(name));
+        if (text.IsNullOrEmpty()) return text;
 
         char marker = '$';
 
-        int off1 = name.IndexOf(marker);
+        int off1 = text!.IndexOf(marker);
         if (off1 == -1)
-            return name;
+            return text;
 
-        int len = name.Length;
+        int len = text.Length;
         int off2;
-        if (off1 == len - 1 || (off2 = name.IndexOf(marker, off1 + 1)) == -1)
-            return name;
+        if (off1 == len - 1 || (off2 = text.IndexOf(marker, off1 + 1)) == -1)
+            return text;
 
         var result = new StringBuilder();
-        result.Append(name, 0, off1);
+        result.Append(text, 0, off1);
         do
         {
-            var var = name.Substring(off1 + 1, off2 - off1 - 1);
+            var var = text.Substring(off1 + 1, off2 - off1 - 1);
             var value = Environment.GetEnvironmentVariable(var);
 
             // If value not found, add $FOO to stream,
@@ -45,9 +45,9 @@ internal static class StringUtils
                 result.Append(value);
             }
             int oldOff2 = off2;
-            off1 = name.IndexOf(marker, off2 + 1);
+            off1 = text.IndexOf(marker, off2 + 1);
             // If no $ found for off1, don't look for one for off2
-            off2 = off1 == -1 || off2 > len - 1 ? -1 : name.IndexOf(marker, off1 + 1);
+            off2 = off1 == -1 || off2 > len - 1 ? -1 : text.IndexOf(marker, off1 + 1);
             // textLen is the length of text between the closing $ of current iteration
             //  and the starting $ of the next iteration if any. This text is added to output
             int textLen;
@@ -62,7 +62,7 @@ internal static class StringUtils
             else
                 textLen = off1 - realOldOff2;
             if (off1 >= oldOff2 || off1 == -1)
-                result.Append(name, oldOff2 + 1, textLen);
+                result.Append(text, oldOff2 + 1, textLen);
         } while (off2 > -1 && off2 < len);
 
         return result.ToString();

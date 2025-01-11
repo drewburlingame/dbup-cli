@@ -1,3 +1,5 @@
+using DotNetEnv;
+
 namespace DbUp.Cli.Tests;
 
 public class TestEnvironment(string currentDirectory = null) : 
@@ -31,5 +33,13 @@ public class TestEnvironment(string currentDirectory = null) :
         return path.StartsWith(InMemFilePrefix) 
             ? fileByPath[path] 
             : base.ReadFile(path);
+    }
+
+    public override void LoadDotEnv(string path)
+    {
+        using Stream stream = path.StartsWith(InMemFilePrefix) 
+            ? new MemoryStream(System.Text.Encoding.UTF8.GetBytes(fileByPath[path]))
+            : File.OpenRead(path);
+        Env.Load(stream);
     }
 }

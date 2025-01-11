@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using DbUp.Cli.Configuration;
+using DotNetEnv;
 
 namespace DbUp.Cli;
 
@@ -26,4 +27,6 @@ public class CliEnvironment(string? currentDirectory = null): IEnvironment
 
         File.WriteAllText(path, content, new UTF8Encoding(false));
     }
+
+    public virtual void LoadDotEnv(string path) => Env.Load(path);
 }

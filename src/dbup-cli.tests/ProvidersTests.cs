@@ -1,4 +1,3 @@
-using DbUp.Cli.Configuration;
 using DbUp.Cli.DbProviders;
 using DbUp.Engine;
 using DbUp.SqlServer;
@@ -16,20 +15,9 @@ public class ProvidersTests
     ];
 
     [Fact]
-    public void SelectDbProvider_ShouldThrow_IfAProviderIsNotSupported()
-    {
-        var ex = Assert.Throws<UnsupportedProviderException>(() => Providers.CreateUpgradeEngineBuilder(
-            Provider.UnsupportedProvider,
-            @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True",
-            60));
-
-        ex.Message.Should().Be("Unsupported provider: UnsupportedProvider");
-    }
-
-    [Fact]
     public void SelectDbProvider_ShouldReturnReturnAValidProvider_ForSqlServer()
     {
-        var builder = Providers.CreateUpgradeEngineBuilder(Provider.SqlServer, 
+        var builder = Providers.CreateUpgradeEngineBuilder("SqlServer", 
             @"Data Source=(localdb)\dbup;Initial Catalog=dbup-tests;Integrated Security=True", 60);
         
         builder.Configure(c => c.ConnectionManager.Should().BeOfType(typeof(SqlConnectionManager)));

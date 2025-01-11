@@ -5,8 +5,8 @@ using Testcontainers.MsSql;
 
 namespace DbUp.Cli.IntegrationTests;
 
-public class MsSqlTests() 
-    : ContainerTest<MsSqlBuilder, MsSqlContainer, MsSqlConfiguration>("SqlServer")
+public class MsSqlTests(ITestOutputHelper output) 
+    : ContainerTest<MsSqlBuilder, MsSqlContainer, MsSqlConfiguration>("SqlServer", output)
 {
     protected override MsSqlBuilder NewBuilder => new();
 

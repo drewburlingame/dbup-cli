@@ -41,7 +41,7 @@ public class LoadMigrationTests
         var path = host.Environment.WriteFileInMem(MinYaml);
         var migration = LoadMigration(path);
         
-        migration.Provider.Should().Be(Provider.SqlServer);
+        migration.Provider.Should().Be("sqlserver");
         migration.ConnectionString.Should().Be(@"(localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True");
 
         migration.Transaction.Should().Be(Transaction.None);
@@ -133,7 +133,7 @@ public class LoadMigrationTests
                                                    -  folder: Vars
                                                  vars:
                                                """);
-        migration.Vars.Should().BeEmpty();
+        migration.Vars.Should().BeNull();
     }
 
     [Fact]
@@ -193,9 +193,10 @@ public class LoadMigrationTests
                                                dbUp:
                                                  version: 1
                                                  provider: postgre1
+                                                 connectionString: (localdb)\dbup;Initial Catalog=DbUpTest;Integrated Security=True
                                                """);
 
-        error.Should().Be("Configuration file error > Exception during deserialization > Requested value 'postgre1' was not found.");
+        error.Should().Be("Unsupported provider: postgre1");
     }
 
     [Fact]

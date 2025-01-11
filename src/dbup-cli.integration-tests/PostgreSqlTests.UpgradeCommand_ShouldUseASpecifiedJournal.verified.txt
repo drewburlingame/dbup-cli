@@ -5,6 +5,6 @@
 [I] Journal table does not exist
 [I] Executing Database Server script '001.sql'
 [I] Checking whether journal table exists
-[I] Creating the "public"."journal" table
-[I] The "public"."journal" table has been created
+[I] Creating the "journal" table
+[I] The "journal" table has been created
 [I] Upgrade successful

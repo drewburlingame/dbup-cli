@@ -10,60 +10,54 @@ namespace DbUp.Cli.Configuration;
 
 public static class ConfigLoader
 {
-    // TODO: environment should eventually be required. Using optional param for now as incremental step to keep tests passing during refactor.
-    // will require using IEnvironment to get environment variables, with a bonus that we can isolate changes within tests
-     public static Migration LoadMigration(string configFilePath, IEnvironment? environment = null)
-     {
-         var path = configFilePath;
-         var yml = environment is null
-             ? File.ReadAllText(path, Encoding.UTF8)
-             : environment.ReadFile(path);
-
-         if (yml is null)
-             throw new ConfigFileNotFoundException(configFilePath);
-         
-         var deserializer = new DeserializerBuilder()
-             .WithNamingConvention(CamelCaseNamingConvention.Instance)
-             .Build();
-         
-         Migration migration;
-         try
-         {
-             migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
-         }
-         catch (YamlException e)
-         {
-             throw new ConfigParsingException(e.Message, e);
-         }
-         
-         Validator.ValidateObject(migration, new ValidationContext(migration));
-
-         if (migration.Version != "1")
-         {
-             throw new UnsupportedConfigFileVersionException(migration.Version);
-         }
-
-         migration.Scripts ??= new List<ScriptBatch>();
-
-         if (migration.Scripts.Count == 0)
-         {
-             migration.Scripts.Add(ScriptBatch.Default);
-         }
-
-         migration.Vars ??= new Dictionary<string, string>();
-
-         ValidateVarNames(migration.Vars);
-
-         migration.ExpandVariables();
-
-         NormalizeScriptFolders(path, migration.Scripts);
-
-         return migration;
-     }
-
-
-     private static void ValidateVarNames(Dictionary<string, string> vars)
+    public static Migration LoadMigration(string configFilePath, IEnvironment environment)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(configFilePath);
+        ArgumentNullException.ThrowIfNull(environment);
+        
+        var yml = environment.ReadFile(configFilePath);
+
+        if (yml is null)
+            throw new ConfigFileNotFoundException(configFilePath);
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+
+        Migration migration;
+        try
+        {
+            yml = StringUtils.ExpandEnvironmentVariables(yml);
+            migration = deserializer.Deserialize<ConfigFile>(yml).DbUp;
+        }
+        catch (YamlException e)
+        {
+            throw new ConfigParsingException(e.Message, e);
+        }
+
+        Validator.ValidateObject(migration, new ValidationContext(migration));
+
+        if (migration.Version != "1")
+        {
+            throw new UnsupportedConfigFileVersionException(migration.Version);
+        }
+
+        if (migration.Scripts.Count == 0)
+        {
+            migration.Scripts.Add(ScriptBatch.Default);
+        }
+
+        ValidateVarNames(migration.Vars);
+
+        NormalizeScriptFolders(configFilePath, migration.Scripts);
+
+        return migration;
+    }
+
+    private static void ValidateVarNames(Dictionary<string, string>? vars)
+    {
+        if (vars is null) return;
+
         Regex exp = new("^[a-z0-9_-]+$", RegexOptions.IgnoreCase);
         var invalidNames = vars.Keys.Where(n => !exp.IsMatch(n)).ToList();
         if (invalidNames.Count > 0)
@@ -80,13 +74,14 @@ public static class ConfigLoader
             script.Folder = new DirectoryInfo(folder).FullName;
         }
     }
-    
+
     public static string GetDefaultConfigFile()
     {
-        using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.Default.ConfigFileResourceName);
-        if (resourceStream is null) 
+        using var resourceStream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream(Constants.Default.ConfigFileResourceName);
+        if (resourceStream is null)
             throw new Exception($"Missing default embedded resource: {Constants.Default.ConfigFileResourceName}");
-        
+
         using var reader = new StreamReader(resourceStream);
         return reader.ReadToEnd();
     }

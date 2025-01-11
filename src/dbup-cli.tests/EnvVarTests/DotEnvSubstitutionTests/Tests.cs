@@ -1,5 +1,4 @@
 using DbUp.Cli.Configuration;
-using FakeItEasy;
 using FluentAssertions;
 
 namespace DbUp.Cli.Tests.EnvVarTests.DotEnvSubstitutionTests;
@@ -8,14 +7,14 @@ public class Tests
 {
     private static readonly string EnvVarsYmlPath = Caller.ConfigFile("env-vars.yml");
     private static readonly string DotEnvCurrentFolder = Caller.ConfigFile("DotEnv-CurrentFolder");
-
+    
     [Fact]
     public void LoadMigration_ShouldSubstituteEnvVars_ToConnectionString()
     {
         const string connstr = "connection string";
         Environment.SetEnvironmentVariable(nameof(connstr), connstr);
 
-        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        var migration = LoadMigration(EnvVarsYmlPath);
         migration.ConnectionString.Should().Be(connstr);
     }
 
@@ -25,7 +24,7 @@ public class Tests
         const string folder = "folder_name";
         Environment.SetEnvironmentVariable(nameof(folder), folder);
 
-        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        var migration = LoadMigration(EnvVarsYmlPath);
         migration.Scripts[0].Folder.Should().EndWith(folder);
     }
 
@@ -35,7 +34,7 @@ public class Tests
         const string var1 = "variable_value";
         Environment.SetEnvironmentVariable(nameof(var1), var1);
 
-        var migration = ConfigLoader.LoadMigration(EnvVarsYmlPath);
+        var migration = LoadMigration(EnvVarsYmlPath);
         migration.Vars["Var1"].Should().Be(var1);
     }
 
@@ -45,7 +44,7 @@ public class Tests
         var dotEnvVarsPath = Caller.ConfigFile("dotenv-vars.yml");
         LoadEnvironmentVariables(DotEnvCurrentFolder, dotEnvVarsPath, []);
 
-        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        var migration = LoadMigration(dotEnvVarsPath, DotEnvCurrentFolder);
         migration.Vars["VarA"].Should().Be("va1");
     }
 
@@ -55,7 +54,7 @@ public class Tests
         var dotEnvVarsPath = Caller.ConfigFile("dotenv-vars.yml");
         LoadEnvironmentVariables(DotEnvCurrentFolder, dotEnvVarsPath, []);
 
-        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        var migration = LoadMigration(dotEnvVarsPath, DotEnvCurrentFolder);
         migration.Vars["VarB"].Should().Be("vb2");
     }
 
@@ -70,7 +69,7 @@ public class Tests
                 Caller.ConfigFile("varD.env")
             ]);
 
-        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        var migration = LoadMigration(dotEnvVarsPath, DotEnvCurrentFolder);
         migration.Vars["VarC"].Should().Be("vc3");
         migration.Vars["VarD"].Should().Be("vd3");
     }
@@ -115,19 +114,22 @@ public class Tests
                 Path.Combine("..", "file4.env")
             ]);
 
-        var migration = ConfigLoader.LoadMigration(dotEnvVarsPath);
+        var migration = LoadMigration(dotEnvVarsPath, currentDirectory);
         migration.Vars["VarA"].Should().Be("va1");
         migration.Vars["VarB"].Should().Be("vb2");
         migration.Vars["VarC"].Should().Be("vc3");
         migration.Vars["VarD"].Should().Be("vd4");
     }
 
+    private static Migration LoadMigration(string configPath, string currentDirectory = null)
+    {
+        return ConfigLoader.LoadMigration(configPath, new TestEnvironment(currentDirectory ?? Caller.Directory()));
+    }
+    
     private static void LoadEnvironmentVariables(string currentDirectory, string dotEnvVarsPath,
         List<string> envFiles)
     {
-        var env = A.Fake<IEnvironment>();
-        A.CallTo(() => env.CurrentDirectory).Returns(currentDirectory);
-        A.CallTo(() => env.FileExists("")).WithAnyArguments().ReturnsLazily(x => File.Exists(x.Arguments[0] as string));
-        env.LoadEnvironmentVariables(dotEnvVarsPath, envFiles);
+        var env = new TestEnvironment(currentDirectory);
+        env.LoadDotEnvFiles(dotEnvVarsPath, envFiles);
     }
 }

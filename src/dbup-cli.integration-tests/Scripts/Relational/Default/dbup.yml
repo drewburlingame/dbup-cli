@@ -1,11 +1,4 @@
 dbUp:
   version: 1                    # should be 1
-  provider: postgresql          # DB provider: sqlserver
+  provider: $PROVIDER$          # DB provider: sqlserver
   connectionString: $CONNSTR$   # Connection string to DB. For example, "Data Source=(localdb)\dbup;Initial Catalog=MyDb;Integrated Security=True" for sqlserver
-  scripts:
-  - folder: RunOnce
-    order: 1
-    runAlways: no
-  - folder: RunAlways
-    order: 2
-    runAlways: yes

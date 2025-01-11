@@ -6,7 +6,7 @@ namespace DbUp.Cli.DbProviders;
 
 internal class PostgresDbProvider : DbProvider
 {
-    public override Provider Provider => Provider.PostgreSQL;
+    public override string Provider => "PostgreSQL";
     
     public override UpgradeEngineBuilder CreateUpgradeEngineBuilder(ConnectionInfo connectionInfo) =>
         DeployChanges.To

@@ -3,7 +3,6 @@ using CommandDotNet.TestTools;
 using DbUp.Cli.Configuration;
 using DbUp.Cli.Tests.RecordingDb;
 using DbUp.Engine.Transactions;
-using DotNetEnv;
 
 namespace DbUp.Cli.Tests;
 
@@ -38,7 +37,7 @@ public class TestHost
         var dbupYmlPath = GetConfigPath("dbup.yml");
         if (!File.Exists(dbupYmlPath))
         {
-            EnsureDirectoryExists(ProjectPaths.TempDir);
+            EnsureDirectoryExists(Path.GetDirectoryName(dbupYmlPath));
             File.WriteAllText(dbupYmlPath, ConfigLoader.GetDefaultConfigFile());
         }
         return dbupYmlPath;

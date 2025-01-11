@@ -26,7 +26,7 @@ public class UpgradeEngineBuilderExtensionsTests
     [Fact]
     public void PerformUpgrade_ShouldUseCustomVersionsTable_IfCustomJournalIsPassed()
     {
-        upgradeEngineBuilder.SelectJournal(Provider.SqlServer, new Journal("test_scheme", "test_SchemaVersion"));
+        upgradeEngineBuilder.SelectJournal("SqlServer", new Journal("test_scheme", "test_SchemaVersion"));
 
         upgradeEngineBuilder.Build().PerformUpgrade();
         host.Logger.InfoMessages.Should().Contain("[I] Creating the [test_scheme].[test_SchemaVersion] table");
@@ -35,7 +35,7 @@ public class UpgradeEngineBuilderExtensionsTests
     [Fact]
     public void PerformUpgrade_ShouldUseDefaultVersionsTable_IfDefaultJournalIsPassed()
     {
-        upgradeEngineBuilder.SelectJournal(Provider.SqlServer, Journal.Default);
+        upgradeEngineBuilder.SelectJournal("SqlServer", Journal.Default);
 
         upgradeEngineBuilder.Build().PerformUpgrade();
         host.Logger.InfoMessages.Should().Contain("[I] Creating the [SchemaVersions] table");
@@ -44,7 +44,7 @@ public class UpgradeEngineBuilderExtensionsTests
     [Fact]
     public void SelectJournal_ShouldSelectNullJournal_IfNoneValueIsPassed()
     {
-        upgradeEngineBuilder.SelectJournal(Provider.SqlServer, null);
+        upgradeEngineBuilder.SelectJournal("SqlServer", null);
 
         upgradeEngineBuilder.Build().PerformUpgrade();
         host.Logger.InfoMessages.Should().NotContain(x => x.StartsWith("Creating the ", StringComparison.Ordinal));

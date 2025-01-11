@@ -10,4 +10,5 @@ public interface IEnvironment
     bool DirectoryExists(string path);
     string ReadFile(string path);
     void WriteFile(string path, string content);
+    void LoadDotEnv(string path);
 }

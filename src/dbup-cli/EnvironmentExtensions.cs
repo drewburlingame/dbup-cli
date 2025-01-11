@@ -27,39 +27,43 @@ public static class EnvironmentExtensions
         return fullPath;
     }
     
-    public static void LoadEnvironmentVariables(this IEnvironment environment, string configFilePath, IEnumerable<string> envFiles)
+    public static void LoadDotEnvFiles(this IEnvironment environment, string configFilePath, IEnumerable<string> extraFiles)
     {
         ArgumentNullException.ThrowIfNull(environment);
         ArgumentException.ThrowIfNullOrWhiteSpace(configFilePath);
         
-        // .env file  in a current folder
-        environment.Load(environment.CurrentDirectory, Constants.Default.DotEnvFileName);
-        // .env.local file  in a current folder
-        environment.Load(environment.CurrentDirectory, Constants.Default.DotEnvLocalFileName);
-
-        var configFileDirectoryName = new FileInfo(configFilePath).DirectoryName!;
+        LoadDefaultsFrom(environment.CurrentDirectory);
         
         // .env file next to a dbup.yml
-        environment.Load(configFileDirectoryName, Constants.Default.DotEnvFileName);
-        // .env.local file next to a dbup.yml
-        environment.Load(configFileDirectoryName, Constants.Default.DotEnvLocalFileName);
-
-        if (envFiles != null)
+        var configFileDirectory = new FileInfo(configFilePath).DirectoryName!;
+        if (configFileDirectory != environment.CurrentDirectory)
         {
-            foreach (var file in envFiles)
+            LoadDefaultsFrom(configFileDirectory);
+        }
+
+        foreach (var file in extraFiles)
+        {
+            Load(environment.GetFilePath(file, fileShouldExist: true));
+        }
+
+        return;
+
+        void LoadDefaultsFrom(string directory)
+        {
+            LoadIfExists(directory, Constants.Default.DotEnvFileName);
+            LoadIfExists(directory, Constants.Default.DotEnvLocalFileName);
+        }
+        
+        void LoadIfExists(string folder, string file)
+        {
+            // TODO: load from stream instead of file to enable in-mem support
+            var path = Path.Combine(folder, file);
+            if (environment.FileExists(path))
             {
-                Env.Load(environment.GetFilePath(file, fileShouldExist: true));
+                Load(path);
             }
         }
-    }
 
-    private static void Load(this IEnvironment environment, string folder, string file)
-    {
-        // TODO: load from stream instead of file to enable in-mem support
-        var defaultEnvFile = Path.Combine(folder, file);
-        if (environment.FileExists(defaultEnvFile))
-        {
-            Env.Load(defaultEnvFile);
-        }
+        void Load(string envFile) => environment.LoadDotEnv(envFile);
     }
 }
