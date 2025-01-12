@@ -5,9 +5,8 @@
 1. Add an instance `Providers.ProviderMap`
 1. Create a new integration test in the `dbup-cli.integration-tests` project.
   - Add corresponding NuGet-package to the `dbup-cli.integration-tests` project
-  - If the database is a sql database, copy one of the existing tests and update the methods to work with the database
+  - If the database is a relational database, copy one of the existing tests and update the methods to work with the database
     - otherwise, follow the pattern in `ContainerTest` to create a new test class 
-  - Under the `Scripts` folder create a new folder for database scripts for tests. You can copy it from another folder. I don't recommend using one of the existing script folder.
-    - Change a provider name in `dbup.yml` files
-    - Change SQL in `Timeout` folder because different databases have different syntax for sleep or delay execution
-    - Adjust connection strings
+  - Under the `Scripts` folder...
+    - in `Timeout` folder, add a folder with the provider name and a script to sleep for 20 seconds.
+    - in `JournalTableScript` folder, if `dbup.yml` the custom table works for the new db then there is nothing to do.  Otherwise, copy dbup.yml to a new file with the provider name and update the table and/or schema.  See the `SqlServer.yml` file as an example.
