@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/DbUp-CLI-2.svg)](https://www.nuget.org/packages/dbup-cli-2)
 
-This project is inspired and based on [DbUp](dbup.github.io) project... and forked from [drwatson1/dbup-cli](https://github.com/drwatson1/dbup-cli) after Sergey was no longer able to maintain it.
+This project is inspired and based on [DbUp](https://github.com/DbUp/DbUp) project... and forked from [drwatson1/dbup-cli](https://github.com/drwatson1/dbup-cli) after Sergey was no longer able to maintain it.
 
 How DbUp authors describe their project:
 
